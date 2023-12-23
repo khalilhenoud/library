@@ -17,4 +17,9 @@ struct fixed_str_t {
   char data[512];
 } fixed_str_t;
 
+typedef
+struct fixed_str_128_t {
+  char data[128];
+} fixed_str_128_t;
+
 #endif
