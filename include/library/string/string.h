@@ -26,14 +26,16 @@ struct string_t {
   const allocator_t* allocator;
 } string_t;
 
-// TODO: expand the functionality provided here, lots of functions are missing.
+// TODO: expand the functionality provided here.
 // TODO: implement a string builder to avoid constant reallocation.
 
+inline
 string_t*
 create_string(const char* str, const allocator_t* allocator)
 {
   string_t* string = (string_t*)allocator->mem_alloc(sizeof(string_t));
-  string->allocator =  allocator;
+  assert(string);
+  string->allocator = allocator;
   string->size = strlen(str);
   string->str = (char*)allocator->mem_alloc(string->size + 1);
   memcpy(string->str, str, string->size + 1);
@@ -41,16 +43,17 @@ create_string(const char* str, const allocator_t* allocator)
 }
 
 // NOTE: do not use string after this operation.
+inline
 void
 free_string(string_t* string)
 {
   if (string->str)
     string->allocator->mem_free(string->str);
-  // this is safe.
   string->allocator->mem_free(string);
 }
 
-// NOTE: keeps the allocator.
+// returns the previous size, preserves the allocator.
+inline
 uint32_t
 clear_string(string_t* string)
 {
@@ -62,6 +65,7 @@ clear_string(string_t* string)
   return previous_size;
 }
 
+inline
 uint32_t
 assign_string(string_t* string, const char* str)
 {
@@ -72,6 +76,7 @@ assign_string(string_t* string, const char* str)
 }
 
 // NOTE: copies the string data but keeps the original allocator
+inline
 void
 copy_string(string_t* target, const string_t* source)
 {
@@ -79,6 +84,7 @@ copy_string(string_t* target, const string_t* source)
   assign_string(target, source->str);
 }
 
+inline
 int32_t
 string_equal(const string_t* left, const string_t* right)
 {
