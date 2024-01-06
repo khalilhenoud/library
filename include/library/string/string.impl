@@ -1,0 +1,84 @@
+/**
+ * @file string.impl
+ * @author khalilhenoud@gmail.com
+ * @brief 
+ * @version 0.1
+ * @date 2024-02-06
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
+#ifndef LIB_STRING_IMPL_H
+#define LIB_STRING_IMPL_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <string.h>
+#include <library/allocator/allocator.h>
+
+
+inline
+string_t*
+allocate_string(const char* str, const allocator_t* allocator)
+{
+  string_t* string = (string_t*)allocator->mem_alloc(sizeof(string_t));
+  string->allocator = allocator;
+  string->size = strlen(str);
+  string->str = (char*)allocator->mem_alloc(string->size + 1);
+  memcpy(string->str, str, string->size + 1);
+  return string;
+}
+
+inline
+void
+free_string(string_t* string)
+{
+  if (string->str)
+    string->allocator->mem_free(string->str);
+  string->allocator->mem_free(string);
+}
+
+inline
+uint32_t
+clear_string(string_t* string)
+{
+  uint32_t previous_size = string->size;
+  string->size = 0;
+  if (string->str)
+    string->allocator->mem_free(string->str);
+  string->str = NULL;
+  return previous_size;
+}
+
+inline
+uint32_t
+assign_string(string_t* string, const char* str)
+{
+  uint32_t previous_size = clear_string(string);
+  string->size = strlen(str);
+  string->str = (char*)string->allocator->mem_alloc(string->size + 1);
+  memcpy(string->str, str, string->size + 1);
+}
+
+inline
+void
+copy_string(string_t* target, const string_t* source)
+{
+  clear_string(target);
+  assign_string(target, source->str);
+}
+
+inline
+int32_t
+string_equal(const string_t* left, const string_t* right)
+{
+  return !strcmp(left->str, right->str);
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
