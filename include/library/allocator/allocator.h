@@ -12,6 +12,7 @@
 #define ALLOCATOR_H
 
 
+// TODO: add stack array allocator.
 typedef 
 struct allocator_t {
   void* (*mem_alloc)(size_t size);
