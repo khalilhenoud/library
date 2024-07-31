@@ -11,6 +11,9 @@
 #ifndef ALLOCATOR_H
 #define ALLOCATOR_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // TODO: add stack array allocator.
 typedef 
@@ -21,5 +24,9 @@ struct allocator_t {
   void* (*mem_cont_alloc)(size_t num, size_t size);
   void* (*mem_alloc_alligned)(size_t alignment, size_t size);
 } allocator_t;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
