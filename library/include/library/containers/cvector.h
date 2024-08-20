@@ -67,7 +67,7 @@ struct cvector_metadata_t {
 #define cvector_size(vec) \
   ((vec) ? cvector_vec_to_base(vec)->size : (size_t)0)
 
-#define cvector_allocator(vec) \ 
+#define cvector_allocator(vec) \
   ((vec) ? cvector_vec_to_base(vec)->allocator : NULL)
 
 /** returns the custom destructor function associated with the vector */
@@ -230,11 +230,11 @@ struct cvector_metadata_t {
 /** returns a pointer to the element at n position or NULL if invalid */
 #define cvector_at(vec, n)                                        \
   (                                                               \
-    (vec) ?                                                       \ 
+    (vec) ?                                                       \
     (                                                             \
-      ((int32_t)(n) < 0 || (size_t)(n) >= cvector_size(vec)) ?    \  
+      ((int32_t)(n) < 0 || (size_t)(n) >= cvector_size(vec)) ?    \
       NULL :                                                      \
-      &(vec)[(n)]) :                                              \ 
+      &(vec)[(n)]) :                                              \
     NULL)
 
 /** returns a pointer to the first element or NULL, as if: cvector_at(vec, 0) */
