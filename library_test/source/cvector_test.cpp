@@ -14,40 +14,51 @@
 #include <cassert>
 #include <iostream>
 
+#ifndef __FUNCTION_NAME__
+    #ifdef WIN32   //WINDOWS
+        #define __FUNCTION_NAME__   __FUNCTION__  
+    #else          //*NIX
+        #define __FUNCTION_NAME__   __func__ 
+    #endif
+#endif
 
-/*
-- [ ]  cvector
-- [ ]  cvector_empty
-- [ ]  cvector_capacity
-- [ ]  cvector_size
-- [ ]  cvector_init
-- [ ]  cvector_reserve
-- [ ]  cvector_erase
-- [ ]  cvector_clear
-- [ ]  cvector_free
-- [ ]  cvector_begin
-- [ ]  cvector_end
-- [ ]  cvector_compute_next_grow
-- [ ]  cvector_push_back
-- [ ]  cvector_set_size
-- [ ]  cvector_set_capacity
-- [ ]  cvector_set_elem_destructor
-- [ ]  cvector_shrink_to_fit
-- [ ]  cvector_at
-- [ ]  cvector_front
-- [ ]  cvector_back
-- [ ]  cvector_pop_back
-- [ ]  cvector_copy
-- [ ]  cvector_swap
-- [ ]  cvector_insert
-- [ ]  cvector_grow
-- [ ]  cvector_resize
-- [ ]  cvector_for_each_in
-*/
+#define TABS std::string(tabs, '\t')
+#define CTABS std::cout << TABS
+#define PRINT_FUNCTION CTABS << "[" __FUNCTION_NAME__ "]"  << std::endl
+#define PRINT_BOOL(x) #x << " = " << (x ? "true" : "false")
+#define PRINT(x) #x << " = " << x
 
 void
-test_cvector_main(
-  const allocator_t* allocator)
+print_cvector(cvector_t& vec, const int32_t tabs)
 {
-  std::cout << "test_cvector_main()" << std::endl;
+  PRINT_FUNCTION;
+  CTABS << "vec.size = " << vec.size << std::endl;
+  CTABS << "vec.elem_size = " << vec.elem_size << std::endl;
+  CTABS << "vec.capacity = " << vec.capacity << std::endl;
+  CTABS << "vec.allocator = " << vec.allocator << std::endl;
+  CTABS << "vec.elem_cleanup = " << vec.elem_cleanup << std::endl;
+  CTABS << "vec.ptr = " << vec.ptr << std::endl;
+}
+
+void
+test_cvector_def(const allocator_t* allocator, const int32_t tabs)
+{
+  PRINT_FUNCTION;
+
+  cvector_t vec = cvector_def();
+  print_cvector(vec, tabs + 1);
+  CTABS << PRINT_BOOL(cvector_is_def(&vec)) << std::endl;
+}
+
+void
+test_cvector_main(const allocator_t* allocator, const int32_t tabs)
+{
+  PRINT_FUNCTION;
+
+  test_cvector_def(allocator, tabs + 1);
+  {
+    cvector_t vec;
+    cvector_setup(&vec, sizeof(int32_t), 1, allocator, NULL);
+    cvector_cleanup(&vec);
+  }
 }

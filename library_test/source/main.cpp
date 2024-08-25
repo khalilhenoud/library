@@ -44,7 +44,7 @@ void free_block(void* block)
 }
 
 void
-test_cvector_main(const allocator_t* allocator);
+test_cvector_main(const allocator_t* allocator, const int32_t tabs = 0);
 
 int 
 main(int argc, char *argv[])
@@ -58,6 +58,7 @@ main(int argc, char *argv[])
 
   test_cvector_main(&allocator);
 
+  std::cout << "allocation remaining: " << allocated.size() << std::endl;
   assert(allocated.size() == 0);
 
   return 0;

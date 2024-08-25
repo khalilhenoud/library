@@ -20,7 +20,7 @@ extern "C" {
 #include <math.h>
 
 
-static inline
+inline
 uint32_t
 is_zero(double val)
 {
@@ -28,7 +28,7 @@ is_zero(double val)
   return fabs(val) <= eps;
 }
 
-static inline
+inline
 void
 populate_at_start(framerate_controller_t* controller)
 {
@@ -42,7 +42,7 @@ populate_at_start(framerate_controller_t* controller)
     controller->internal.start = timeGetTime();
 }
 
-static inline
+inline
 void
 populate_at_end(framerate_controller_t* controller)
 {
@@ -54,7 +54,7 @@ populate_at_end(framerate_controller_t* controller)
     controller->internal.end = timeGetTime();
 }
 
-static inline
+inline
 double
 get_cycle_duration(
   framerate_controller_t* controller, 
