@@ -161,10 +161,16 @@ cvector_grow(cvector_t* vec, size_t new_capacity)
 
   {
     const size_t to_realloc = new_capacity * vec->elem_size;
-    void* new_ptr = vec->allocator->mem_realloc(vec->ptr, to_realloc);
-    assert(new_ptr);
-    vec->ptr = new_ptr;
-    vec->capacity = new_capacity;
+    if (!to_realloc) {
+      vec->allocator->mem_free(vec->ptr);
+      vec->ptr = NULL;
+      vec->capacity = new_capacity;
+    } else {
+      void* new_ptr = vec->allocator->mem_realloc(vec->ptr, to_realloc);
+      assert(new_ptr);
+      vec->ptr = new_ptr;
+      vec->capacity = new_capacity;
+    }
   }
 }
 
@@ -177,6 +183,15 @@ cvector_reserve(cvector_t* vec, size_t capacity)
     if (capacity > vec->capacity)
       cvector_grow(vec, capacity);
   }
+}
+
+/** NOTE: internal use only. use this if size will be updated afterwards;. */
+inline
+void*
+cvector_at_unchecked(cvector_t* vec, size_t index)
+{
+  assert(vec);
+  return (char*)vec->ptr + index * vec->elem_size;
 }
 
 inline
@@ -208,8 +223,8 @@ cvector_erase(cvector_t* vec, size_t index)
       vec->elem_cleanup(cvector_at(vec, index), vec->allocator);
     --vec->size; 
     memmove(
-      cvector_at(vec, index), 
-      cvector_at(vec, index + 1), 
+      cvector_at_unchecked(vec, index), 
+      cvector_at_unchecked(vec, index + 1), 
       vec->elem_size * (vec->size - index));
   }
 }
@@ -258,7 +273,8 @@ cvector_resize(cvector_t* vec, size_t count)
     if (count > vec->size) {
       cvector_reserve(vec, count);
       memset(
-        cvector_at(vec, vec->size), 0, (count - vec->size) * vec->elem_size);
+        cvector_at_unchecked(
+          vec, vec->size), 0, (count - vec->size) * vec->elem_size);
       vec->size = count;
     } else {
       while (count < vec->size)

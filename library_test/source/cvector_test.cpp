@@ -35,33 +35,22 @@ void
 print_cvector_content(cvector_t& vec, const int32_t tabs)
 {
   PRINT_FUNCTION;
-  CTABS << "vec.ptr: ";
+  CTABS << "values: ";
   for (size_t i = 0; i < vec.size; ++i)
     std::cout << *cvector_as(&vec, i, T) << " ";
   NEWLINE;
 }
 
 void
-print_cvector(cvector_t& vec, const int32_t tabs)
-{
-  PRINT_FUNCTION;
-  CTABS << "vec.size = " << vec.size << std::endl;
-  CTABS << "vec.elem_size = " << vec.elem_size << std::endl;
-  CTABS << "vec.capacity = " << vec.capacity << std::endl;
-  CTABS << "vec.allocator = " << vec.allocator << std::endl;
-  CTABS << "vec.elem_cleanup = " << vec.elem_cleanup << std::endl;
-  CTABS << "vec.ptr = " << vec.ptr << std::endl;
-}
-
-void
 print_meta(cvector_t& vec, const int32_t tabs) 
 {
-  CTABS << PRINT_BOOL(cvector_empty(&vec)) << std::endl;
-  CTABS << "vec.size = " << cvector_size(&vec) << std::endl;
-  CTABS << "vec.elem_size = " << cvector_elem_size(&vec) << std::endl;
-  CTABS << "vec.capacity = " << cvector_capacity(&vec) << std::endl;
-  CTABS << "vec.allocator = " << cvector_allocator(&vec) << std::endl;
-  CTABS << "vec.elem_cleanup = " << cvector_elem_cleanup(&vec) << std::endl;
+  CTABS << 
+  "vec(size: " << vec.size << 
+  ", elem_size: " << vec.elem_size << 
+  ", capacity: " << vec.capacity << 
+  ", allocator: " << (uint64_t)(vec.allocator) <<
+  ", elem_cleanup: " << (uint64_t)(vec.elem_cleanup) << ")" << 
+  std::endl;
 };
 
 void
@@ -70,7 +59,7 @@ test_cvector_def(const allocator_t* allocator, const int32_t tabs)
   PRINT_FUNCTION;
 
   cvector_t vec = cvector_def();
-  print_cvector(vec, tabs + 1);
+  print_meta(vec, tabs + 1);
   CTABS << PRINT_BOOL(cvector_is_def(&vec)) << std::endl;
 }
 
@@ -84,7 +73,7 @@ test_cvector_basics(const allocator_t* allocator, const int32_t tabs)
   print_meta(vec_i8, tabs + 1);
   for (int32_t i = 100; i < 120; ++i)
     cvector_push_back(&vec_i8, (char)i + 1, char);
-  print_cvector(vec_i8, tabs + 1);
+  print_meta(vec_i8, tabs + 1);
   print_cvector_content<char>(vec_i8, tabs + 1);
   cvector_cleanup(&vec_i8);
   NEWLINE;
@@ -94,7 +83,7 @@ test_cvector_basics(const allocator_t* allocator, const int32_t tabs)
   print_meta(vec_i16, tabs + 1);
   for (int32_t i = 120; i < 140; ++i)
     cvector_push_back(&vec_i16, (short)i + 1, short);
-  print_cvector(vec_i16, tabs + 1);
+  print_meta(vec_i16, tabs + 1);
   print_cvector_content<short>(vec_i16, tabs + 1);
   cvector_cleanup(&vec_i16);
   NEWLINE;
@@ -104,7 +93,7 @@ test_cvector_basics(const allocator_t* allocator, const int32_t tabs)
   print_meta(vec_i32, tabs + 1);
   for (int32_t i = 0; i < 10; ++i)
     cvector_push_back(&vec_i32, (int32_t)i + 1, int32_t);
-  print_cvector(vec_i32, tabs + 1);
+  print_meta(vec_i32, tabs + 1);
   print_cvector_content<int32_t>(vec_i32, tabs + 1);
   cvector_cleanup(&vec_i32);
   NEWLINE;
@@ -114,7 +103,7 @@ test_cvector_basics(const allocator_t* allocator, const int32_t tabs)
   print_meta(vec_f32, tabs + 1);
   for (int32_t i = 1; i < 20; ++i)
     cvector_push_back(&vec_f32, (float)i + 1.75f * i, float);
-  print_cvector(vec_f32, tabs + 1);
+  print_meta(vec_f32, tabs + 1);
   print_cvector_content<float>(vec_f32, tabs + 1);
   cvector_cleanup(&vec_f32);
   NEWLINE;
@@ -124,7 +113,7 @@ test_cvector_basics(const allocator_t* allocator, const int32_t tabs)
   print_meta(vec_f64, tabs + 1);
   for (int32_t i = 20; i < 35; ++i)
     cvector_push_back(&vec_f64, (double)i + 1.75 * i, double);
-  print_cvector(vec_f64, tabs + 1);
+  print_meta(vec_f64, tabs + 1);
   print_cvector_content<double>(vec_f64, tabs + 1);
   cvector_cleanup(&vec_f64);
 }
@@ -174,7 +163,7 @@ test_cvector_ops(const allocator_t* allocator, const int32_t tabs)
     cvector_setup(&left, sizeof(int32_t), 16, allocator, NULL);
     for (int32_t i = 0; i < 10; ++i)
       cvector_push_back(&left, i + 1, int32_t);
-    print_cvector(left, tabs + 1);
+    print_meta(left, tabs + 1);
     print_cvector_content<int32_t>(left, tabs + 1);
 
     cvector_t right = cvector_def();
@@ -222,7 +211,92 @@ test_cvector_mem(const allocator_t* allocator, const int32_t tabs)
 {
   PRINT_FUNCTION;
 
-  // reserve, resize, clear, at, insert, erase,
+  cvector_t vec = cvector_def();
+  cvector_setup(&vec, sizeof(int32_t), 16, allocator, NULL);
+  cvector_resize(&vec, 100);
+  for (auto i = 0; i < vec.size; ++i)
+    *(int32_t*)cvector_at(&vec, i) = i;
+  print_cvector_content<int32_t>(vec, tabs + 1);
+  print_meta(vec, tabs + 1);
+  {
+    // erase every other element.
+    for (int64_t i = vec.size - 1; i >= 0; --i) {
+      if (!((i + 1) % 2))
+        cvector_erase(&vec, (size_t)i);
+    }
+
+    print_meta(vec, tabs + 1);
+    print_cvector_content<int32_t>(vec, tabs + 1);
+    NEWLINE;
+  }
+  {
+    cvector_clear(&vec);
+    cvector_shrink_to_fit(&vec);
+    print_meta(vec, tabs + 1);
+
+    for (int32_t i = 0; i < 100; ++i)
+      cvector_insert(&vec, 0, i, int32_t);
+    print_meta(vec, tabs + 1);
+    print_cvector_content<int32_t>(vec, tabs + 1);
+    cvector_shrink_to_fit(&vec);
+    print_meta(vec, tabs + 1);
+    NEWLINE;
+  }
+  {
+    cvector_clear(&vec);
+    cvector_shrink_to_fit(&vec);
+    print_meta(vec, tabs + 1);
+    cvector_reserve(&vec, 100);
+    print_meta(vec, tabs + 1);
+
+    for (int32_t i = 0; i < 100; ++i)
+      cvector_insert(&vec, 0, i, int32_t);
+    print_meta(vec, tabs + 1);
+    print_cvector_content<int32_t>(vec, tabs + 1);
+    cvector_shrink_to_fit(&vec);
+    print_meta(vec, tabs + 1);
+  }
+  cvector_cleanup(&vec); 
+}
+
+typedef
+struct custom_t {
+  int32_t* data;
+  int32_t count;
+} custom_t;
+
+void elem_cleanup(void *elem_ptr, const allocator_t* allocator)
+{
+  custom_t* casted = (custom_t*)elem_ptr;
+  if (casted->count && casted->data) {
+    std::cout << "freeing " << casted->count << " elements" << std::endl;
+    allocator->mem_free(casted->data);
+  } else
+    std::cout << "nothing to free" << std::endl;
+}
+
+void
+test_cvector_custom(const allocator_t* allocator, const int32_t tabs)
+{
+  PRINT_FUNCTION;
+
+  custom_t data;
+  memset(&data, 0, sizeof(custom_t));
+  cvector_t vec = cvector_def();
+  cvector_setup(&vec, sizeof(custom_t), 4, allocator, elem_cleanup);
+  cvector_push_back(&vec, data, custom_t);
+  cvector_push_back(&vec, data, custom_t);
+  cvector_push_back(&vec, data, custom_t);
+
+  auto* ptr = cvector_as(&vec, 0, custom_t);
+  ptr->count = 3;
+  ptr->data = (int32_t*)allocator->mem_cont_alloc(ptr->count, sizeof(int32_t));
+
+  ptr = cvector_as(&vec, 2, custom_t);
+  ptr->count = 5;
+  ptr->data = (int32_t*)allocator->mem_cont_alloc(ptr->count, sizeof(int32_t));
+
+  cvector_cleanup(&vec);
 }
 
 void
@@ -235,4 +309,5 @@ test_cvector_main(const allocator_t* allocator, const int32_t tabs)
   test_cvector_iterators(allocator, tabs + 1);    NEWLINE;
   test_cvector_ops(allocator, tabs + 1);          NEWLINE;
   test_cvector_mem(allocator, tabs + 1);          NEWLINE;
+  test_cvector_custom(allocator, tabs + 1);       NEWLINE;
 }

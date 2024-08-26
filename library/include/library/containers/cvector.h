@@ -24,6 +24,7 @@ extern "C" {
 // TODO: allow types to provide their (de)serialization and swap functions.
 // TODO: support intial size with default values.
 // TODO: support custom alignment.
+// TODO: add cvector_fullswap_back() functions.
 // TODO: will need accessor variants for const types (cvector_cbegin, etc...)
 
 /**
@@ -226,11 +227,11 @@ cvector_resize(cvector_t* vec, size_t count);
         cvector_grow((vec), cvector_compute_next_grow(cv_cap__));     \
       if ((pos) < cvector_size(vec)) {                                \
         memmove(                                                      \
-          (type*)(vec->ptr) + (pos) + 1,                              \
-          (type*)(vec->ptr) + (pos),                                  \
+          (type*)((vec)->ptr) + (pos) + 1,                            \
+          (type*)((vec)->ptr) + (pos),                                \
           (vec)->elem_size * ((vec)->size - (pos)));                  \
       }                                                               \
-      ((type*)(vec->ptr))[(pos)] = (val);                             \
+      ((type*)((vec)->ptr))[(pos)] = (val);                           \
       (vec)->size += 1;                                               \
     }                                                                 \
   } while (0)
