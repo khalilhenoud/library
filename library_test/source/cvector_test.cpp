@@ -167,6 +167,62 @@ void
 test_cvector_ops(const allocator_t* allocator, const int32_t tabs)
 {
   PRINT_FUNCTION;
+
+  {
+    // replicate
+    cvector_t left = cvector_def();
+    cvector_setup(&left, sizeof(int32_t), 16, allocator, NULL);
+    for (int32_t i = 0; i < 10; ++i)
+      cvector_push_back(&left, i + 1, int32_t);
+    print_cvector(left, tabs + 1);
+    print_cvector_content<int32_t>(left, tabs + 1);
+
+    cvector_t right = cvector_def();
+    cvector_replicate(&left, &right, allocator, NULL);
+    print_cvector_content<int32_t>(right, tabs + 1);
+    cvector_cleanup(&right);
+
+    cvector_setup(&right, sizeof(int32_t), 32, allocator, NULL);
+    cvector_replicate(&left, &right, NULL, NULL);
+    print_cvector_content<int32_t>(right, tabs + 1);
+    print_meta(right, tabs + 1);
+    
+    cvector_cleanup(&right);
+    cvector_cleanup(&left);
+    NEWLINE;
+  }
+  
+  {
+    // fullswap
+    cvector_t left = cvector_def();
+    cvector_setup(&left, sizeof(int32_t), 16, allocator, NULL);
+    for (int32_t i = 10; i < 15; ++i)
+      cvector_push_back(&left, i + 1, int32_t);
+
+    cvector_t right = cvector_def();
+    cvector_setup(&right, sizeof(int32_t), 20, allocator, NULL);
+    for (int32_t i = 120; i < 130; ++i)
+      cvector_push_back(&right, i + 1, int32_t);
+    
+    print_cvector_content<int32_t>(left, tabs + 1);
+    print_cvector_content<int32_t>(right, tabs + 1);
+
+    cvector_fullswap(&left, &right);
+
+    print_cvector_content<int32_t>(left, tabs + 1);
+    print_cvector_content<int32_t>(right, tabs + 1);
+
+    cvector_cleanup(&right);
+    cvector_cleanup(&left);
+  }
+}
+
+void
+test_cvector_mem(const allocator_t* allocator, const int32_t tabs)
+{
+  PRINT_FUNCTION;
+
+  // reserve, resize, clear, at, insert, erase,
 }
 
 void
@@ -178,4 +234,5 @@ test_cvector_main(const allocator_t* allocator, const int32_t tabs)
   test_cvector_basics(allocator, tabs + 1);       NEWLINE;
   test_cvector_iterators(allocator, tabs + 1);    NEWLINE;
   test_cvector_ops(allocator, tabs + 1);          NEWLINE;
+  test_cvector_mem(allocator, tabs + 1);          NEWLINE;
 }
