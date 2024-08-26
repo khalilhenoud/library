@@ -24,12 +24,7 @@ extern "C" {
 // TODO: allow types to provide their (de)serialization and swap functions.
 // TODO: support intial size with default values.
 // TODO: support custom alignment.
-
-/**
- * NOTE: we require the initial instace to be set to NULL. that is the only 
- * thing we consider in regards to whether the vector has been initialized or 
- * not (cvector_init() called or not).
- */
+// TODO: will need accessor variants for const types (cvector_cbegin, etc...)
 
 /**
  * NOTE: non-trivial types (types that have memory allocation as part of their
@@ -182,9 +177,7 @@ cvector_resize(cvector_t* vec, size_t count);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-#define cvector_type(type) type *
-
-#define cvector_iterator(type) cvector_type(type)
+#define cvector_iterator(type) type *
 
 /** adds an element to the end of the vector */
 #define cvector_push_back(vec__, value__, type__)                     \
@@ -201,14 +194,14 @@ cvector_resize(cvector_t* vec, size_t count);
 
 /** syntatic sugar, simply returns the pointer casted */
 #define cvector_begin(vec, type) \
-  ((type*)vec->ptr)
+  ((type*)(vec)->ptr)
 
 /** 
  * returns the address to one past the last element of the array 
  * NOTE: this is legal, dereferencing this pointer is undefined behavior
  */
 #define cvector_end(vec, type) \
-  ((vec)->ptr ? ((type*)((vec)->ptr) + vec->size) : NULL)
+  ((vec)->ptr ? ((type*)((vec)->ptr) + (vec)->size) : NULL)
 
 /** returns a casted pointer to the element at n position or NULL if invalid */
 #define cvector_as(vec, n, type) \
