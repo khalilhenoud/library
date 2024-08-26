@@ -18,21 +18,39 @@
 
 std::vector<uintptr_t> allocated;
 
-void* allocate(size_t size)
+void* 
+allocate(size_t size)
 {
   void* block = malloc(size);
   allocated.push_back(uintptr_t(block));
   return block;
 }
 
-void* container_allocate(size_t count, size_t elem_size)
+void* 
+reallocate(void* old_block, size_t size)
+{
+  void* block = realloc(old_block, size);
+  assert(block);
+  allocated.erase(
+    std::remove_if(
+      allocated.begin(), 
+      allocated.end(), 
+      [=](uintptr_t elem) { return (uintptr_t)old_block == elem; }), 
+    allocated.end());
+  allocated.push_back(uintptr_t(block));
+  return block;
+}
+
+void* 
+container_allocate(size_t count, size_t elem_size)
 {
   void* block = calloc(count, elem_size);
   allocated.push_back(uintptr_t(block));
   return block;
 }
 
-void free_block(void* block)
+void 
+free_block(void* block)
 {
   allocated.erase(
     std::remove_if(
@@ -54,7 +72,7 @@ main(int argc, char *argv[])
   allocator.mem_cont_alloc = container_allocate;
   allocator.mem_free = free_block;
   allocator.mem_alloc_alligned = NULL;
-  allocator.mem_realloc = NULL;
+  allocator.mem_realloc = reallocate;
 
   test_cvector_main(&allocator);
 

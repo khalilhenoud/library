@@ -162,7 +162,7 @@ cvector_grow(cvector_t* vec, size_t new_capacity);
 
 /** the grow rate starts at 4 then follows size * 1.5 */
 #define cvector_compute_next_grow(size) \
-  ((size) < 4 ? ((size) + (size)/2) : 4 )
+  ((size) >= 4 ? ((size) + (size)/2) : 4 )
 
 /** discards extra memory capacity. */
 void
@@ -187,15 +187,15 @@ cvector_resize(cvector_t* vec, size_t count);
 #define cvector_iterator(type) cvector_type(type)
 
 /** adds an element to the end of the vector */
-#define cvector_push_back(vec, value, type)                           \
+#define cvector_push_back(vec__, value__, type__)                     \
   do {                                                                \
-    assert(vec);                                                      \
+    assert(vec__);                                                    \
     {                                                                 \
-      size_t cv_cap__ = cvector_capacity(vec);                        \
-      if (cv_cap__ <= cvector_size(vec))                              \
-        cvector_grow((vec), cvector_compute_next_grow(cv_cap__));     \
-      ((type*)vec->ptr)[cvector_size(vec)] = (value);                 \
-      cvector_set_size((vec), cvector_size(vec) + 1);                 \
+      size_t cv_cap__ = cvector_capacity(vec__);                      \
+      if (cv_cap__ <= cvector_size(vec__))                            \
+        cvector_grow((vec__), cvector_compute_next_grow(cv_cap__));   \
+      ((type__*)(vec__)->ptr)[cvector_size(vec__)] = (value__);       \
+      (vec__)->size++;                                                \
     }                                                                 \
   } while (0)
 
@@ -238,7 +238,7 @@ cvector_resize(cvector_t* vec, size_t count);
           (vec)->elem_size * ((vec)->size - (pos)));                  \
       }                                                               \
       ((type*)(vec->ptr))[(pos)] = (val);                             \
-      cvector_set_size((vec), cvector_size(vec) + 1);                 \
+      (vec)->size += 1;                                               \
     }                                                                 \
   } while (0)
 
