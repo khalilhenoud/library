@@ -16,6 +16,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_executable(${PROJECT_NAME} 
 				./source/main.cpp
         ./source/cvector_test.cpp
+        ./source/clist_test.cpp
 				)
 
 target_link_libraries(${PROJECT_NAME}

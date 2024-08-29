@@ -30,7 +30,7 @@ cvector_setup(
     vec->allocator = allocator;
     vec->elem_cleanup = elem_cleanup_fn;
 
-    vec->ptr = capacity ? allocator->mem_alloc(capacity * elem_size) : NULL;
+    vec->data = capacity ? allocator->mem_alloc(capacity * elem_size) : NULL;
   }
 }
 
@@ -46,8 +46,8 @@ cvector_cleanup(cvector_t* vec)
         vec->elem_cleanup(cvector_at(vec, i), vec->allocator);
     }
 
-    vec->allocator->mem_free(vec->ptr);
-    vec->ptr = NULL;
+    vec->allocator->mem_free(vec->data);
+    vec->data = NULL;
     vec->allocator = NULL;
     vec->elem_cleanup = NULL;
     vec->size = vec->elem_size = vec->capacity = 0;
@@ -81,7 +81,7 @@ cvector_replicate(
   dst->size = src->size;
 
   if (!elem_replicate_fn)
-    memcpy(dst->ptr, src->ptr, src->size * src->elem_size);
+    memcpy(dst->data, src->data, src->size * src->elem_size);
   else {
     size_t i = 0, count = src->size;
     for (; i < count; ++i)
@@ -162,13 +162,13 @@ cvector_grow(cvector_t* vec, size_t new_capacity)
   {
     const size_t to_realloc = new_capacity * vec->elem_size;
     if (!to_realloc) {
-      vec->allocator->mem_free(vec->ptr);
-      vec->ptr = NULL;
+      vec->allocator->mem_free(vec->data);
+      vec->data = NULL;
       vec->capacity = new_capacity;
     } else {
-      void* new_ptr = vec->allocator->mem_realloc(vec->ptr, to_realloc);
+      void* new_ptr = vec->allocator->mem_realloc(vec->data, to_realloc);
       assert(new_ptr);
-      vec->ptr = new_ptr;
+      vec->data = new_ptr;
       vec->capacity = new_capacity;
     }
   }
@@ -191,7 +191,7 @@ void*
 cvector_at_unchecked(cvector_t* vec, size_t index)
 {
   assert(vec);
-  return (char*)vec->ptr + index * vec->elem_size;
+  return (char*)vec->data + index * vec->elem_size;
 }
 
 inline
@@ -200,7 +200,7 @@ cvector_at(cvector_t* vec, size_t index)
 {
   assert(vec);
   assert(index < vec->size);
-  return (char*)vec->ptr + index * vec->elem_size;
+  return (char*)vec->data + index * vec->elem_size;
 }
 
 inline
@@ -209,7 +209,7 @@ cvector_at_cst(const cvector_t* vec, size_t index)
 {
   assert(vec);
   assert(index < vec->size);
-  return (char*)vec->ptr + index * vec->elem_size;
+  return (char*)vec->data + index * vec->elem_size;
 }
 
 inline

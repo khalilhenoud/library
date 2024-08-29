@@ -1,7 +1,7 @@
 /**
  * @file cvector.h
  * @author khalilhenoud@gmail.com
- * @brief generic c vector
+ * @brief generic vector
  * @version 0.1
  * @date 2024-08-10
  * 
@@ -48,7 +48,7 @@ struct cvector_t {
     size_t capacity;
     const allocator_t* allocator;
     cvector_elem_cleanup_t elem_cleanup;
-    void *ptr;
+    void *data;
 } cvector_t;
 
 /** returns a default initialized copy of the struct */
@@ -73,13 +73,10 @@ cvector_is_def(const cvector_t* vec)
     vec->elem_size == def.elem_size && 
     vec->allocator == def.allocator && 
     vec->elem_cleanup == def.elem_cleanup && 
-    vec->ptr == def.ptr;
+    vec->data == def.data;
 }
 
 /**
- * NOTE: this must be called first or prior to any operation that might require
- * memory allocation. if the allocator is not set, an assert is the standard
- * behavior of the container in such cases. will also assert if vec is not NULL.
  * NOTE: capacity can be zero at which point vec will be invalid, and cannot be
  * dereferenced. this is intended behavior. allocation after the fact will
  * remedy this.
@@ -90,7 +87,7 @@ cvector_setup(
   size_t elem_size, 
   size_t capacity, 
   const allocator_t* allocator, 
-  cvector_elem_cleanup_t elem_destructor_fn);
+  cvector_elem_cleanup_t elem_cleanup_fn);
 
 /** frees all internal memory, call setup again to reuse. */
 void
@@ -188,21 +185,21 @@ cvector_resize(cvector_t* vec, size_t count);
       size_t cv_cap__ = cvector_capacity(vec__);                      \
       if (cv_cap__ <= cvector_size(vec__))                            \
         cvector_grow((vec__), cvector_compute_next_grow(cv_cap__));   \
-      ((type__*)(vec__)->ptr)[cvector_size(vec__)] = (value__);       \
+      ((type__*)(vec__)->data)[cvector_size(vec__)] = (value__);      \
       (vec__)->size++;                                                \
     }                                                                 \
   } while (0)
 
 /** syntatic sugar, simply returns the pointer casted */
 #define cvector_begin(vec, type) \
-  ((type*)(vec)->ptr)
+  ((type*)(vec)->data)
 
 /** 
  * returns the address to one past the last element of the array 
  * NOTE: this is legal, dereferencing this pointer is undefined behavior
  */
 #define cvector_end(vec, type) \
-  ((vec)->ptr ? ((type*)((vec)->ptr) + (vec)->size) : NULL)
+  ((vec)->data ? ((type*)((vec)->data) + (vec)->size) : NULL)
 
 /** returns a casted pointer to the element at n position or NULL if invalid */
 #define cvector_as(vec, n, type) \
@@ -227,11 +224,11 @@ cvector_resize(cvector_t* vec, size_t count);
         cvector_grow((vec), cvector_compute_next_grow(cv_cap__));     \
       if ((pos) < cvector_size(vec)) {                                \
         memmove(                                                      \
-          (type*)((vec)->ptr) + (pos) + 1,                            \
-          (type*)((vec)->ptr) + (pos),                                \
+          (type*)((vec)->data) + (pos) + 1,                           \
+          (type*)((vec)->data) + (pos),                               \
           (vec)->elem_size * ((vec)->size - (pos)));                  \
       }                                                               \
-      ((type*)((vec)->ptr))[(pos)] = (val);                           \
+      ((type*)((vec)->data))[(pos)] = (val);                          \
       (vec)->size += 1;                                               \
     }                                                                 \
   } while (0)
