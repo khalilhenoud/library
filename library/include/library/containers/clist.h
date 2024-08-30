@@ -94,6 +94,22 @@ clist_setup(
 void
 clist_cleanup(clist_t* list);
 
+/** 
+ * NOTE: will assert if 'src' is not initialized, or if 'dst' is initialized but
+ * with non-zero size.
+ * NOTE: either 'dst' or 'allocator' is NULL, not both (we assert).
+ */
+void 
+clist_replicate(
+  const clist_t *src, 
+  clist_t *dst, 
+  const allocator_t *allocator, 
+  clist_elem_replicate_t elem_replicate_fn);
+
+/** exchanges the content of the specified containers, even allocators */
+void
+clist_fullswap(clist_t* src, clist_t* dst);
+
 size_t
 clist_size(const clist_t* vec);
 
@@ -112,6 +128,8 @@ clist_empty(const clist_t* vec);
 /** returns the node at index, internal use only. */
 clist_node_t* 
 clist_at(clist_t *list, size_t index);
+const clist_node_t* 
+clist_at_cst(const clist_t *list, size_t index);
 
 /** removes the node at index from the list. */
 void
@@ -145,56 +163,21 @@ clist_end(clist_t* list);
 void
 clist_advance(clist_iterator_t* iter);
 
+
 ////////////////////////////////////////////////////////////////////////////////
 #define clist_iterator clist_iterator_t
 
 #define clist_deref(iter, type) \
-  ((type)*)((iter)->current->data)
+  (type*)((iter)->current->data)
 
 #define clist_as(list, n, type) \
-  ((type)*)(clist_at((list), (n))->data)
+  (type*)(clist_at((list), (n))->data)
 
 #define clist_front(list, type) \
-  ((type)*)(clist_at(list), 0)->data)
+  (type*)(clist_at((list), 0)->data)
 
 #define clist_back(list, type) \
-  ((type)*)(clist_at(list), (list)->size - 1)->data)
-
-// void clist_insert(clist_t* list, size_t pos, int32_t val) {
-//   do {
-//     assert(list && !clist_is_def(list));
-//     assert(pos >= 0 && pos <= list->size);
-//     {
-//       clist_node_t* to_insert = 
-//         (clist_node_t*)list->allocator->mem_alloc(sizeof(clist_node_t));
-//       to_insert->data = list->allocator->mem_alloc(list->elem_size);
-//       *((int32_t*)(to_insert->data)) = val;
-
-//       if (!list->nodes) {
-//         list->nodes = to_insert;
-//         to_insert->previous = to_insert->next = to_insert;
-//       } else {
-//         clist_node_t* current = clist_at(list, pos);
-//         clist_node_t* previous = current->previous;
-
-//         // only one instance is in.
-//         if (current == previous) {
-//           to_insert->previous = to_insert->next = current;
-//           current->previous = current->next = to_insert;
-//         } else {
-//           to_insert->previous = previous;
-//           to_insert->next = current;
-//           previous->next = to_insert;
-//           current->previous = to_insert;
-//         }
-
-//         list->nodes = (pos == 0 || pos == list->size) ? to_insert : list->nodes;
-//       }
-
-//       ++list->size;
-//     }
-//   } while (0);
-// }
+  (type*)(clist_at((list), (list)->size - 1)->data)
 
 /** insert element 'val' at 'pos' in the list */
 #define clist_insert(list, pos, val, type)                                    \
@@ -205,7 +188,7 @@ clist_advance(clist_iterator_t* iter);
       clist_node_t* to_insert =                                               \
         (clist_node_t*)(list)->allocator->mem_alloc(sizeof(clist_node_t));    \
       to_insert->data = (list)->allocator->mem_alloc((list)->elem_size);      \
-      *((type)*)(to_insert->data)) = (val);                                   \
+      *((type*)to_insert->data) = (val);                                      \
                                                                               \
       if (!(list)->nodes) {                                                   \
         (list)->nodes = to_insert;                                            \
@@ -224,20 +207,52 @@ clist_advance(clist_iterator_t* iter);
           current->previous = to_insert;                                      \
         }                                                                     \
                                                                               \
-        (list)->nodes =                                                       \
-          ((pos) == 0 || (pos) == (list)->size) ? to_insert : (list)->nodes;  \
+        (list)->nodes = (pos) == 0 ? to_insert : (list)->nodes;               \
       }                                                                       \
-      ++(list)->size;                                                         \
+      ++((list)->size);                                                       \
+    }                                                                         \
+  } while (0)
+
+#define clist_insert_empty(list, pos)                                         \
+  do {                                                                        \
+    assert((list) && !clist_is_def(list));                                    \
+    assert((pos) >= 0 && (pos) <= (list)->size);                              \
+    {                                                                         \
+      clist_node_t* to_insert =                                               \
+        (clist_node_t*)(list)->allocator->mem_alloc(sizeof(clist_node_t));    \
+      to_insert->data = (list)->allocator->mem_alloc((list)->elem_size);      \
+      memset(to_insert->data, 0, (list)->elem_size);                          \
+                                                                              \
+      if (!(list)->nodes) {                                                   \
+        (list)->nodes = to_insert;                                            \
+        to_insert->previous = to_insert->next = to_insert;                    \
+      } else {                                                                \
+        clist_node_t* current = clist_at((list), (pos));                      \
+        clist_node_t* previous = current->previous;                           \
+                                                                              \
+        if (current == previous) {                                            \
+          to_insert->previous = to_insert->next = current;                    \
+          current->previous = current->next = to_insert;                      \
+        } else {                                                              \
+          to_insert->previous = previous;                                     \
+          to_insert->next = current;                                          \
+          previous->next = to_insert;                                         \
+          current->previous = to_insert;                                      \
+        }                                                                     \
+                                                                              \
+        (list)->nodes = (pos) == 0 ? to_insert : (list)->nodes;               \
+      }                                                                       \
+      ++((list)->size);                                                       \
     }                                                                         \
   } while (0)
 
 /** adds an element to the end of the list */
 #define clist_push_back(list__, value__, type__) \
-  clist_insert((list__), (list__)->size, (value__), (type__))
+  clist_insert((list__), (list__)->size, (value__), type__)
 
 /** adds an element to the start of the list */
 #define clist_push_front(list__, value__, type__) \
-  clist_insert((list__), 0, (value__), (type__))
+  clist_insert((list__), 0, (value__), type__)
 
 #include "clist.inl"
 

@@ -42,6 +42,7 @@ print_cvector_content(cvector_t& vec, const int32_t tabs)
   NEWLINE;
 }
 
+static
 void
 print_meta(cvector_t& vec, const int32_t tabs) 
 {

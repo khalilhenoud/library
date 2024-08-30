@@ -47,6 +47,59 @@ clist_cleanup(clist_t* list)
 }
 
 inline
+void 
+clist_replicate(
+  const clist_t *src, 
+  clist_t *dst, 
+  const allocator_t *allocator, 
+  clist_elem_replicate_t elem_replicate_fn)
+{
+  assert(src && !clist_is_def(src));
+  assert(dst);
+  assert(
+    (clist_is_def(dst) && allocator) || 
+    (
+      !clist_is_def(dst) && 
+      !allocator && 
+      dst->elem_size == src->elem_size && 
+      dst->size == 0 && 
+      dst->elem_cleanup == src->elem_cleanup));
+
+  if (clist_is_def(dst)) {
+    clist_setup(
+      dst, src->elem_size, allocator, src->elem_cleanup);
+  }
+
+  {
+    const clist_node_t* src_node;
+    clist_node_t* dst_node;
+    size_t i = 0;
+    for (; i < src->size; ++i) {
+      src_node = clist_at_cst(src, i);
+      clist_insert_empty(dst, i);
+      dst_node = clist_at(dst, i);
+
+      if (!elem_replicate_fn)
+        memcpy(dst_node->data, src_node->data, src->elem_size);
+      else
+        elem_replicate_fn(src_node->data, dst_node->data, dst->allocator);
+    }
+  }
+}
+
+inline
+void
+clist_fullswap(clist_t* src, clist_t* dst)
+{
+  assert(src && dst);
+  {
+    clist_t tmp = *src;
+    *src = *dst;
+    *dst = tmp;
+  }
+}
+
+inline
 size_t
 clist_size(const clist_t* list) 
 { 
@@ -95,6 +148,22 @@ clist_at(clist_t *list, size_t index)
 
   {
     clist_node_t* start = list->nodes;
+    int64_t i = (int64_t)index;
+    while (i--)
+      start = start->next;
+    return start;
+  }
+}
+
+inline
+const clist_node_t* 
+clist_at_cst(const clist_t *list, size_t index)
+{
+  assert(list && !clist_is_def(list));
+  assert(index <= list->size);
+
+  {
+    const clist_node_t* start = list->nodes;
     int64_t i = (int64_t)index;
     while (i--)
       start = start->next;
@@ -171,6 +240,7 @@ clist_begin(clist_t* list)
   iter.list = list;
   iter.current = list->nodes;
   iter.last = list->nodes ? list->nodes->previous : NULL;
+  return iter;
 }
 
 inline
@@ -180,6 +250,17 @@ clist_end(clist_t* list)
   clist_iterator_t iter;
   iter.list = list;
   iter.current = iter.last = NULL;
+  return iter;
+}
+
+inline
+int32_t
+clist_iter_equal(clist_iterator_t left, clist_iterator_t right)
+{
+  return 
+    left.list == right.list && 
+    left.last == right.last && 
+    left.current == right.current;
 }
 
 inline
