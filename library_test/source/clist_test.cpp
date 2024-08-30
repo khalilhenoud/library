@@ -244,6 +244,57 @@ test_clist_mem(const allocator_t* allocator, const int32_t tabs)
   clist_cleanup(&list); 
 }
 
+typedef
+struct custom_t {
+  int32_t* data;
+  int32_t count;
+  int32_t tabs;
+} custom_t;
+
+static
+void 
+elem_cleanup(void *elem_ptr, const allocator_t* allocator)
+{
+  custom_t* casted = (custom_t*)elem_ptr;
+  if (casted->count && casted->data) {
+    std::cout << std::string(casted->tabs, '\t') << "freeing " << 
+    casted->count << " elements" << std::endl;
+    allocator->mem_free(casted->data);
+  } else
+    std::cout << std::string(casted->tabs, '\t') << "nothing to free" << 
+    std::endl;
+}
+
+void
+test_clist_custom(const allocator_t* allocator, const int32_t tabs)
+{
+  PRINT_FUNCTION;
+
+  custom_t data;
+  memset(&data, 0, sizeof(custom_t));
+  clist_t list = clist_def();
+  clist_setup(&list, sizeof(custom_t), allocator, elem_cleanup);
+  print_meta(list, tabs);
+  clist_push_back(&list, data, custom_t);
+  clist_push_back(&list, data, custom_t);
+  clist_push_back(&list, data, custom_t);
+
+  auto* ptr = clist_as(&list, 0, custom_t);
+  ptr->count = 3;
+  ptr->data = (int32_t*)allocator->mem_cont_alloc(ptr->count, sizeof(int32_t));
+  ptr->tabs = tabs;
+
+  ptr = clist_as(&list, 1, custom_t);
+  ptr->tabs = tabs;
+
+  ptr = clist_as(&list, 2, custom_t);
+  ptr->count = 5;
+  ptr->data = (int32_t*)allocator->mem_cont_alloc(ptr->count, sizeof(int32_t));
+  ptr->tabs = tabs;
+
+  clist_cleanup(&list);
+}
+
 void
 test_clist_main(const allocator_t* allocator, const int32_t tabs)
 {
@@ -254,4 +305,5 @@ test_clist_main(const allocator_t* allocator, const int32_t tabs)
   test_clist_iterators(allocator, tabs + 1);    NEWLINE;
   test_clist_ops(allocator, tabs + 1);          NEWLINE;
   test_clist_mem(allocator, tabs + 1);          NEWLINE;
+  test_clist_custom(allocator, tabs + 1);       NEWLINE;
 }

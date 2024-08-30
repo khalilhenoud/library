@@ -287,6 +287,7 @@ elem_cleanup(void *elem_ptr, const allocator_t* allocator)
     std::endl;
 }
 
+static
 void
 test_cvector_custom(const allocator_t* allocator, const int32_t tabs)
 {
