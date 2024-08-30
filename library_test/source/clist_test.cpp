@@ -210,6 +210,41 @@ test_clist_ops(const allocator_t* allocator, const int32_t tabs)
 }
 
 void
+test_clist_mem(const allocator_t* allocator, const int32_t tabs)
+{
+  PRINT_FUNCTION;
+  PRINT_DESC("erase, clear testing...");
+
+  clist_t list = clist_def();
+  clist_setup(&list, sizeof(int32_t), allocator, NULL);
+  for (auto i = 0; i < 20; ++i)
+    clist_push_back(&list, i, int32_t);
+  print_clist_content<int32_t>(list, tabs);
+  print_meta(list, tabs);
+  {
+    // erase every other element.
+    for (int64_t i = list.size - 1; i >= 0; --i) {
+      if (!((i + 1) % 2))
+        clist_erase(&list, (size_t)i);
+    }
+
+    print_meta(list, tabs);
+    print_clist_content<int32_t>(list, tabs);
+    NEWLINE;
+  }
+  {
+    clist_clear(&list);
+    print_meta(list, tabs);
+    for (int32_t i = 0; i < 20; ++i)
+      clist_insert(&list, 0, i, int32_t);
+    
+    print_meta(list, tabs);
+    print_clist_content<int32_t>(list, tabs);
+  }
+  clist_cleanup(&list); 
+}
+
+void
 test_clist_main(const allocator_t* allocator, const int32_t tabs)
 {
   PRINT_FUNCTION;
@@ -218,4 +253,5 @@ test_clist_main(const allocator_t* allocator, const int32_t tabs)
   test_clist_basics(allocator, tabs + 1);       NEWLINE;
   test_clist_iterators(allocator, tabs + 1);    NEWLINE;
   test_clist_ops(allocator, tabs + 1);          NEWLINE;
+  test_clist_mem(allocator, tabs + 1);          NEWLINE;
 }
