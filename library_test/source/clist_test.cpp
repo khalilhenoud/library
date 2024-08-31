@@ -150,6 +150,17 @@ test_clist_iterators(const allocator_t* allocator, const int32_t tabs)
     clist_pop_back(&list);
   }
 
+  CTABS << "clist_push_front: " << std::endl;
+  for (int32_t i = 0; i < 10; ++i)
+    clist_push_front(&list, (double)i, double);
+  print_clist_content<double>(list, tabs);
+
+  CTABS << "clist_pop_front() loop: " << std::endl;
+  while (!clist_empty(&list)) {
+    print_clist_content<double>(list, tabs);
+    clist_pop_front(&list);
+  }
+
   clist_cleanup(&list);
 }
 
