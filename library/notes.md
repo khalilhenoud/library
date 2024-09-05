@@ -14,6 +14,8 @@ container interface:
 *_fullswap      move/swap. usefull to transfer resources
 *_serialize     write the content to a byte stream
 *_deserialize   read the content from a byte stream
+*_hash          used for hash maps (containers are valid in container container
+                scenarios)
 
 to be finalized:
 *_guid          unique guid associated with the container
@@ -40,6 +42,7 @@ type interface:
 *_fullswap      move/swap. 
 *_serialize     write the content to a byte stream
 *_deserialize   read the content from a byte stream
+*_hash          used, when it exists, for hashmaps and the likes
 
 to be finalized:
 *_guid          unique guid associated with the container
@@ -55,3 +58,8 @@ NOTE: setup functions do not allocate the memory for the instance in question.
 they are responsible for the instance internal initialization (whether that
 contains memory allocation or not is of no relevance). the logic for cleanup is
 similar.
+
+IMPORTANT: 
+I suspect we will need *_allocate *_deallocate variants to support deserializing
+in an agnostic way (the guid is mapped to _allocate which can be used to 
+instantiate an object).

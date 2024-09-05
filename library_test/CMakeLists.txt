@@ -17,6 +17,7 @@ add_executable(${PROJECT_NAME}
 				./source/main.cpp
         ./source/cvector_test.cpp
         ./source/clist_test.cpp
+        ./source/hash_test.cpp
 				)
 
 target_link_libraries(${PROJECT_NAME}

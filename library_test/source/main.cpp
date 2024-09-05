@@ -67,6 +67,9 @@ test_cvector_main(const allocator_t* allocator, const int32_t tabs = 0);
 void
 test_clist_main(const allocator_t* allocator, const int32_t tabs = 0);
 
+void
+test_hash_main(const allocator_t* allocator, const int32_t tabs = 0);
+
 int 
 main(int argc, char *argv[])
 {
@@ -79,6 +82,7 @@ main(int argc, char *argv[])
 
   test_cvector_main(&allocator);
   test_clist_main(&allocator);
+  test_hash_main(&allocator);
 
   std::cout << "allocation remaining: " << allocated.size() << std::endl;
   assert(allocated.size() == 0);
