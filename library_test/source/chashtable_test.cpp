@@ -12,34 +12,17 @@
 #include <library/containers/chashtable.h>
 #include <stdint.h>
 #include <cassert>
-#include <iostream>
-
-#ifndef __FUNCTION_NAME__
-    #ifdef WIN32   //WINDOWS
-        #define __FUNCTION_NAME__   __FUNCTION__  
-    #else          //*NIX
-        #define __FUNCTION_NAME__   __func__ 
-    #endif
-#endif
-
-#define TABS std::string(tabs, '\t')
-#define CTABS std::cout << TABS
-#define PRINT_FUNCTION CTABS << "-------[" __FUNCTION_NAME__ "]-------" \
-  << std::endl
-#define PRINT_DESC(x) CTABS << ">>>>>>> " << x << " <<<<<<<" << std::endl
-#define PRINT_BOOL(x) #x << " = " << (x ? "true" : "false")
-#define PRINT(x) #x << " = " << x
-#define NEWLINE std::cout << std::endl
+#include <common.h>
 
 
-template<typename VALUE_TYPE, typename KEY_TYPE>
+template<typename KEY_TYPE, typename VALUE_TYPE>
 void
 print_chashtable_content(chashtable_t& map, const int32_t tabs)
 {
-  CTABS << "<values, keys> : ";
+  CTABS << "[key, value]: ";
   for (size_t i = 0; i < map.values.size; ++i)
-    std::cout << '<' << *cvector_as(&map.values, i, VALUE_TYPE) << ", "
-      << *cvector_as(&map.keys, i, KEY_TYPE) << '>' << std::ends;
+    std::cout << '[' << *cvector_as(&map.keys, i, KEY_TYPE) << ", "
+      << *cvector_as(&map.values, i, VALUE_TYPE) << "] ";
   NEWLINE;
   CTABS << "indices: ";
   for (size_t i = 0; i < map.indices.size; ++i) {
@@ -121,14 +104,14 @@ test_chashtable_basics(const allocator_t* allocator, const int32_t tabs)
     print_meta(map, tabs);
   
     chashtable_insert(&map, 16, uint64_t, 1.12f, float);
-    print_chashtable_content<float, uint64_t>(map, tabs + 1);
+    print_chashtable_content<uint64_t, float>(map, tabs + 1);
     print_meta(map, tabs);
+    NEWLINE;
 
-    // for (int32_t i = 100; i < 120; ++i)
-    //   cvector_push_back(&vec_i8, (char)i + 1, char);
-    // print_meta(vec_i8, tabs);
-    // print_cvector_content<char>(vec_i8, tabs);
-    // cvector_cleanup(&vec_i8);
+    for (uint64_t i = 0; i < 100; ++i)
+      chashtable_insert(&map, i, uint64_t, i * 1.4f, float);
+    print_chashtable_content<uint64_t, float>(map, tabs + 1);
+    print_meta(map, tabs);
     chashtable_cleanup(&map);
     NEWLINE;
   }

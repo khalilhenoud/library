@@ -14,24 +14,7 @@
 #include <cassert>
 #include <string>
 #include <algorithm>
-#include <iostream>
-
-#ifndef __FUNCTION_NAME__
-    #ifdef WIN32   //WINDOWS
-        #define __FUNCTION_NAME__   __FUNCTION__  
-    #else          //*NIX
-        #define __FUNCTION_NAME__   __func__ 
-    #endif
-#endif
-
-#define TABS std::string(tabs, '\t')
-#define CTABS std::cout << TABS
-#define PRINT_FUNCTION CTABS << "-------[" __FUNCTION_NAME__ "]-------" \
-  << std::endl
-#define PRINT_DESC(x) CTABS << ">>>>>>> " << x << " <<<<<<<" << std::endl
-#define PRINT_BOOL(x) #x << " = " << (x ? "true" : "false")
-#define PRINT(x) #x << " = " << x
-#define NEWLINE std::cout << std::endl
+#include <common.h>
 
 #define LEN(x) (sizeof(x)-1)
 /* TEST macro does not include trailing NUL byte in the test vector */
