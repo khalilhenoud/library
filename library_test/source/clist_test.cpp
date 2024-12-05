@@ -53,7 +53,7 @@ print_meta(clist_t& list, const int32_t tabs)
   ", elem_cleanup: " << (uint64_t)(list.elem_cleanup) << 
   ", nodes: " << (uint64_t)(list.nodes) << ")" << 
   std::endl;
-};
+}
 
 void
 test_clist_def(const allocator_t* allocator, const int32_t tabs)

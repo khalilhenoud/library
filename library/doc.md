@@ -34,7 +34,7 @@ iterator interface:
 *_deref
 
 type interface:
-*_def           returns a default initialized instance of the type
+*_def           returns/sets a default initialized instance of the type
 *_is_def        returns whether the instance is equivalent to the default type
 *_setup         constructor
 *_cleanup       destructor
@@ -63,3 +63,6 @@ IMPORTANT:
 I suspect we will need *_allocate *_deallocate variants to support deserializing
 in an agnostic way (the guid is mapped to _allocate which can be used to 
 instantiate an object).
+
+NOTE: the reason why I went with non macro instantiations was compatibility with
+C++. But does this hold, maybe I should make a test and see?

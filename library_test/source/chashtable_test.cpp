@@ -1,15 +1,15 @@
 /**
- * @file cvector_test.cpp
+ * @file chashtable_test.cpp
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief tests for hashtable functionality
  * @version 0.1
- * @date 2024-08-19
+ * @date 2024-11-30
  * 
  * @copyright Copyright (c) 2024
  * 
  */
 #include <library/allocator/allocator.h>
-#include <library/containers/cvector.h>
+#include <library/containers/chashtable.h>
 #include <stdint.h>
 #include <cassert>
 #include <iostream>
@@ -32,95 +32,149 @@
 #define NEWLINE std::cout << std::endl
 
 
-template<typename T>
+template<typename VALUE_TYPE, typename KEY_TYPE>
 void
-print_cvector_content(cvector_t& vec, const int32_t tabs)
+print_chashtable_content(chashtable_t& map, const int32_t tabs)
 {
-  CTABS << "values: ";
-  for (size_t i = 0; i < vec.size; ++i)
-    std::cout << *cvector_as(&vec, i, T) << " ";
+  CTABS << "<values, keys> : ";
+  for (size_t i = 0; i < map.values.size; ++i)
+    std::cout << '<' << *cvector_as(&map.values, i, VALUE_TYPE) << ", "
+      << *cvector_as(&map.keys, i, KEY_TYPE) << '>' << std::ends;
+  NEWLINE;
+  CTABS << "indices: ";
+  for (size_t i = 0; i < map.indices.size; ++i) {
+    uint64_t index = *cvector_as(&map.indices, i, uint32_t);
+    if (index == (uint32_t)-1)
+      std::cout << "INV ";
+    else
+      std::cout << index << " ";
+  }
   NEWLINE;
 }
 
 static
 void
-print_meta(cvector_t& vec, const int32_t tabs) 
+print_meta(chashtable_t& map, const int32_t tabs) 
 {
   CTABS << 
-  "vec(size: " << vec.size << 
-  ", elem_size: " << vec.elem_size << 
-  ", capacity: " << vec.capacity << 
-  ", allocator: " << (uint64_t)(vec.allocator) <<
-  ", elem_cleanup: " << (uint64_t)(vec.elem_cleanup) << ")" << 
+  "map(values.size: " << map.values.size << 
+  ", values.elem_size: " << map.values.elem_size << 
+  ", values.capacity: " << map.values.capacity << 
+  ", values.allocator: " << (uint64_t)(map.allocator) <<
+  ", values.elem_cleanup: " << (uint64_t)(map.values.elem_cleanup) << ")" << 
   std::endl;
+  CTABS << 
+  "map(keys.size: " << map.keys.size << 
+  ", keys.elem_size: " << map.keys.elem_size << 
+  ", keys.capacity: " << map.keys.capacity << 
+  ", keys.allocator: " << (uint64_t)(map.allocator) <<
+  ", keys.elem_cleanup: " << (uint64_t)(map.keys.elem_cleanup) << ")" << 
+  std::endl;
+  CTABS << 
+  "map(indices.size: " << map.indices.size << 
+  ", indices.elem_size: " << map.indices.elem_size << 
+  ", indices.capacity: " << map.indices.capacity << 
+  ", indices.allocator: " << (uint64_t)(map.allocator) <<
+  ", indices.elem_cleanup: " << (uint64_t)(map.indices.elem_cleanup) << ")" << 
+  std::endl;
+  CTABS << 
+  "map(max_load_factor: " << map.max_load_factor << 
+  ", allocator: " << (uint64_t)(map.allocator) <<
+  ", key_replicate: " << (uint64_t)(map.key_replicate) << 
+  ", key_equal: " << (uint64_t)(map.key_equal) << 
+  ", hash_calc:" << (uint64_t)(map.hash_calc) << ")" << std::endl; 
 }
 
 void
-test_cvector_def(const allocator_t* allocator, const int32_t tabs)
+test_chashtable_def(const allocator_t* allocator, const int32_t tabs)
 {
   PRINT_FUNCTION;
 
-  cvector_t vec = cvector_def();
-  print_meta(vec, tabs);
-  CTABS << PRINT_BOOL(cvector_is_def(&vec)) << std::endl;
+  chashtable_t map = chashtable_def();
+  print_meta(map, tabs);
+  CTABS << PRINT_BOOL(chashtable_is_def(&map)) << std::endl;
+}
+
+uint64_t hash_calc(const void* key)
+{
+  return *((uint64_t*)key);
+}
+
+int32_t key_equal(const void* key1, const void* key2)
+{
+  return hash_calc(key1) == hash_calc(key2);
 }
 
 void
-test_cvector_basics(const allocator_t* allocator, const int32_t tabs)
+test_chashtable_basics(const allocator_t* allocator, const int32_t tabs)
 {
   PRINT_FUNCTION;
-  PRINT_DESC("defines and populate basic types of vectors");
+  PRINT_DESC("defines and populate basic types of hashtables");
 
-  cvector_t vec_i8 = cvector_def();
-  cvector_setup(&vec_i8, sizeof(char), 4, allocator, NULL);
-  print_meta(vec_i8, tabs);
-  for (int32_t i = 100; i < 120; ++i)
-    cvector_push_back(&vec_i8, (char)i + 1, char);
-  print_meta(vec_i8, tabs);
-  print_cvector_content<char>(vec_i8, tabs);
-  cvector_cleanup(&vec_i8);
-  NEWLINE;
+  {
+    chashtable_t map = chashtable_def();
+    chashtable_setup(
+      &map, 
+      sizeof(uint64_t), sizeof(float), 
+      allocator, 0.6f, 
+      NULL, NULL, key_equal, NULL, hash_calc);
+    print_meta(map, tabs);
+  
+    chashtable_insert(&map, 16, uint64_t, 1.12f, float);
+    print_chashtable_content<float, uint64_t>(map, tabs + 1);
+    print_meta(map, tabs);
 
-  cvector_t vec_i16 = cvector_def();
-  cvector_setup(&vec_i16, sizeof(short), 4, allocator, NULL);
-  print_meta(vec_i16, tabs);
-  for (int32_t i = 120; i < 140; ++i)
-    cvector_push_back(&vec_i16, (short)i + 1, short);
-  print_meta(vec_i16, tabs);
-  print_cvector_content<short>(vec_i16, tabs);
-  cvector_cleanup(&vec_i16);
-  NEWLINE;
+    // for (int32_t i = 100; i < 120; ++i)
+    //   cvector_push_back(&vec_i8, (char)i + 1, char);
+    // print_meta(vec_i8, tabs);
+    // print_cvector_content<char>(vec_i8, tabs);
+    // cvector_cleanup(&vec_i8);
+    chashtable_cleanup(&map);
+    NEWLINE;
+  }
 
-  cvector_t vec_i32 = cvector_def();
-  cvector_setup(&vec_i32, sizeof(int32_t), 4, allocator, NULL);
-  print_meta(vec_i32, tabs);
-  for (int32_t i = 0; i < 10; ++i)
-    cvector_push_back(&vec_i32, (int32_t)i + 1, int32_t);
-  print_meta(vec_i32, tabs);
-  print_cvector_content<int32_t>(vec_i32, tabs);
-  cvector_cleanup(&vec_i32);
-  NEWLINE;
 
-  cvector_t vec_f32 = cvector_def();
-  cvector_setup(&vec_f32, sizeof(float), 4, allocator, NULL);
-  print_meta(vec_f32, tabs);
-  for (int32_t i = 1; i < 20; ++i)
-    cvector_push_back(&vec_f32, (float)i + 1.75f * i, float);
-  print_meta(vec_f32, tabs);
-  print_cvector_content<float>(vec_f32, tabs);
-  cvector_cleanup(&vec_f32);
-  NEWLINE;
+  // cvector_t vec_i16 = cvector_def();
+  // cvector_setup(&vec_i16, sizeof(short), 4, allocator, NULL);
+  // print_meta(vec_i16, tabs);
+  // for (int32_t i = 120; i < 140; ++i)
+  //   cvector_push_back(&vec_i16, (short)i + 1, short);
+  // print_meta(vec_i16, tabs);
+  // print_cvector_content<short>(vec_i16, tabs);
+  // cvector_cleanup(&vec_i16);
+  // NEWLINE;
 
-  cvector_t vec_f64 = cvector_def();
-  cvector_setup(&vec_f64, sizeof(double), 4, allocator, NULL);
-  print_meta(vec_f64, tabs);
-  for (int32_t i = 20; i < 35; ++i)
-    cvector_push_back(&vec_f64, (double)i + 1.75 * i, double);
-  print_meta(vec_f64, tabs);
-  print_cvector_content<double>(vec_f64, tabs);
-  cvector_cleanup(&vec_f64);
+  // cvector_t vec_i32 = cvector_def();
+  // cvector_setup(&vec_i32, sizeof(int32_t), 4, allocator, NULL);
+  // print_meta(vec_i32, tabs);
+  // for (int32_t i = 0; i < 10; ++i)
+  //   cvector_push_back(&vec_i32, (int32_t)i + 1, int32_t);
+  // print_meta(vec_i32, tabs);
+  // print_cvector_content<int32_t>(vec_i32, tabs);
+  // cvector_cleanup(&vec_i32);
+  // NEWLINE;
+
+  // cvector_t vec_f32 = cvector_def();
+  // cvector_setup(&vec_f32, sizeof(float), 4, allocator, NULL);
+  // print_meta(vec_f32, tabs);
+  // for (int32_t i = 1; i < 20; ++i)
+  //   cvector_push_back(&vec_f32, (float)i + 1.75f * i, float);
+  // print_meta(vec_f32, tabs);
+  // print_cvector_content<float>(vec_f32, tabs);
+  // cvector_cleanup(&vec_f32);
+  // NEWLINE;
+
+  // cvector_t vec_f64 = cvector_def();
+  // cvector_setup(&vec_f64, sizeof(double), 4, allocator, NULL);
+  // print_meta(vec_f64, tabs);
+  // for (int32_t i = 20; i < 35; ++i)
+  //   cvector_push_back(&vec_f64, (double)i + 1.75 * i, double);
+  // print_meta(vec_f64, tabs);
+  // print_cvector_content<double>(vec_f64, tabs);
+  // cvector_cleanup(&vec_f64);
 }
 
+/*
 void
 test_cvector_iterators(const allocator_t* allocator, const int32_t tabs)
 {
@@ -317,16 +371,13 @@ test_cvector_custom(const allocator_t* allocator, const int32_t tabs)
 
   cvector_cleanup(&vec);
 }
+*/
 
 void
-test_cvector_main(const allocator_t* allocator, const int32_t tabs)
+test_chashtable_main(const allocator_t* allocator, const int32_t tabs)
 {
   PRINT_FUNCTION;
 
-  test_cvector_def(allocator, tabs + 1);          NEWLINE;
-  test_cvector_basics(allocator, tabs + 1);       NEWLINE;
-  test_cvector_iterators(allocator, tabs + 1);    NEWLINE;
-  test_cvector_ops(allocator, tabs + 1);          NEWLINE;
-  test_cvector_mem(allocator, tabs + 1);          NEWLINE;
-  test_cvector_custom(allocator, tabs + 1);       NEWLINE;
+  test_chashtable_def(allocator, tabs + 1);          NEWLINE;
+  test_chashtable_basics(allocator, tabs + 1);       NEWLINE;
 }

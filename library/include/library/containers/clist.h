@@ -47,7 +47,7 @@ struct clist_iterator_t {
   clist_t *list;
   clist_node_t *current;
   clist_node_t *last;
-} clist_iterator_t;
+} clist_iterator_t; 
 
 // TODO: consider removing size, this nets us a 32 bytes struct.
 typedef
@@ -97,7 +97,7 @@ clist_cleanup(clist_t* list);
 /** 
  * NOTE: will assert if 'src' is not initialized, or if 'dst' is initialized but
  * with non-zero size.
- * NOTE: either 'dst' or 'allocator' is NULL, not both (we assert).
+ * NOTE: either 'dst' is def or 'allocator' is NULL, not both (we assert).
  */
 void 
 clist_replicate(

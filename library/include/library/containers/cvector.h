@@ -153,9 +153,11 @@ cvector_clear(cvector_t* vec);
 void
 cvector_grow(cvector_t* vec, size_t new_capacity);
 
+#define CVECTOR_INIT_SIZE 4
+
 /** the grow rate starts at 4 then follows size * 1.5 */
 #define cvector_compute_next_grow(size) \
-  ((size) >= 4 ? ((size) + (size)/2) : 4 )
+  ((size) >= CVECTOR_INIT_SIZE ? ((size) + (size)/2) : CVECTOR_INIT_SIZE )
 
 /** discards extra memory capacity. */
 void
