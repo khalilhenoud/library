@@ -152,6 +152,15 @@ cvector_empty(const cvector_t* vec)
 
 inline
 void
+cvector_cleanup_at(cvector_t* vec, size_t index)
+{
+  assert(vec && !cvector_is_def(vec));
+  if (vec->elem_cleanup)
+    vec->elem_cleanup(cvector_at(vec, index), vec->allocator);
+}
+
+inline
+void
 cvector_grow(cvector_t* vec, size_t new_capacity)
 {
   assert(vec && !cvector_is_def(vec));

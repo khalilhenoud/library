@@ -29,6 +29,11 @@ chashtable_setup(
   chashtable_hash_calc_t hash_calc_fn)
 {
   assert(hashtable && allocator);
+  assert(
+    ((key_replicate_fn && key_cleanup_fn) || 
+    (!key_replicate_fn && !key_cleanup_fn)) && 
+    "if key_replicate_fn is provided, key_cleanup_fn must as well and vice" 
+    "versa!");
 
   {
     hashtable->max_load_factor = max_load_factor;

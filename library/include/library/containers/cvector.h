@@ -128,6 +128,10 @@ cvector_elem_cleanup(const cvector_t* vec);
 int32_t
 cvector_empty(const cvector_t* vec);
 
+/** internal: used to cleanup an element to reuse the space. */
+void
+cvector_cleanup_at(cvector_t* vec, size_t index);
+
 /** expands capacity to max(capacity, vec->capacity) */
 void
 cvector_reserve(cvector_t* vec, size_t capacity);

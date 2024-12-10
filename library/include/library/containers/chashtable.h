@@ -36,7 +36,8 @@ uint64_t (*chashtable_hash_calc_t)(const void* key);
 // i require a 
 //  - function to make a copy of the key, we shouldn't leave a reference to the 
 //    original key (can be defaulted, at which point we do a byte wise copy)
-//  - function to delete the key (can be default, same logic)
+//  - function to delete the key (can be default, same logic), assert if the 
+//    deletion is set without the deletion.
 // a value can be any type.
 //  - function to delete the elem.
 // we require an
@@ -196,17 +197,31 @@ chashtable_reserve(chashtable_t* hashtable, size_t count);
         chashtable_compute_next_grow(chashtable_capacity(hashtable)));         \
                                                                                \
     {                                                                          \
-      uint32_t data_index;                                                     \
-      chashtable_contains((hashtable), (key), key_type, data_index);           \
-      if (data_index != CHASHTABLE_INVALID_INDEX) {                            \
-        cvector_erase(&(hashtable)->values, data_index);                       \
-        cvector_insert(                                                        \
-          &(hashtable)->values, data_index, (value), value_type);              \
+      uint32_t index;                                                          \
+      key_type scopy = (key);                                                  \
+      chashtable_contains((hashtable), (key), key_type, index);           \
+      if (index != CHASHTABLE_INVALID_INDEX) {                            \
+        if ((hashtable)->key_replicate) { \
+        cvector_cleanup_at(&(hashtable)->keys, index);       \
+        (hashtable)->key_replicate( \
+          &scopy, \
+          cvector_at(&(hashtable)->keys, index), (hashtable)->allocator); \
+        } \
+        cvector_cleanup_at(&(hashtable)->values, index);                       \
+        *cvector_as(&(hashtable)->values, index, value_type) = (value); \
       } else {                                                                 \
         uint64_t count = cvector_size(&(hashtable)->indices);                  \
         key_type scopy = (key);                                                \
         uint32_t hashed = (uint32_t)(hashtable)->hash_calc(&scopy) % count;    \
-        cvector_push_back(&(hashtable)->keys, (key), key_type);                \
+        if ((hashtable)->key_replicate) { \
+          uint32_t last_index = cvector_size(&(hashtable)->keys); \
+          cvector_resize( \
+            &(hashtable)->keys, last_index + 1); \
+          (hashtable)->key_replicate( \
+          &scopy, \
+          cvector_at(&(hashtable)->keys, last_index), (hashtable)->allocator); \
+        } else \
+          cvector_push_back(&(hashtable)->keys, (key), key_type);                \
         cvector_push_back(&(hashtable)->values, (value), value_type);          \
         while (                                                                \
           *cvector_as(&(hashtable)->indices, hashed, uint32_t) !=              \
