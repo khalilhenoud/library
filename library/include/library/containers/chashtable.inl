@@ -118,9 +118,9 @@ chashtable_replicate(
   }
 
   // the vector replicate rules should be satisfied by our earlier tests.
-  cvector_replicate(&src->indices, &dst->indices, allocator, NULL);
-  cvector_replicate(&src->keys, &dst->keys, allocator, dst->key_replicate);
-  cvector_replicate(&src->values, &dst->values, allocator, elem_replicate_fn);
+  cvector_replicate(&src->indices, &dst->indices, NULL, NULL);
+  cvector_replicate(&src->keys, &dst->keys, NULL, dst->key_replicate);
+  cvector_replicate(&src->values, &dst->values, NULL, elem_replicate_fn);
 
   dst->max_load_factor = src->max_load_factor;
 }

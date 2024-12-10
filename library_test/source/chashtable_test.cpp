@@ -20,19 +20,31 @@ template<typename KEY_TYPE, typename VALUE_TYPE>
 void
 print_chashtable_content(chashtable_t& map, const int32_t tabs)
 {
+  const static constexpr uint32_t per_row_key_value = 5;
+  const static constexpr uint32_t per_row_indices = 10;
   CTABS << "[key, value]: " << std::endl;
   CTABS;
-  for (size_t i = 0; i < map.values.size; ++i)
+  for (size_t i = 0, j = 1; i < map.values.size; ++i, ++j) {
     std::cout << '[' << *cvector_as(&map.keys, i, KEY_TYPE) << ", "
       << *cvector_as(&map.values, i, VALUE_TYPE) << "] ";
+    if (!(j % per_row_key_value)) {
+      std::cout << std::endl;
+      CTABS;
+    }
+  }
   NEWLINE;
-  CTABS << "indices: ";
-  for (size_t i = 0, j = 0; i < map.indices.size; ++i, ++j) {
+  CTABS << "[indices]: " << std::endl;
+  CTABS;
+  for (size_t i = 0, j = 1; i < map.indices.size; ++i, ++j) {
     uint64_t index = *cvector_as(&map.indices, i, uint32_t);
     if (index == (uint32_t)-1)
       std::cout << "- ";
     else
       std::cout << index << " ";
+    if (!(j % per_row_indices)) {
+      std::cout << std::endl;
+      CTABS;
+    }
   }
   NEWLINE;
 }
@@ -67,8 +79,9 @@ print_meta(chashtable_t& map, const int32_t tabs)
   << "])" << std::endl;
   std::cout << std::dec;
   CTABS << 
-  "map(max_load_factor: " << map.max_load_factor << 
-  ", allocator: " << std::hex << (uint64_t)(map.allocator) <<
+  "map(max_load_factor: " << map.max_load_factor << ", "<< std::endl;
+  CTABS << 
+  "  allocator: " << std::hex << (uint64_t)(map.allocator) <<
   ", key_replicate: " << std::hex << (uint64_t)(map.key_replicate) << 
   ", key_equal: " << std::hex << (uint64_t)(map.key_equal) << 
   ", hash_calc: " << std::hex << (uint64_t)(map.hash_calc) << ")" << std::endl; 
@@ -85,23 +98,27 @@ test_chashtable_def(const allocator_t* allocator, const int32_t tabs)
   CTABS << PRINT_BOOL(chashtable_is_def(&map)) << std::endl;
 }
 
-uint64_t hash_calc(const void* key)
+uint64_t 
+hash_calc(const void* key)
 {
   return *((uint64_t*)key);
 }
 
-int32_t key_equal(const void* key1, const void* key2)
+int32_t 
+key_equal(const void* key1, const void* key2)
 {
   return hash_calc(key1) == hash_calc(key2);
 }
 
-uint64_t hash_calc2(const void* key)
+uint64_t 
+hash_calc2(const void* key)
 {
   const char** str = (const char**)key;
   return hash_fnv1a_64(*str, strlen(*str));
 }
 
-int32_t key_equal2(const void* key1, const void* key2)
+int32_t 
+key_equal2(const void* key1, const void* key2)
 {
   const char** str_key1 = (const char**)key1;
   const char** str_key2 = (const char**)key2;
@@ -117,14 +134,15 @@ replicate_str(const void* src, void* dst, const allocator_t* allocator)
   memcpy(*dst_str, *source_str, strlen(*source_str) + 1);
 }
 
-void cleanup_str(void *elem_ptr, const allocator_t* allocator)
+void 
+cleanup_str(void *elem_ptr, const allocator_t* allocator)
 {
   char** ptr = (char**)elem_ptr;
   allocator->mem_free(*ptr);
 }
 
 #define DECLARE_HELPER_CHASHTABLE(alias, type_key, type_value)  \
-void alias##_insert(chashtable_t* map, type_key key, type_value value) \
+inline void alias##_insert(chashtable_t* map, type_key key, type_value value) \
 { \
  chashtable_insert(map, key, type_key, value, type_value); \
 }
@@ -147,11 +165,15 @@ test_chashtable_basics(const allocator_t* allocator, const int32_t tabs)
       NULL, NULL, key_equal, NULL, hash_calc);
     print_meta(map, tabs);
     mullf_insert(&map, 16, 1.12f);
+    NEWLINE;
     print_chashtable_content<uint64_t, float>(map, tabs + 1);
+    NEWLINE;
     print_meta(map, tabs);
+    NEWLINE;
     for (uint64_t i = 0; i < 100; ++i)
       mullf_insert(&map, i, i * 1.4f);
     print_chashtable_content<uint64_t, float>(map, tabs + 1);
+    NEWLINE;
     print_meta(map, tabs);
     chashtable_cleanup(&map);
     NEWLINE;
@@ -167,61 +189,115 @@ test_chashtable_basics(const allocator_t* allocator, const int32_t tabs)
       allocator, 0.6f, 
       cleanup_str, replicate_str, key_equal2, NULL, hash_calc2);
     print_meta(map, tabs);
-    chashtable_insert(&map, "khalil", char*, 5, int32_t);
-    chashtable_insert(&map, "khalil", char*, 6, int32_t);
-    chashtable_insert(&map, "aline", char*, 7, int32_t);
-    chashtable_insert(&map, "simone", char*, 8, int32_t);
-    
-
+    NEWLINE;
+    mstri_insert(&map, "khalil", 15);
+    mstri_insert(&map, "khalil", 62);
+    mstri_insert(&map, "aline", 71);
+    mstri_insert(&map, "simone", 80);
+    mstri_insert(&map, "simone", 18);
+    mstri_insert(&map, "naji", 32);
+    mstri_insert(&map, "ibtissam", 167);
+    mstri_insert(&map, "mohammad", 22112);
+    mstri_insert(&map, "kafa", 809);
+    mstri_insert(&map, "hailey", 143);
+    mstri_insert(&map, "panda", 11);
+    mstri_insert(&map, "echo", 9);
+    mstri_insert(&map, "ginny", 1);
+    mstri_insert(&map, "ginny", 762);
+    mstri_insert(&map, "tarek", 20);
+    mstri_insert(&map, "mostafa", 9);
     print_chashtable_content<char*, int32_t>(map, tabs + 1);
-    // print_meta(map, tabs);
-    // for (uint64_t i = 0; i < 100; ++i)
-    //   mullf_insert(&map, i, i * 1.4f);
-    // print_chashtable_content<uint64_t, float>(map, tabs + 1);
+    NEWLINE;
     print_meta(map, tabs);
     chashtable_cleanup(&map);
     NEWLINE;
   }
+}
 
+void
+test_chashtable_ops(const allocator_t* allocator, const int32_t tabs)
+{
+  PRINT_FUNCTION;
+  PRINT_DESC("replicate and fullswap function testing");
 
-  // cvector_t vec_i16 = cvector_def();
-  // cvector_setup(&vec_i16, sizeof(short), 4, allocator, NULL);
-  // print_meta(vec_i16, tabs);
-  // for (int32_t i = 120; i < 140; ++i)
-  //   cvector_push_back(&vec_i16, (short)i + 1, short);
-  // print_meta(vec_i16, tabs);
-  // print_cvector_content<short>(vec_i16, tabs);
-  // cvector_cleanup(&vec_i16);
-  // NEWLINE;
+  {
+    CTABS << "replicate testing: " << std::endl;
+    // replicate
+    chashtable_t left = chashtable_def();
+    chashtable_setup(
+      &left, 
+      sizeof(char*), sizeof(int32_t), 
+      allocator, 0.6f, 
+      cleanup_str, replicate_str, key_equal2, NULL, hash_calc2);
+    mstri_insert(&left, "khalil", 15);
+    mstri_insert(&left, "khalil", 62);
+    mstri_insert(&left, "aline", 71);
+    mstri_insert(&left, "simone", 80);
+    mstri_insert(&left, "simone", 18);
+    mstri_insert(&left, "naji", 32);
+    mstri_insert(&left, "ibtissam", 167);
+    mstri_insert(&left, "mohammad", 22112);
+    mstri_insert(&left, "kafa", 809);
+    mstri_insert(&left, "hailey", 143);
+    mstri_insert(&left, "panda", 11);
+    mstri_insert(&left, "echo", 9);
+    mstri_insert(&left, "ginny", 1);
+    mstri_insert(&left, "ginny", 762);
+    mstri_insert(&left, "tarek", 20);
+    mstri_insert(&left, "mostafa", 9);
+    print_meta(left, tabs);
+    NEWLINE;
+    print_chashtable_content<char*, int32_t>(left, tabs + 1);
 
-  // cvector_t vec_i32 = cvector_def();
-  // cvector_setup(&vec_i32, sizeof(int32_t), 4, allocator, NULL);
-  // print_meta(vec_i32, tabs);
-  // for (int32_t i = 0; i < 10; ++i)
-  //   cvector_push_back(&vec_i32, (int32_t)i + 1, int32_t);
-  // print_meta(vec_i32, tabs);
-  // print_cvector_content<int32_t>(vec_i32, tabs);
-  // cvector_cleanup(&vec_i32);
-  // NEWLINE;
+    chashtable_t right = chashtable_def();
+    chashtable_replicate(&left, &right, allocator, NULL);
+    NEWLINE;
+    print_meta(right, tabs);
+    NEWLINE;
+    print_chashtable_content<char*, int32_t>(right, tabs + 1);
+    chashtable_cleanup(&right);
 
-  // cvector_t vec_f32 = cvector_def();
-  // cvector_setup(&vec_f32, sizeof(float), 4, allocator, NULL);
-  // print_meta(vec_f32, tabs);
-  // for (int32_t i = 1; i < 20; ++i)
-  //   cvector_push_back(&vec_f32, (float)i + 1.75f * i, float);
-  // print_meta(vec_f32, tabs);
-  // print_cvector_content<float>(vec_f32, tabs);
-  // cvector_cleanup(&vec_f32);
-  // NEWLINE;
+    chashtable_setup(
+      &right,
+      sizeof(char*), sizeof(int32_t),
+      allocator, 0.6f,
+      cleanup_str, replicate_str, key_equal2, NULL, hash_calc2);
+    chashtable_replicate(&left, &right, NULL, NULL);
+    NEWLINE;
+    print_meta(right, tabs);
+    NEWLINE;
+    print_chashtable_content<char*, int32_t>(right, tabs + 1);
+        
+    chashtable_cleanup(&right);
+    chashtable_cleanup(&left);
+  }
+  
+  {
+    /*
+    CTABS << "fullswap testing: " << std::endl;
+    // fullswap
+    cvector_t left = cvector_def();
+    cvector_setup(&left, sizeof(int32_t), 16, allocator, NULL);
+    for (int32_t i = 10; i < 15; ++i)
+      cvector_push_back(&left, i + 1, int32_t);
 
-  // cvector_t vec_f64 = cvector_def();
-  // cvector_setup(&vec_f64, sizeof(double), 4, allocator, NULL);
-  // print_meta(vec_f64, tabs);
-  // for (int32_t i = 20; i < 35; ++i)
-  //   cvector_push_back(&vec_f64, (double)i + 1.75 * i, double);
-  // print_meta(vec_f64, tabs);
-  // print_cvector_content<double>(vec_f64, tabs);
-  // cvector_cleanup(&vec_f64);
+    cvector_t right = cvector_def();
+    cvector_setup(&right, sizeof(int32_t), 20, allocator, NULL);
+    for (int32_t i = 120; i < 130; ++i)
+      cvector_push_back(&right, i + 1, int32_t);
+    
+    print_cvector_content<int32_t>(left, tabs);
+    print_cvector_content<int32_t>(right, tabs);
+
+    cvector_fullswap(&left, &right);
+
+    print_cvector_content<int32_t>(left, tabs);
+    print_cvector_content<int32_t>(right, tabs);
+
+    cvector_cleanup(&right);
+    cvector_cleanup(&left);
+    */
+  }
 }
 
 /*
@@ -259,64 +335,12 @@ test_cvector_iterators(const allocator_t* allocator, const int32_t tabs)
   }
   
   cvector_cleanup(&vec);
-}
+}*/
 
-void
-test_cvector_ops(const allocator_t* allocator, const int32_t tabs)
-{
-  PRINT_FUNCTION;
-  PRINT_DESC("replicate and fullswap function testing");
+/*
+*/
 
-  {
-    CTABS << "replicate testing: " << std::endl;
-    // replicate
-    cvector_t left = cvector_def();
-    cvector_setup(&left, sizeof(int32_t), 16, allocator, NULL);
-    for (int32_t i = 0; i < 10; ++i)
-      cvector_push_back(&left, i + 1, int32_t);
-    print_meta(left, tabs);
-    print_cvector_content<int32_t>(left, tabs);
-
-    cvector_t right = cvector_def();
-    cvector_replicate(&left, &right, allocator, NULL);
-    print_cvector_content<int32_t>(right, tabs);
-    cvector_cleanup(&right);
-
-    cvector_setup(&right, sizeof(int32_t), 32, allocator, NULL);
-    cvector_replicate(&left, &right, NULL, NULL);
-    print_cvector_content<int32_t>(right, tabs);
-    print_meta(right, tabs);
-    
-    cvector_cleanup(&right);
-    cvector_cleanup(&left);
-  }
-  
-  {
-    CTABS << "fullswap testing: " << std::endl;
-    // fullswap
-    cvector_t left = cvector_def();
-    cvector_setup(&left, sizeof(int32_t), 16, allocator, NULL);
-    for (int32_t i = 10; i < 15; ++i)
-      cvector_push_back(&left, i + 1, int32_t);
-
-    cvector_t right = cvector_def();
-    cvector_setup(&right, sizeof(int32_t), 20, allocator, NULL);
-    for (int32_t i = 120; i < 130; ++i)
-      cvector_push_back(&right, i + 1, int32_t);
-    
-    print_cvector_content<int32_t>(left, tabs);
-    print_cvector_content<int32_t>(right, tabs);
-
-    cvector_fullswap(&left, &right);
-
-    print_cvector_content<int32_t>(left, tabs);
-    print_cvector_content<int32_t>(right, tabs);
-
-    cvector_cleanup(&right);
-    cvector_cleanup(&left);
-  }
-}
-
+/*
 void
 test_cvector_mem(const allocator_t* allocator, const int32_t tabs)
 {
@@ -369,8 +393,9 @@ test_cvector_mem(const allocator_t* allocator, const int32_t tabs)
     print_meta(vec, tabs);
   }
   cvector_cleanup(&vec); 
-}
+}*/
 
+/*
 typedef
 struct custom_t {
   int32_t* data;
@@ -430,4 +455,5 @@ test_chashtable_main(const allocator_t* allocator, const int32_t tabs)
 
   test_chashtable_def(allocator, tabs + 1);          NEWLINE;
   test_chashtable_basics(allocator, tabs + 1);       NEWLINE;
+  test_chashtable_ops(allocator, tabs + 1);          NEWLINE;
 }
