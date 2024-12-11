@@ -27,7 +27,7 @@ print_chashtable_content(chashtable_t& map, const int32_t tabs)
   for (size_t i = 0, j = 1; i < map.values.size; ++i, ++j) {
     std::cout << '[' << *cvector_as(&map.keys, i, KEY_TYPE) << ", "
       << *cvector_as(&map.values, i, VALUE_TYPE) << "] ";
-    if (!(j % per_row_key_value)) {
+    if (!(j % per_row_key_value) && j != map.values.size) {
       std::cout << std::endl;
       CTABS;
     }
@@ -41,7 +41,7 @@ print_chashtable_content(chashtable_t& map, const int32_t tabs)
       std::cout << "- ";
     else
       std::cout << index << " ";
-    if (!(j % per_row_indices)) {
+    if (!(j % per_row_indices) && j != map.indices.size) {
       std::cout << std::endl;
       CTABS;
     }
@@ -222,7 +222,6 @@ test_chashtable_ops(const allocator_t* allocator, const int32_t tabs)
 
   {
     CTABS << "replicate testing: " << std::endl;
-    // replicate
     chashtable_t left = chashtable_def();
     chashtable_setup(
       &left, 
@@ -273,30 +272,41 @@ test_chashtable_ops(const allocator_t* allocator, const int32_t tabs)
   }
   
   {
-    /*
     CTABS << "fullswap testing: " << std::endl;
-    // fullswap
-    cvector_t left = cvector_def();
-    cvector_setup(&left, sizeof(int32_t), 16, allocator, NULL);
-    for (int32_t i = 10; i < 15; ++i)
-      cvector_push_back(&left, i + 1, int32_t);
+    chashtable_t left = chashtable_def();
+    chashtable_setup(
+      &left, 
+      sizeof(char*), sizeof(int32_t), 
+      allocator, 0.6f, 
+      cleanup_str, replicate_str, key_equal2, NULL, hash_calc2);
+    mstri_insert(&left, "khalil", 1);
+    mstri_insert(&left, "aline", 2);
+    mstri_insert(&left, "simone", 3);
+    mstri_insert(&left, "naji", 4);
+    mstri_insert(&left, "ibtissam", 5);
 
-    cvector_t right = cvector_def();
-    cvector_setup(&right, sizeof(int32_t), 20, allocator, NULL);
-    for (int32_t i = 120; i < 130; ++i)
-      cvector_push_back(&right, i + 1, int32_t);
-    
-    print_cvector_content<int32_t>(left, tabs);
-    print_cvector_content<int32_t>(right, tabs);
+    chashtable_t right = chashtable_def();
+    chashtable_setup(
+      &right, 
+      sizeof(char*), sizeof(int32_t), 
+      allocator, 0.6f, 
+      cleanup_str, replicate_str, key_equal2, NULL, hash_calc2);
+    mstri_insert(&right, "elias", 10);
+    mstri_insert(&right, "tawas", 20);
+    mstri_insert(&right, "charbel", 30);
+    mstri_insert(&right, "tony", 40);
+    mstri_insert(&right, "karim", 50);
 
-    cvector_fullswap(&left, &right);
+    print_chashtable_content<char*, int32_t>(left, tabs + 1);
+    print_chashtable_content<char*, int32_t>(right, tabs + 1);
 
-    print_cvector_content<int32_t>(left, tabs);
-    print_cvector_content<int32_t>(right, tabs);
+    chashtable_fullswap(&left, &right);
 
-    cvector_cleanup(&right);
-    cvector_cleanup(&left);
-    */
+    print_chashtable_content<char*, int32_t>(left, tabs + 1);
+    print_chashtable_content<char*, int32_t>(right, tabs + 1);
+
+    chashtable_cleanup(&right);
+    chashtable_cleanup(&left);
   }
 }
 
@@ -336,9 +346,6 @@ test_cvector_iterators(const allocator_t* allocator, const int32_t tabs)
   
   cvector_cleanup(&vec);
 }*/
-
-/*
-*/
 
 /*
 void
