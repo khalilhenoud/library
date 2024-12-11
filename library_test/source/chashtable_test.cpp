@@ -310,6 +310,46 @@ test_chashtable_ops(const allocator_t* allocator, const int32_t tabs)
   }
 }
 
+void
+test_chashtable_misc(const allocator_t* allocator, const int32_t tabs)
+{
+  PRINT_FUNCTION;
+  PRINT_DESC("misc function testing");
+
+  {
+    chashtable_t left = chashtable_def();
+    chashtable_setup(
+      &left, 
+      sizeof(char*), sizeof(int32_t), 
+      allocator, 0.6f, 
+      cleanup_str, replicate_str, key_equal2, NULL, hash_calc2);
+    mstri_insert(&left, "khalil", 15);
+    mstri_insert(&left, "aline", 71);
+    mstri_insert(&left, "simone", 80);
+    CTABS << chashtable_empty(&left) << std::endl;
+    CTABS << chashtable_size(&left) << std::endl;
+    CTABS << chashtable_capacity(&left) << std::endl;
+    CTABS << chashtable_load_factor(&left) << std::endl;
+    CTABS << chashtable_max_load_factor(&left) << std::endl;
+    print_chashtable_content<char*, int32_t>(left, tabs + 1);
+    chashtable_clear(&left);
+    CTABS << chashtable_empty(&left) << std::endl;
+    mstri_insert(&left, "naji", 15);
+    mstri_insert(&left, "ibtissam", 71);
+    mstri_insert(&left, "elie", 80);
+    print_chashtable_content<char*, int32_t>(left, tabs + 1);
+    {
+      int32_t* ptr;
+      chashtable_at(&left, "naji", char*, int32_t, ptr);
+      CTABS << *ptr << std::endl;
+    }
+    mstri_insert(&left, "nissan", 90);
+    chashtable_rehash(&left, 16);
+    print_chashtable_content<char*, int32_t>(left, tabs + 1);
+    chashtable_cleanup(&left);
+  }
+}
+
 /*
 void
 test_cvector_iterators(const allocator_t* allocator, const int32_t tabs)
@@ -463,4 +503,5 @@ test_chashtable_main(const allocator_t* allocator, const int32_t tabs)
   test_chashtable_def(allocator, tabs + 1);          NEWLINE;
   test_chashtable_basics(allocator, tabs + 1);       NEWLINE;
   test_chashtable_ops(allocator, tabs + 1);          NEWLINE;
+  test_chashtable_misc(allocator, tabs + 1);         NEWLINE;
 }

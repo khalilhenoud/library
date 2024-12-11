@@ -246,6 +246,14 @@ chashtable_load_factor(chashtable_t* hashtable)
 }
 
 inline
+float
+chashtable_max_load_factor(chashtable_t* hashtable)
+{
+  assert(hashtable && !chashtable_is_def(hashtable));
+  return hashtable->max_load_factor;
+}
+
+inline
 void
 chashtable_set_max_load_factor(
   chashtable_t* hashtable, 

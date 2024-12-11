@@ -166,6 +166,10 @@ chashtable_clear(chashtable_t* hashtable);
 float
 chashtable_load_factor(chashtable_t* hashtable);
 
+// retuns the current max load factor.
+float
+chashtable_max_load_factor(chashtable_t* hashtable);
+
 // sets the max load factor, might trigger a rehash
 void
 chashtable_set_max_load_factor(
@@ -199,29 +203,29 @@ chashtable_reserve(chashtable_t* hashtable, size_t count);
     {                                                                          \
       uint32_t index;                                                          \
       key_type scopy = (key);                                                  \
-      chashtable_contains((hashtable), (key), key_type, index);           \
-      if (index != CHASHTABLE_INVALID_INDEX) {                            \
-        if ((hashtable)->key_replicate) { \
-        cvector_cleanup_at(&(hashtable)->keys, index);       \
-        (hashtable)->key_replicate( \
-          &scopy, \
-          cvector_at(&(hashtable)->keys, index), (hashtable)->allocator); \
-        } \
+      chashtable_contains((hashtable), (key), key_type, index);                \
+      if (index != CHASHTABLE_INVALID_INDEX) {                                 \
+        if ((hashtable)->key_replicate) {                                      \
+        cvector_cleanup_at(&(hashtable)->keys, index);                         \
+        (hashtable)->key_replicate(                                            \
+          &scopy,                                                              \
+          cvector_at(&(hashtable)->keys, index), (hashtable)->allocator);      \
+        }                                                                      \
         cvector_cleanup_at(&(hashtable)->values, index);                       \
-        *cvector_as(&(hashtable)->values, index, value_type) = (value); \
+        *cvector_as(&(hashtable)->values, index, value_type) = (value);        \
       } else {                                                                 \
         uint64_t count = cvector_size(&(hashtable)->indices);                  \
         key_type scopy = (key);                                                \
         uint32_t hashed = (uint32_t)(hashtable)->hash_calc(&scopy) % count;    \
-        if ((hashtable)->key_replicate) { \
-          uint32_t last_index = cvector_size(&(hashtable)->keys); \
-          cvector_resize( \
-            &(hashtable)->keys, last_index + 1); \
-          (hashtable)->key_replicate( \
-          &scopy, \
+        if ((hashtable)->key_replicate) {                                      \
+          uint32_t last_index = cvector_size(&(hashtable)->keys);              \
+          cvector_resize(                                                      \
+            &(hashtable)->keys, last_index + 1);                               \
+          (hashtable)->key_replicate(                                          \
+          &scopy,                                                              \
           cvector_at(&(hashtable)->keys, last_index), (hashtable)->allocator); \
-        } else \
-          cvector_push_back(&(hashtable)->keys, (key), key_type);                \
+        } else                                                                 \
+          cvector_push_back(&(hashtable)->keys, (key), key_type);              \
         cvector_push_back(&(hashtable)->values, (value), value_type);          \
         while (                                                                \
           *cvector_as(&(hashtable)->indices, hashed, uint32_t) !=              \
