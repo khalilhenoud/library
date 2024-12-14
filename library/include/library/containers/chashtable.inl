@@ -277,10 +277,12 @@ chashtable_rehash(chashtable_t* hashtable, size_t count)
       (float)chashtable_size(hashtable)/hashtable->max_load_factor);
     count = lower_bound > count ? lower_bound : count;
 
-    cvector_reserve(&hashtable->values, count);
-    cvector_reserve(&hashtable->keys, count);
-    
+    // preserves but also allows the various vectors to shrink.
+    cvector_grow(&hashtable->values, count);
+    cvector_grow(&hashtable->keys, count);
     cvector_resize(&hashtable->indices, count);
+    cvector_grow(&hashtable->indices, count);
+    
     for (i = 0; i < count; ++i) 
       *cvector_as(&hashtable->indices, i, uint32_t) = CHASHTABLE_INVALID_INDEX;
     

@@ -245,18 +245,18 @@ chashtable_reserve(chashtable_t* hashtable, size_t count);
     assert((hashtable) && !chashtable_is_def(hashtable));                      \
                                                                                \
     {                                                                          \
-      uint32_t* val;                                                           \
-      uint32_t data_index, i, count = cvector_size(&(hashtable)->indices);     \
-      chashtable_contains((hashtable), (key), key_type, data_index);           \
-      if (data_index != CHASHTABLE_INVALID_INDEX) {                            \
-        cvector_erase(&(hashtable)->keys, data_index);                         \
-        cvector_erase(&(hashtable)->values, data_index);                       \
-        for (i = 0; i < count; ++i) {                                          \
-          val = cvector_as(&(hashtable)->indices, i, uint32_t);                \
-          *val = (*val == data_index) ?                                        \
+      uint32_t* __val;                                                         \
+      uint32_t __index, __i, __count = cvector_size(&(hashtable)->indices);    \
+      chashtable_contains((hashtable), (key), key_type, __index);              \
+      if (__index != CHASHTABLE_INVALID_INDEX) {                               \
+        cvector_erase(&(hashtable)->keys, __index);                            \
+        cvector_erase(&(hashtable)->values, __index);                          \
+        for (__i = 0; __i < __count; ++__i) {                                  \
+          __val = cvector_as(&(hashtable)->indices, __i, uint32_t);            \
+          *__val = (*__val == __index) ?                                       \
             CHASHTABLE_INVALID_INDEX :                                         \
-            ((*val > data_index && *val != CHASHTABLE_INVALID_INDEX) ?         \
-            (*val - 1) : *val);                                                \
+            ((*__val > __index && *__val != CHASHTABLE_INVALID_INDEX) ?        \
+            (*__val - 1) : *__val);                                            \
         }                                                                      \
       }                                                                        \
     }                                                                          \

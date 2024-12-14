@@ -257,6 +257,7 @@ struct custom_t {
   int32_t tabs;
 } custom_t;
 
+static
 void 
 elem_cleanup(void *elem_ptr, const allocator_t* allocator)
 {

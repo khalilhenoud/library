@@ -394,62 +394,44 @@ test_cvector_iterators(const allocator_t* allocator, const int32_t tabs)
   cvector_cleanup(&vec);
 }*/
 
-/*
 void
-test_cvector_mem(const allocator_t* allocator, const int32_t tabs)
+test_chashtable_mem(const allocator_t* allocator, const int32_t tabs)
 {
   PRINT_FUNCTION;
-  PRINT_DESC("resize, clear, shrink_to_fit, reserve testing...");
+  PRINT_DESC("rehash, reserve testing...");
 
-  cvector_t vec = cvector_def();
-  cvector_setup(&vec, sizeof(int32_t), 16, allocator, NULL);
-  cvector_resize(&vec, 20);
-  for (auto i = 0; i < vec.size; ++i)
-    *(int32_t*)cvector_at(&vec, i) = i;
-  print_cvector_content<int32_t>(vec, tabs);
-  print_meta(vec, tabs);
-  {
-    // erase every other element.
-    for (int64_t i = vec.size - 1; i >= 0; --i) {
-      if (!((i + 1) % 2))
-        cvector_erase(&vec, (size_t)i);
-    }
+  chashtable_t map = chashtable_def();
+  chashtable_setup(
+    &map, 
+    sizeof(uint64_t), sizeof(float), 
+    allocator, 0.6f, 
+    NULL, NULL, key_equal, NULL, hash_calc);
+  print_meta(map, tabs);
+  mullf_insert(&map, 16, 1.12f);
+  print_chashtable_content<uint64_t, float>(map, tabs + 1);
+  NEWLINE;
+  chashtable_reserve(&map, 100 / chashtable_max_load_factor(&map));
+  print_meta(map, tabs);
+  print_chashtable_content<uint64_t, float>(map, tabs + 1);
+  NEWLINE;
+  for (uint64_t i = 0; i < 100; ++i)
+    mullf_insert(&map, i, i * 1.4f);
+  print_meta(map, tabs);
+  print_chashtable_content<uint64_t, float>(map, tabs + 1);
+  NEWLINE;
+  for (uint64_t i = 0; i < 100; ++i)
+    chashtable_erase(&map, i, uint64_t);
+  print_meta(map, tabs);
+  print_chashtable_content<uint64_t, float>(map, tabs + 1);
+  chashtable_rehash(&map, 0);
+  print_meta(map, tabs);
+  print_chashtable_content<uint64_t, float>(map, tabs + 1);
+  chashtable_reserve(&map, 0);
+  print_meta(map, tabs);
+  print_chashtable_content<uint64_t, float>(map, tabs + 1);
+  chashtable_cleanup(&map);
+}
 
-    print_meta(vec, tabs);
-    print_cvector_content<int32_t>(vec, tabs);
-    NEWLINE;
-  }
-  {
-    cvector_clear(&vec);
-    cvector_shrink_to_fit(&vec);
-    print_meta(vec, tabs);
-
-    for (int32_t i = 0; i < 20; ++i)
-      cvector_insert(&vec, 0, i, int32_t);
-    print_meta(vec, tabs);
-    print_cvector_content<int32_t>(vec, tabs);
-    cvector_shrink_to_fit(&vec);
-    print_meta(vec, tabs);
-    NEWLINE;
-  }
-  {
-    cvector_clear(&vec);
-    cvector_shrink_to_fit(&vec);
-    print_meta(vec, tabs);
-    cvector_reserve(&vec, 20);
-    print_meta(vec, tabs);
-
-    for (int32_t i = 0; i < 20; ++i)
-      cvector_insert(&vec, 0, i, int32_t);
-    print_meta(vec, tabs);
-    print_cvector_content<int32_t>(vec, tabs);
-    cvector_shrink_to_fit(&vec);
-    print_meta(vec, tabs);
-  }
-  cvector_cleanup(&vec); 
-}*/
-
-/*
 typedef
 struct custom_t {
   int32_t* data;
@@ -457,6 +439,7 @@ struct custom_t {
   int32_t tabs;
 } custom_t;
 
+static
 void 
 elem_cleanup(void *elem_ptr, const allocator_t* allocator)
 {
@@ -472,35 +455,38 @@ elem_cleanup(void *elem_ptr, const allocator_t* allocator)
 
 static
 void
-test_cvector_custom(const allocator_t* allocator, const int32_t tabs)
+test_chashtable_custom(const allocator_t* allocator, const int32_t tabs)
 {
   PRINT_FUNCTION;
 
   custom_t data;
   memset(&data, 0, sizeof(custom_t));
-  cvector_t vec = cvector_def();
-  cvector_setup(&vec, sizeof(custom_t), 4, allocator, elem_cleanup);
-  print_meta(vec, tabs);
-  cvector_push_back(&vec, data, custom_t);
-  cvector_push_back(&vec, data, custom_t);
-  cvector_push_back(&vec, data, custom_t);
+  chashtable_t map = chashtable_def();
+  chashtable_setup(
+    &map, 
+    sizeof(uint64_t), sizeof(custom_t), 
+    allocator, 0.6f, 
+    NULL, NULL, key_equal, elem_cleanup, hash_calc);
+  print_meta(map, tabs);
+  chashtable_insert(&map, 16ull, uint64_t, data, custom_t);
+  chashtable_insert(&map, 17ull, uint64_t, data, custom_t);
+  chashtable_insert(&map, 32ull, uint64_t, data, custom_t);
 
-  auto* ptr = cvector_as(&vec, 0, custom_t);
+  custom_t* ptr; chashtable_at(&map, 16ull, uint64_t, custom_t, ptr);
   ptr->count = 3;
   ptr->data = (int32_t*)allocator->mem_cont_alloc(ptr->count, sizeof(int32_t));
   ptr->tabs = tabs;
 
-  ptr = cvector_as(&vec, 1, custom_t);
+  chashtable_at(&map, 17ull, uint64_t, custom_t, ptr);
   ptr->tabs = tabs;
 
-  ptr = cvector_as(&vec, 2, custom_t);
+  chashtable_at(&map, 32ull, uint64_t, custom_t, ptr);
   ptr->count = 5;
   ptr->data = (int32_t*)allocator->mem_cont_alloc(ptr->count, sizeof(int32_t));
   ptr->tabs = tabs;
 
-  cvector_cleanup(&vec);
+  chashtable_cleanup(&map);
 }
-*/
 
 void
 test_chashtable_main(const allocator_t* allocator, const int32_t tabs)
@@ -511,4 +497,6 @@ test_chashtable_main(const allocator_t* allocator, const int32_t tabs)
   test_chashtable_basics(allocator, tabs + 1);       NEWLINE;
   test_chashtable_ops(allocator, tabs + 1);          NEWLINE;
   test_chashtable_misc(allocator, tabs + 1);         NEWLINE;
+  test_chashtable_mem(allocator, tabs + 1);          NEWLINE;
+  test_chashtable_custom(allocator, tabs + 1);       NEWLINE;
 }
