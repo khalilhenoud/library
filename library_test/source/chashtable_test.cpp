@@ -346,7 +346,14 @@ test_chashtable_misc(const allocator_t* allocator, const int32_t tabs)
     mstri_insert(&left, "nissan", 90);
     chashtable_rehash(&left, 16);
     print_chashtable_content<char*, int32_t>(left, tabs + 1);
+    chashtable_erase(&left, "nissan", char*);
+    print_chashtable_content<char*, int32_t>(left, tabs + 1);
+    mstri_insert(&left, "nissan", 90);
+    print_chashtable_content<char*, int32_t>(left, tabs + 1);
+    chashtable_erase(&left, "nissan", char*);
+    print_chashtable_content<char*, int32_t>(left, tabs + 1);
     chashtable_cleanup(&left);
+    NEWLINE;
   }
 }
 

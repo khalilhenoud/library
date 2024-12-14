@@ -238,14 +238,16 @@ chashtable_reserve(chashtable_t* hashtable, size_t count);
   } while (0)
 
 // removes the key and value that corresponds to it.
-#define chashtable_erase(hashtable, key)                                       \
+// TODO: we should not iterate through the array to get reset the index. 
+// consider implementing a key-value pair struct based dictionary.
+#define chashtable_erase(hashtable, key, key_type)                             \
   do {                                                                         \
     assert((hashtable) && !chashtable_is_def(hashtable));                      \
                                                                                \
     {                                                                          \
       uint32_t* val;                                                           \
       uint32_t data_index, i, count = cvector_size(&(hashtable)->indices);     \
-      chashtable_contains((hashtable), (key), data_index);                     \
+      chashtable_contains((hashtable), (key), key_type, data_index);           \
       if (data_index != CHASHTABLE_INVALID_INDEX) {                            \
         cvector_erase(&(hashtable)->keys, data_index);                         \
         cvector_erase(&(hashtable)->values, data_index);                       \
@@ -253,7 +255,8 @@ chashtable_reserve(chashtable_t* hashtable, size_t count);
           val = cvector_as(&(hashtable)->indices, i, uint32_t);                \
           *val = (*val == data_index) ?                                        \
             CHASHTABLE_INVALID_INDEX :                                         \
-            ((*val > data_index) ? (*val - 1) : *val);                         \
+            ((*val > data_index && *val != CHASHTABLE_INVALID_INDEX) ?         \
+            (*val - 1) : *val);                                                \
         }                                                                      \
       }                                                                        \
     }                                                                          \
