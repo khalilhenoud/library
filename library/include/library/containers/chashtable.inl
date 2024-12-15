@@ -309,4 +309,46 @@ chashtable_reserve(chashtable_t* hashtable, size_t count)
     hashtable, (size_t)ceilf((float)count/hashtable->max_load_factor));
 }
 
+inline
+chashtable_iterator_t
+chashtable_begin(chashtable_t* map)
+{
+  assert(map);
+  {
+    chashtable_iterator_t iter;
+    iter.map = map;
+    iter.index = 0;
+    return iter;
+  }
+}
+
+inline
+chashtable_iterator_t
+chashtable_end(chashtable_t* map)
+{
+  assert(map);
+  {
+    chashtable_iterator_t iter;
+    iter.map = map;
+    iter.index = chashtable_size(map);
+    return iter;
+  }
+}
+
+inline
+void
+chashtable_advance(chashtable_iterator_t* iter)
+{
+  assert(iter);
+  assert(iter->map && "the iterator is invalid!");
+  ++iter->index;
+}
+
+inline
+int32_t
+chashtable_iter_equal(chashtable_iterator_t left, chashtable_iterator_t right)
+{
+  return left.map == right.map && left.index == right.index;
+}
+
 #endif

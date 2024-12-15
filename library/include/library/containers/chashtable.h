@@ -21,6 +21,18 @@ extern "C" {
 #include <library/containers/cvector.h>
 
 
+// NOTES:
+// - The hashtable will replicate the keys when a replicate function is
+//   provided.
+// - The values are inserted by copy only, there is no ownership taken, that
+//   might change in the future with the implementation of a type registry.
+// - If a key replicate function is provided, a key cleanup function should also
+//   be provided. An assert is triggered otherwise.
+// - Right now we have 3 vectors, each containing the key, value and indices
+//   where the elements are kept. This will change, as I intend to either add a
+//   stack to indicate gaps in the data-key vector (to improve performance) or a
+//   key-value pair implementation akin to C++ unordered_map. 
+
 typedef cvector_elem_cleanup_t chashtable_key_cleanup_t;
 typedef cvector_elem_cleanup_t chashtable_value_cleanup_t;
 typedef cvector_elem_replicate_t chashtable_key_replicate_t;
@@ -31,21 +43,6 @@ int32_t (*chashtable_key_equal_t)(const void* key1, const void* key2);
 
 typedef
 uint64_t (*chashtable_hash_calc_t)(const void* key);
-
-// a key can be any type
-// i require a 
-//  - function to make a copy of the key, we shouldn't leave a reference to the 
-//    original key (can be defaulted, at which point we do a byte wise copy)
-//  - function to delete the key (can be default, same logic), assert if the 
-//    deletion is set without the deletion.
-// a value can be any type.
-//  - function to delete the elem.
-// we require an
-//  - array that holds keys
-//  - array that holds the values (this array and the keys array are of the 
-//  same size)
-//  - array that holds the indexes into the value's array, this is our hashmap
-//  - all 3 arrays have the same size.
 
 // NOTE: the indices is a vector of uint32_t.
 typedef
@@ -59,6 +56,12 @@ struct chashtable_t {
   chashtable_key_equal_t key_equal;
   chashtable_hash_calc_t hash_calc;
 } chashtable_t;
+
+typedef
+struct chashtable_iterator_t {
+  chashtable_t *map;
+  size_t index;
+} chashtable_iterator_t;
 
 /** returns a default initialized copy of the struct */
 inline
@@ -183,6 +186,32 @@ chashtable_rehash(chashtable_t* hashtable, size_t count);
 // reserve count number of elements, assumes table is emtpy.
 void
 chashtable_reserve(chashtable_t* hashtable, size_t count);
+
+/** returns an iterator that can be used to iterate over the map. */
+chashtable_iterator_t
+chashtable_begin(chashtable_t* map);
+
+/** returns an end iterator. */
+chashtable_iterator_t
+chashtable_end(chashtable_t* map);
+
+/** advance the iterator. */
+void
+chashtable_advance(chashtable_iterator_t* iter);
+
+// TODO: should I use const pointer ? or since it is inline it does not matter.
+/** 1 if equal, 0 otherwise */
+int32_t
+chashtable_iter_equal(chashtable_iterator_t left, chashtable_iterator_t right);
+
+
+////////////////////////////////////////////////////////////////////////////////
+#define chashtable_key(iter, key_type) \
+  ((key_type*)((iter)->map->keys.data) + (iter)->index)
+
+#define chashtable_value(iter, value_type) \
+  ((value_type*)((iter)->map->values.data) + (iter)->index)
+  
 
 #define CHASHTABLE_INVALID_INDEX ((uint32_t)-1)
 #define CHASHTABLE_INIT_SIZE 16

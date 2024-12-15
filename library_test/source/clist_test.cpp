@@ -118,7 +118,7 @@ test_clist_iterators(const allocator_t* allocator, const int32_t tabs)
 
   CTABS << "values: ";
   for (
-    clist_iterator iter = clist_begin(&list); 
+    clist_iterator_t iter = clist_begin(&list); 
     !clist_iter_equal(iter, clist_end(&list)); 
     clist_advance(&iter)) {
       std::cout << *clist_deref(&iter, double) << " "; 

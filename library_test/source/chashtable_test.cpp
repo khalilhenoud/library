@@ -357,42 +357,38 @@ test_chashtable_misc(const allocator_t* allocator, const int32_t tabs)
   }
 }
 
-/*
 void
-test_cvector_iterators(const allocator_t* allocator, const int32_t tabs)
+test_chashtable_iterators(const allocator_t* allocator, const int32_t tabs)
 {
   PRINT_FUNCTION;
-  PRINT_DESC("tests for iterators, front, back, push_back functions...");
+  PRINT_DESC("tests for iterators, begin, end, advance, equal, key, value...");
 
-  cvector_t vec = cvector_def();
-  cvector_setup(&vec, sizeof(double), 16, allocator, NULL);
-  print_meta(vec, tabs);
-  for (int32_t i = 0; i < 5; ++i)
-    cvector_push_back(&vec, (double)i + 1.75 * i, double);
+  chashtable_t map = chashtable_def();
+  chashtable_setup(
+    &map, 
+    sizeof(char*), sizeof(int32_t), 
+    allocator, 0.6f, 
+    cleanup_str, replicate_str, key_equal2, NULL, hash_calc2);
+  mstri_insert(&map, "elias", 10);
+  mstri_insert(&map, "tawas", 20);
+  mstri_insert(&map, "charbel", 30);
+  mstri_insert(&map, "tony", 40);
+  mstri_insert(&map, "karim", 50);
 
-  CTABS << "values: ";
-  for (
-    cvector_iterator(double) iter = cvector_begin(&vec, double); 
-    iter != cvector_end(&vec, double); 
-    ++iter) {
-      std::cout << *iter << " "; 
-    }
-  NEWLINE;
-  CTABS << "front: " << *cvector_front(&vec, double) << std::endl;
-  CTABS << "back: " << *cvector_back(&vec, double) << std::endl;
-
-  CTABS << "cvector_shrink_to_fit(&vec)" << std::endl;
-  cvector_shrink_to_fit(&vec);
-  print_meta(vec, tabs);
-
-  CTABS << "cvector_pop_back() loop: " << std::endl;
-  while (!cvector_empty(&vec)) {
-    print_cvector_content<double>(vec, tabs);
-    cvector_pop_back(&vec);
+  CTABS << "[key, value]: " << std::endl;
+  {
+    CTABS;
+    for (
+      chashtable_iterator_t iter = chashtable_begin(&map); 
+      !chashtable_iter_equal(iter, chashtable_end(&map)); 
+      chashtable_advance(&iter)) {
+        std::cout << "[" << *chashtable_key(&iter, char*) << ", "; 
+        std::cout << *chashtable_value(&iter, int32_t) << "] ";
+      }
+    NEWLINE;
   }
-  
-  cvector_cleanup(&vec);
-}*/
+  chashtable_cleanup(&map);
+}
 
 void
 test_chashtable_mem(const allocator_t* allocator, const int32_t tabs)
@@ -498,5 +494,6 @@ test_chashtable_main(const allocator_t* allocator, const int32_t tabs)
   test_chashtable_ops(allocator, tabs + 1);          NEWLINE;
   test_chashtable_misc(allocator, tabs + 1);         NEWLINE;
   test_chashtable_mem(allocator, tabs + 1);          NEWLINE;
+  test_chashtable_iterators(allocator, tabs + 1);    NEWLINE;
   test_chashtable_custom(allocator, tabs + 1);       NEWLINE;
 }

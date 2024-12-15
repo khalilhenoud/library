@@ -236,21 +236,27 @@ inline
 clist_iterator_t
 clist_begin(clist_t* list)
 {
-  clist_iterator_t iter;
-  iter.list = list;
-  iter.current = list->nodes;
-  iter.last = list->nodes ? list->nodes->previous : NULL;
-  return iter;
+  assert(list);
+  {
+    clist_iterator_t iter;
+    iter.list = list;
+    iter.current = list->nodes;
+    iter.last = list->nodes ? list->nodes->previous : NULL;
+    return iter;
+  }
 }
 
 inline
 clist_iterator_t
 clist_end(clist_t* list)
 {
-  clist_iterator_t iter;
-  iter.list = list;
-  iter.current = iter.last = NULL;
-  return iter;
+  assert(list);
+  { 
+    clist_iterator_t iter;
+    iter.list = list;
+    iter.current = iter.last = NULL;
+    return iter;
+  }
 }
 
 inline
@@ -267,6 +273,7 @@ inline
 void
 clist_advance(clist_iterator_t* iter)
 {
+  assert(iter);
   if (iter->current == iter->last)
     iter->current = iter->last = NULL;
   else

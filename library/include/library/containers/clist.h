@@ -163,10 +163,12 @@ clist_end(clist_t* list);
 void
 clist_advance(clist_iterator_t* iter);
 
+/** 1 if equal, 0 otherwise */
+int32_t
+clist_iter_equal(clist_iterator_t left, clist_iterator_t right);
+
 
 ////////////////////////////////////////////////////////////////////////////////
-#define clist_iterator clist_iterator_t
-
 #define clist_deref(iter, type) \
   (type*)((iter)->current->data)
 
