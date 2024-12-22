@@ -1,28 +1,87 @@
-WIP; this feels like we are recreating C++.
+WIP; This feels like I am recreating C++.
 
-IMPORTANT: all these functions right now, like cvector_setup() and the likes 
+IMPORTANT: 
+----------
+All these functions right now, like cvector_setup() and the likes 
 take a cvector_t* pointer or a clist_t* pointer, for them to be generic and used
 in a meta way, they should take void*, and cast to the appropriate type inside 
-the function.
+the function. Or at the least have a wrapper inlined function that calls it.
 
-container interface:
-*_def           returns a default initialized instance of the container
-*_is_def        returns true if the container instance is equal to the default
-*_setup         constructor
-*_cleanup       destructor
+type interface:
+---------------
+#define uint32_t type_id;
+
+*_def           default initialize an instance of the type, create an 
+                initialized memory image.
+  declaration:
+    void  $type$_def(void *ptr);
+
+*_is_def        returns 1 if the type instance is equal to the default or 0
+  declaration:
+    void  $type$_is_def(const void *ptr);
+
 *_replicate     copy, shallow vs deep depends on the provided function
+  declaration:
+    void  $type$_replicate(
+      const void *src, void *dst, const allocator_t* allocator);
+
 *_fullswap      move/swap. usefull to transfer resources
+  declaration:
+    void  $type$_fullswap(void* lhs, void* rhs);
+
 *_serialize     write the content to a byte stream
+  declaration:
+    void  $type$_serialize(const void *src, binary_stream* stream);
+
 *_deserialize   read the content from a byte stream
+  declaration:
+    void  $type$_deserialize(void *dst, binary_stream* stream);
+
 *_hash          used for hash maps (containers are valid in container container
                 scenarios)
+  declaration:
+    uint64_t  $type$_hash(const void *ptr);
 
-to be finalized:
-*_guid          unique guid associated with the container
-*_size          size of the data struct itself
-*_inner_guid    [meta type only] unique guid assocaited with the type the 
-                container holds, i.e: a vector of int32_t or the likes.
+*_size          used to determine the size, so that allocation could happen.
+                note that this is the size of the struct itself and not its 
+                contained data, same as sizeof(type);
+  declaration:
+    size_t  $type$_size(const void *ptr);
 
+*_alignment     used to determine the alignment of the type, also for allocation
+                purposes. would be equivalent in C++ to alignof(type). some
+                restrictions between alignment and types can be enforced.
+  declaration:
+    size_t  $type$_alignment(const void *ptr);
+
+*_type_id_count returns the number of inner types the container depend on. this 
+                is valid when you have a  $type$ or uint32_t, the _type_id_count
+                would be 1 in this case (referring to the uin32_t). this is used
+                to support container types. a hashmap would return 2, one for
+                the key type and another one for the value type.
+  declaration:
+    uint32_t  $type$_type_id_count(const void *ptr);
+
+*_type_ids      returns the list of type_ids the container depend on. the 
+                function takes an array of size corresponding to _type_id_count.
+                the caller is responsible for providing the correct sized array.
+  declaration:
+    void  $type$_type_ids(const void *ptr, type_id *ids);
+
+*_owns_alloc    returns 1 if it contains a reference to the allocator it uses
+                internally or 0 otherwise
+  declaration:
+    uint32_t  $type$_owns_alloc(const void* ptr);
+
+*_cleanup       destructor equivalent, cleans up the instance, this does not 
+                free up the memory associated with the instance itself, simply
+                frees the insides of the type. Only one cleanup function can be
+                registered by type.
+  declaration:
+    void  $type$_cleanup(void *ptr);
+    void  $type$_cleanup(void *ptr, const allocator_t* allocator);
+
+--------------------------------------------------------------------------------
 NOTE: a well defined iterator interface will allow us to work with algorithms in
 an abstract manner, without consideration for the container underneath.
 
@@ -32,23 +91,6 @@ iterator interface:
 *_end
 *_advance
 *_deref
-
-type interface:
-*_def           returns/sets a default initialized instance of the type
-*_is_def        returns whether the instance is equivalent to the default type
-*_setup         constructor
-*_cleanup       destructor
-*_replicate     copy, controls how the type does copy; i.e: deep vs shallow    
-*_fullswap      move/swap. 
-*_serialize     write the content to a byte stream
-*_deserialize   read the content from a byte stream
-*_hash          used, when it exists, for hashmaps and the likes
-
-to be finalized:
-*_guid          unique guid associated with the container
-*_size          size of the data struct itself
-*_inner_guid    [meta type only] : unique guid assocaited with the type the 
-                structs holds. like a unique ptr to int32_t
 
 NOTE: type interface functions are optional in a lot of cases. for example if
 the replicate function is missing, the elements of such types are replicated
@@ -66,3 +108,8 @@ instantiate an object).
 
 NOTE: the reason why I went with non macro instantiations was compatibility with
 C++. But does this hold, maybe I should make a test and see?
+
+// NOTE: this function would have custom arguments specific to the type, I do 
+// not think it is helpful to the type interface system for serialization 
+// purposes. use def instead.
+*_setup         constructor, sets up a preallocated instance of the type
