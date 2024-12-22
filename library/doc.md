@@ -42,6 +42,11 @@ type interface:
   declaration:
     uint64_t  $type$_hash(const void *ptr);
 
+*_is_equal      if the type is used for hashing, this becomes necessary in case
+                of collision (equivalent to == operator). 1 if same, 0 otherwise
+  declaration:
+    uint32_t $type$_is_equal(const void *lhs, const void *rhs);
+
 *_size          used to determine the size, so that allocation could happen.
                 note that this is the size of the struct itself and not its 
                 contained data, same as sizeof(type);
@@ -80,6 +85,41 @@ type interface:
   declaration:
     void  $type$_cleanup(void *ptr);
     void  $type$_cleanup(void *ptr, const allocator_t* allocator);
+
+type registry:
+--------------
+This feature makes it necessary for this project to no longer be header only. I
+do not want to rely on the static variables in inline functions. thus this will
+no longer be a header only module.
+As a side effect a internal module.h definition must be created to handle 
+__declspec(dll_export) and __declspec(dll_import), as well as change the project
+to a library. 
+
+// 4k buffer defined in a source file.
+static uint8_t buffer[4 * 1024];
+static uint32_t registered = 0;
+
+typedef uint32_t type_id;
+
+typedef
+struct vtable_t {
+  function_ptrs...;
+} vtable_t;
+
+// use fnv to convert #type to a uint32_t hash.
+#define get_type_id(type) \
+  ...
+
+// register the vtable associated with the type.
+LIBRARY_API
+void register_type(const type_id type, const vtable_t *ptr);
+
+LIBRARY_API
+void associate_alias(const type_id type, const type_id alias);
+
+// sets ptr to the vtable associated with the type.
+LIBRARY_API
+void get_vtable(const type_id type, vtable_t *ptr);
 
 --------------------------------------------------------------------------------
 NOTE: a well defined iterator interface will allow us to work with algorithms in
