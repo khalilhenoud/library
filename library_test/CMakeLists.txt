@@ -19,6 +19,7 @@ add_executable(${PROJECT_NAME}
         ./source/clist_test.cpp
         ./source/hash_test.cpp
         ./source/chashtable_test.cpp
+        ./source/binary_stream_test.cpp
 				)
 
 target_link_libraries(${PROJECT_NAME}

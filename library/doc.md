@@ -18,7 +18,7 @@ type interface:
 
 *_is_def        returns 1 if the type instance is equal to the default or 0
   declaration:
-    void  $type$_is_def(const void *ptr);
+    int32_t  $type$_is_def(const void *ptr);
 
 *_replicate     copy, shallow vs deep depends on the provided function
   declaration:
