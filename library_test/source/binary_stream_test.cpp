@@ -77,10 +77,10 @@ test_binarystream(const allocator_t* allocator, const int32_t tabs)
   binary_stream_setup(&stream, allocator);
 
   test_struct_t test;
-  test.i = 900;
+  test.i = 702;
   test.k = test.i + 1;
-  test.l = 55.5555;
-  test.c = 'k';
+  test.l = 66.5555;
+  test.c = 'c';
   print_test(test, tabs + 1);
 
   serialize_test(&stream, test, tabs);
