@@ -67,6 +67,7 @@ print_test(const test_struct_t &src, const int32_t tabs)
     std::endl;
 }
 
+static
 void
 test_binarystream(const allocator_t* allocator, const int32_t tabs)
 {
@@ -94,10 +95,53 @@ test_binarystream(const allocator_t* allocator, const int32_t tabs)
   binary_stream_cleanup(&stream);
 }
 
+static constexpr uint32_t size = 278; // 278 * 4 = 1024+;
+static constexpr uint32_t incr = 20;
+
+static
+void
+print_array(int32_t data[size], const int32_t tabs)
+{
+  PRINT_FUNCTION;
+
+  for (uint32_t i = 0; i < size; i += incr) {
+    CTABS;
+    for (uint32_t k = i, j = 0; k < size && j < incr; ++k, ++j) 
+      std::cout << data[k] << " ";
+    NEWLINE;
+  }
+}
+
+static
+void
+test_binarystream_large(const allocator_t* allocator, const int32_t tabs)
+{
+  PRINT_FUNCTION;
+
+  binary_stream_t stream;
+  binary_stream_def(&stream);
+  binary_stream_setup(&stream, allocator);
+
+  int32_t data[size], to_read[size];
+  for (uint32_t i = 0; i < size; ++i)
+    data[i] = i, to_read[i] = -i;
+
+  print_array(to_read, tabs + 1);
+  binary_stream_write(&stream, data, sizeof(data));
+  binary_stream_read(&stream, (uint8_t *)to_read, sizeof(data), sizeof(data));
+  print_array(to_read, tabs + 1);
+
+  assert(stream.pos == STREAM_EOF);
+
+  binary_stream_cleanup(&stream);
+}
+
+
 void
 test_binarystream_main(const allocator_t* allocator, const int32_t tabs)
 {
   PRINT_FUNCTION;
 
   test_binarystream(allocator, tabs + 1);          NEWLINE;
+  test_binarystream_large(allocator, tabs + 1);    NEWLINE;
 }
