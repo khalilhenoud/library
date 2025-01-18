@@ -337,6 +337,34 @@ deserialize_generic(
   vtable.fn_deserialize(*ptr, allocator, stream);
 }
 
+static
+void
+print_student(
+  student_t &student, 
+  const int32_t tabs, 
+  const bool omit_function_header = false)
+{
+  if (!omit_function_header) 
+    PRINT_FUNCTION;
+
+  CTABS << "student(age:" << student.age << ", name:" << student.name << ")";
+  NEWLINE;
+}
+
+static
+void
+print_classroom(classroom_t &classroom, const int32_t tabs)
+{
+  PRINT_FUNCTION;
+
+  CTABS << "classroom{";
+  NEWLINE;
+  for (uint32_t i = 0; i < classroom.count; ++i)
+    print_student(classroom.students[i], tabs + 1, true);
+  CTABS << "}";
+  NEWLINE;
+}
+
 void
 test_registry(const allocator_t* allocator, const int32_t tabs)
 {
@@ -376,9 +404,14 @@ test_registry(const allocator_t* allocator, const int32_t tabs)
   deserialize_generic(elements + 0, allocator, &stream);
   deserialize_generic(elements + 1, allocator, &stream);
 
+  print_student(bowser, tabs);
+  print_classroom(classroom, tabs);
+
+  print_student(*(student_t*)elements[0], tabs);
+  print_classroom(*(classroom_t*)elements[1], tabs);
+
   assert(student_is_equal(elements[0], &bowser) && "must be equal!");
   assert(classroom_is_equal(elements[1], &classroom) && "must be equal!");
-  CTABS << "serialized elements are identical to deserialized ones";
   NEWLINE;
 
   student_cleanup(elements[0], NULL);
