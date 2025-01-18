@@ -18,7 +18,7 @@ type interface:
 
 *_is_def        returns 1 if the type instance is equal to the default or 0
   declaration:
-    int32_t  $type$_is_def(const void *ptr);
+    uint32_t  $type$_is_def(const void *ptr);
 
 *_replicate     copy, shallow vs deep depends on the provided function
   declaration:
@@ -29,18 +29,20 @@ type interface:
   declaration:
     void  $type$_fullswap(void* lhs, void* rhs);
 
-*_serialize     write the content to a byte stream
+*_serialize     write the content to a byte stream. never serialize the
+                allocator, even if the type owns it.
   declaration:
     void  $type$_serialize(const void *src, binary_stream* stream);
 
-*_deserialize   read the content from a byte stream
+*_deserialize   read the content from a byte stream.
   declaration:
-    void  $type$_deserialize(void *dst, binary_stream* stream);
+    void  $type$_deserialize(
+      void *dst, const allocator_t *allocator, binary_stream* stream);
 
 *_hash          used for hash maps (containers are valid in container container
                 scenarios)
   declaration:
-    uint64_t  $type$_hash(const void *ptr);
+    uint32_t  $type$_hash(const void *ptr);
 
 *_is_equal      if the type is used for hashing, this becomes necessary in case
                 of collision (equivalent to == operator). 1 if same, 0 otherwise
@@ -51,13 +53,13 @@ type interface:
                 note that this is the size of the struct itself and not its 
                 contained data, same as sizeof(type);
   declaration:
-    size_t  $type$_size(const void *ptr);
+    size_t  $type$_size(void);
 
 *_alignment     used to determine the alignment of the type, also for allocation
                 purposes. would be equivalent in C++ to alignof(type). some
                 restrictions between alignment and types can be enforced.
   declaration:
-    size_t  $type$_alignment(const void *ptr);
+    size_t  $type$_alignment(void);
 
 *_type_id_count returns the number of inner types the container depend on. this 
                 is valid when you have a  $type$ or uint32_t, the _type_id_count
@@ -65,26 +67,41 @@ type interface:
                 to support container types. a hashmap would return 2, one for
                 the key type and another one for the value type.
   declaration:
-    uint32_t  $type$_type_id_count(const void *ptr);
+    uint32_t  $type$_type_id_count(void);
 
 *_type_ids      returns the list of type_ids the container depend on. the 
                 function takes an array of size corresponding to _type_id_count.
                 the caller is responsible for providing the correct sized array.
   declaration:
-    void  $type$_type_ids(const void *ptr, type_id *ids);
+    void  $type$_type_ids(type_id *ids);
 
 *_owns_alloc    returns 1 if it contains a reference to the allocator it uses
                 internally or 0 otherwise
   declaration:
-    uint32_t  $type$_owns_alloc(const void* ptr);
+    uint32_t  $type$_owns_alloc(void);
+
+*_get_alloc     returns the allocator or NULL. _owns_alloc should return 1
+  declaration:
+    const allocator_t* $type$_get_alloc(const void *ptr);
 
 *_cleanup       destructor equivalent, cleans up the instance, this does not 
                 free up the memory associated with the instance itself, simply
                 frees the insides of the type. Only one cleanup function can be
                 registered by type.
   declaration:
-    void  $type$_cleanup(void *ptr);
     void  $type$_cleanup(void *ptr, const allocator_t* allocator);
+
+best practices:
+---------------
+1- never serialize the allocator reference even if the type holds its own 
+reference.
+2- the serializer passed to deserialize should be held if the type dictates as 
+much.
+3- do not serialize the type hash in the type's own serialize function, that is 
+the responsability of the owner type.
+4- when implementing _is_equal, do not compare held allocators.
+5- remember that cleanup is for the element of the struct and not the struct 
+itself, that is the responsability of the owner.
 
 type registry:
 --------------
@@ -153,3 +170,22 @@ C++. But does this hold, maybe I should make a test and see?
 // not think it is helpful to the type interface system for serialization 
 // purposes. use def instead.
 *_setup         constructor, sets up a preallocated instance of the type
+
+
+void $type$_def(void *ptr);
+uint32_t $type$_is_def(const void *ptr);
+void $type$_replicate(
+  const void *src, void *dst, const allocator_t* allocator);
+void $type$_fullswap(void* lhs, void* rhs);
+void $type$_serialize(const void *src, binary_stream_t* stream);
+void $type$_deserialize(
+  void *dst, const allocator_t *allocator, binary_stream_t* stream);
+uint32_t $type$_hash(const void *ptr);
+uint32_t $type$_is_equal(const void *lhs, const void *rhs);
+size_t $type$_size(void);
+size_t $type$_alignment(void);
+uint32_t $type$_type_id_count(void);
+void $type$_type_ids(type_id_t *ids);
+uint32_t $type$_owns_alloc(void);
+const allocator_t* $type$_get_alloc(const void *ptr);
+void $type$_cleanup(void *ptr, const allocator_t* allocator);
