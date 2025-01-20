@@ -1,11 +1,35 @@
-WIP; This feels like I am recreating C++.
+WIP: This feels like I am recreating parts of C++.
 
-IMPORTANT: 
+Purpose:
+--------
+- Generic types in c are either implemented via macros or void pointers. I opted 
+for the latter approach since I want to avoid any ugly declaration at the 
+beginning of the files. 
+- This necessitates that the container holds a ref to the type and a mechanism 
+for us to retrieve information about the type. 
+- This is a stop gap solution to a full on source code parsing and will later be
+augmented with source code parsing to generate the serialization functions and 
+helper functionalities.
+- This ensures that generic containers can work with any type that adheres to 
+the registration, and greatly simplifies the serializer package by removing data
+duplication and deferring the serialization to the type in question. This makes
+deserialization a lot easier and removes code duplication.
+- Most importantly this was done for me to learn.
+
+Downsides:
 ----------
-All these functions right now, like cvector_setup() and the likes 
-take a cvector_t* pointer or a clist_t* pointer, for them to be generic and used
-in a meta way, they should take void*, and cast to the appropriate type inside 
-the function. Or at the least have a wrapper inlined function that calls it.
+This approach has a couple of major problems:
+  - linking optimizations opportunities are greatly reduces. The types cannot be
+  deduced at runtime, which means that function calls cannot be statically 
+  linked (you lose a lot of speed because of that). A macro approach would have
+  been better for this, but I did not care for it.
+  - void pointers do not provide any type safety whatsoever. You need to know
+  what you are looking at, and macro code (required in some aspects) is terrible
+  to debug.
+I am looking for a solution to both these problems (generating offline data
+structs that are typed and easily included), but this won't be for a while. An
+alternative would be to shift the project or part of it to C++ and use eastl to
+provide these functionalities.
 
 type interface:
 ---------------
@@ -110,44 +134,42 @@ do not want to rely on the static variables in inline functions. thus this will
 no longer be a header only module.
 As a side effect a internal module.h definition must be created to handle 
 __declspec(dll_export) and __declspec(dll_import), as well as change the project
-to a library. 
+to a library (see type_registry.c).
 
-// 4k buffer defined in a source file.
-static uint8_t buffer[4 * 1024];
-static uint32_t registered = 0;
+Template:
+---------
+Replace the $type$ in the text below to your type and then define the functions
+you care about and delete the rest;
 
-typedef uint32_t type_id;
+  void $type$_def(void *ptr);
+  uint32_t $type$_is_def(const void *ptr);
+  void $type$_replicate(
+    const void *src, void *dst, const allocator_t* allocator);
+  void $type$_fullswap(void* lhs, void* rhs);
+  void $type$_serialize(const void *src, binary_stream_t* stream);
+  void $type$_deserialize(
+    void *dst, const allocator_t *allocator, binary_stream_t* stream);
+  uint32_t $type$_hash(const void *ptr);
+  uint32_t $type$_is_equal(const void *lhs, const void *rhs);
+  size_t $type$_size(void);
+  size_t $type$_alignment(void);
+  uint32_t $type$_type_id_count(void);
+  void $type$_type_ids(type_id_t *ids);
+  uint32_t $type$_owns_alloc(void);
+  const allocator_t* $type$_get_alloc(const void *ptr);
+  void $type$_cleanup(void *ptr, const allocator_t* allocator);
 
-typedef
-struct vtable_t {
-  function_ptrs...;
-} vtable_t;
+TODO:
+-----
+- A well defined iterator interface can make implementing an algorithms library
+container agnostic. Doing so might require us to require some classification 
+functions (less or greater functions) per type that require sorting.
+- Expand the library considerably, I want to support many more stuff.
 
-// use fnv to convert #type to a uint32_t hash.
-#define get_type_id(type) \
-  ...
+MISC:
+-----
+- 
 
-// register the vtable associated with the type.
-LIBRARY_API
-void register_type(const type_id type, const vtable_t *ptr);
-
-LIBRARY_API
-void associate_alias(const type_id type, const type_id alias);
-
-// sets ptr to the vtable associated with the type.
-LIBRARY_API
-void get_vtable(const type_id type, vtable_t *ptr);
-
---------------------------------------------------------------------------------
-NOTE: a well defined iterator interface will allow us to work with algorithms in
-an abstract manner, without consideration for the container underneath.
-
-iterator interface:
-{containertype}_iterator
-*_begin
-*_end
-*_advance
-*_deref
 
 NOTE: type interface functions are optional in a lot of cases. for example if
 the replicate function is missing, the elements of such types are replicated
@@ -166,26 +188,3 @@ instantiate an object).
 NOTE: the reason why I went with non macro instantiations was compatibility with
 C++. But does this hold, maybe I should make a test and see?
 
-// NOTE: this function would have custom arguments specific to the type, I do 
-// not think it is helpful to the type interface system for serialization 
-// purposes. use def instead.
-*_setup         constructor, sets up a preallocated instance of the type
-
-
-void $type$_def(void *ptr);
-uint32_t $type$_is_def(const void *ptr);
-void $type$_replicate(
-  const void *src, void *dst, const allocator_t* allocator);
-void $type$_fullswap(void* lhs, void* rhs);
-void $type$_serialize(const void *src, binary_stream_t* stream);
-void $type$_deserialize(
-  void *dst, const allocator_t *allocator, binary_stream_t* stream);
-uint32_t $type$_hash(const void *ptr);
-uint32_t $type$_is_equal(const void *lhs, const void *rhs);
-size_t $type$_size(void);
-size_t $type$_alignment(void);
-uint32_t $type$_type_id_count(void);
-void $type$_type_ids(type_id_t *ids);
-uint32_t $type$_owns_alloc(void);
-const allocator_t* $type$_get_alloc(const void *ptr);
-void $type$_cleanup(void *ptr, const allocator_t* allocator);

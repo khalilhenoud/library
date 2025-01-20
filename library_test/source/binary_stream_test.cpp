@@ -136,7 +136,6 @@ test_binarystream_large(const allocator_t* allocator, const int32_t tabs)
   binary_stream_cleanup(&stream);
 }
 
-
 void
 test_binarystream_main(const allocator_t* allocator, const int32_t tabs)
 {

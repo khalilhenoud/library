@@ -95,11 +95,11 @@ main(int argc, char *argv[])
   allocator.mem_alloc_alligned = NULL;
   allocator.mem_realloc = reallocate;
 
-  // test_cvector_main(&allocator);
-  // test_clist_main(&allocator);
-  // test_hash_main(&allocator);
-  // test_chashtable_main(&allocator);
-  // test_binarystream_main(&allocator);
+  test_cvector_main(&allocator);
+  test_clist_main(&allocator);
+  test_hash_main(&allocator);
+  test_chashtable_main(&allocator);
+  test_binarystream_main(&allocator);
   test_registry_main(&allocator);
 
   std::cout << "allocation remaining: " << allocated.size() << std::endl;
