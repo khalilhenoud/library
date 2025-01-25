@@ -16,52 +16,63 @@ inline
 void
 cvector_setup(
   cvector_t* vec,
-  size_t elem_size, 
+  type_data_t type_data,
   size_t capacity, 
-  const allocator_t* allocator, 
-  cvector_elem_cleanup_t elem_cleanup_fn)
+  const allocator_t* allocator)
 {
   assert(vec && allocator);
 
   {
     vec->size = 0;
-    vec->elem_size = elem_size;
+    vec->elem_data = get_cont_elem_data_from_packed(type_data);
     vec->capacity = capacity;
     vec->allocator = allocator;
-    vec->elem_cleanup = elem_cleanup_fn;
 
-    vec->data = capacity ? allocator->mem_alloc(capacity * elem_size) : NULL;
+    vec->data = 
+      capacity ? allocator->mem_alloc(capacity * vec->elem_data.size) : NULL;
   }
 }
 
 inline
 void
-cvector_cleanup(cvector_t* vec)
+cvector_cleanup(void *ptr, const allocator_t* allocator)
 {
-  assert(vec && !cvector_is_def(vec));
+  assert(ptr && !cvector_is_def(ptr));
+  assert(!allocator && "type holds its own allocator! pass NULL as param.");
+
   {
-    if (vec->elem_cleanup) {
+    cvector_t* vec = (cvector_t *)ptr;
+    fn_cleanup_t cleanup = elem_data_get_cleanup_fn(&vec->elem_data);
+
+    if (cleanup) {
       size_t i = 0, count = vec->size;
+      uint32_t owns_alloc = 
+        (vec->elem_data.vtable->fn_owns_alloc == NULL) ? 0 : 
+        vec->elem_data.vtable->fn_owns_alloc();
+        
       for (; i < count; ++i)
-        vec->elem_cleanup(cvector_at(vec, i), vec->allocator);
+        cleanup(
+          cvector_at(vec, i), owns_alloc ? NULL : vec->allocator);
     }
 
     vec->allocator->mem_free(vec->data);
     vec->data = NULL;
     vec->allocator = NULL;
-    vec->elem_cleanup = NULL;
-    vec->size = vec->elem_size = vec->capacity = 0;
+    elem_data_clear(&vec->elem_data);
+    vec->size = vec->capacity = 0;
   }
 }
 
 inline
 void 
 cvector_replicate(
-  const cvector_t *src, 
-  cvector_t *dst, 
-  const allocator_t *allocator, 
-  cvector_elem_replicate_t elem_replicate_fn)
+  const void *v_src, 
+  void *v_dst, 
+  const allocator_t *allocator)
 {
+  const cvector_t *src = (const cvector_t *)v_src;
+  cvector_t *dst = (cvector_t *)v_dst;
+
   assert(src && !cvector_is_def(src));
   assert(dst);
   assert(
@@ -69,36 +80,38 @@ cvector_replicate(
     (
       !cvector_is_def(dst) && 
       !allocator && 
-      dst->elem_size == src->elem_size && 
-      dst->size == 0 && 
-      dst->elem_cleanup == src->elem_cleanup));
+      cvector_empty(dst) &&
+      elem_data_identical(&dst->elem_data, &src->elem_data)));
 
   if (cvector_is_def(dst)) {
     cvector_setup(
-      dst, src->elem_size, src->capacity, allocator, src->elem_cleanup);
+      dst, 
+      pack_type_data(src->elem_data.type_id, src->elem_data.size), 
+      src->capacity, allocator);
   } else
     cvector_grow(dst, src->capacity);
   dst->size = src->size;
 
-  if (!elem_replicate_fn)
-    memcpy(dst->data, src->data, src->size * src->elem_size);
+  if (!elem_data_get_replicate_fn(&src->elem_data))
+    memcpy(dst->data, src->data, src->size * src->elem_data.size);
   else {
+    fn_replicate_t replicate = elem_data_get_replicate_fn(&src->elem_data);
     size_t i = 0, count = src->size;
     for (; i < count; ++i)
-      elem_replicate_fn(
+      replicate(
         cvector_at_cst(src, i), cvector_at(dst, i), dst->allocator);
   }
 }
 
 inline
 void
-cvector_fullswap(cvector_t* src, cvector_t* dst)
+cvector_fullswap(void* src, void* dst)
 {
   assert(src && dst);
   {
-    cvector_t tmp = *src;
-    *src = *dst;
-    *dst = tmp;
+    cvector_t tmp = *(cvector_t *)src;
+    *(cvector_t *)src = *(cvector_t *)dst;
+    *(cvector_t *)dst = tmp;
   }
 }
 
@@ -123,24 +136,8 @@ size_t
 cvector_elem_size(const cvector_t* vec) 
 { 
   assert(vec && !cvector_is_def(vec));  
-  return vec->elem_size; 
+  return vec->elem_data.size; 
 }
-
-inline
-const allocator_t*
-cvector_allocator(const cvector_t* vec) 
-{ 
-  assert(vec && !cvector_is_def(vec)); 
-  return vec->allocator; 
-} 
-
-inline
-cvector_elem_cleanup_t
-cvector_elem_cleanup(const cvector_t* vec) 
-{ 
-  assert(vec && !cvector_is_def(vec)); 
-  return vec->elem_cleanup; 
-} 
 
 inline
 int32_t
@@ -155,8 +152,12 @@ void
 cvector_cleanup_at(cvector_t* vec, size_t index)
 {
   assert(vec && !cvector_is_def(vec));
-  if (vec->elem_cleanup)
-    vec->elem_cleanup(cvector_at(vec, index), vec->allocator);
+
+  {
+    fn_cleanup_t cleanup = elem_data_get_cleanup_fn(&vec->elem_data);
+    if (cleanup)
+      cleanup(cvector_at(vec, index), vec->allocator);
+  }
 }
 
 inline
@@ -169,7 +170,7 @@ cvector_grow(cvector_t* vec, size_t new_capacity)
     "cannot shrink beyond the current elem count!");
 
   {
-    const size_t to_realloc = new_capacity * vec->elem_size;
+    const size_t to_realloc = new_capacity * vec->elem_data.size;
     if (!to_realloc) {
       vec->allocator->mem_free(vec->data);
       vec->data = NULL;
@@ -200,7 +201,7 @@ void*
 cvector_at_unchecked(cvector_t* vec, size_t index)
 {
   assert(vec);
-  return (char*)vec->data + index * vec->elem_size;
+  return (char*)vec->data + index * vec->elem_data.size;
 }
 
 inline
@@ -209,7 +210,7 @@ cvector_at(cvector_t* vec, size_t index)
 {
   assert(vec);
   assert(index < vec->size);
-  return (char*)vec->data + index * vec->elem_size;
+  return (char*)vec->data + index * vec->elem_data.size;
 }
 
 inline
@@ -218,7 +219,7 @@ cvector_at_cst(const cvector_t* vec, size_t index)
 {
   assert(vec);
   assert(index < vec->size);
-  return (char*)vec->data + index * vec->elem_size;
+  return (char*)vec->data + index * vec->elem_data.size;
 }
 
 inline
@@ -228,13 +229,14 @@ cvector_erase(cvector_t* vec, size_t index)
   assert(vec);
   assert(index < vec->size);
   {
-    if (vec->elem_cleanup)
-      vec->elem_cleanup(cvector_at(vec, index), vec->allocator);
+    fn_cleanup_t cleanup = elem_data_get_cleanup_fn(&vec->elem_data);
+    if (cleanup)
+      cleanup(cvector_at(vec, index), vec->allocator);
     --vec->size; 
     memmove(
       cvector_at_unchecked(vec, index), 
       cvector_at_unchecked(vec, index + 1), 
-      vec->elem_size * (vec->size - index));
+      vec->elem_data.size * (vec->size - index));
   }
 }
 
@@ -244,10 +246,11 @@ cvector_clear(cvector_t* vec)
 {
   assert(vec);
   {
-    if (vec->elem_cleanup) {
+    fn_cleanup_t cleanup = elem_data_get_cleanup_fn(&vec->elem_data);
+    if (cleanup) {
       size_t i = 0, count = vec->size;
       for (; i < count; ++i)
-        vec->elem_cleanup(cvector_at(vec, i), vec->allocator);
+        cleanup(cvector_at(vec, i), vec->allocator);
     }
     vec->size = 0;
   }
@@ -267,8 +270,9 @@ cvector_pop_back(cvector_t* vec)
 {
   assert(vec && vec->size);
   {
-    if (vec->elem_cleanup)
-      vec->elem_cleanup(cvector_at(vec, vec->size - 1), vec->allocator);
+    fn_cleanup_t cleanup = elem_data_get_cleanup_fn(&vec->elem_data);
+    if (cleanup)
+      cleanup(cvector_at(vec, vec->size - 1), vec->allocator);
     --vec->size;
   }
 }
@@ -283,7 +287,7 @@ cvector_resize(cvector_t* vec, size_t count)
       cvector_reserve(vec, count);
       memset(
         cvector_at_unchecked(
-          vec, vec->size), 0, (count - vec->size) * vec->elem_size);
+          vec, vec->size), 0, (count - vec->size) * vec->elem_data.size);
       vec->size = count;
     } else {
       while (count < vec->size)

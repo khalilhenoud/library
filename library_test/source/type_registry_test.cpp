@@ -165,7 +165,7 @@ INITIALIZER(register_student)
   vtable.fn_fullswap = student_fullswap;
   vtable.fn_serialize = student_serialize;
   vtable.fn_deserialize = student_deserialize;
-  vtable.fn_size = student_size;
+  vtable.fn_type_size = student_size;
   vtable.fn_owns_alloc = student_owns_alloc;
   vtable.fn_get_alloc = student_get_alloc;
   vtable.fn_cleanup = student_cleanup;
@@ -294,7 +294,7 @@ INITIALIZER(register_classroom)
   vtable.fn_is_equal = classroom_is_equal;
   vtable.fn_serialize = classroom_serialize;
   vtable.fn_deserialize = classroom_deserialize;
-  vtable.fn_size = classroom_size;
+  vtable.fn_type_size = classroom_size;
   vtable.fn_owns_alloc = classroom_owns_alloc;
   vtable.fn_get_alloc = classroom_get_alloc;
   vtable.fn_cleanup = classroom_cleanup;
@@ -314,10 +314,10 @@ static
 void
 serialize_generic(type_id_t type, void *ptr, binary_stream_t *stream)
 {
-  vtable_t vtable;
+  vtable_t *vtable;
   binary_stream_write(stream, &type, sizeof(type_id_t));
-  get_vtable(type, &vtable);
-  vtable.fn_serialize(ptr, stream);
+  vtable = get_vtable(type);
+  vtable->fn_serialize(ptr, stream);
 }
 
 static
@@ -331,10 +331,9 @@ deserialize_generic(
   size_t tsize = sizeof(type_id_t);
   binary_stream_read(stream, (uint8_t *)&type, tsize, tsize);
 
-  vtable_t vtable;
-  get_vtable(type, &vtable);
-  *ptr = allocator->mem_alloc(vtable.fn_size());
-  vtable.fn_deserialize(*ptr, allocator, stream);
+  vtable_t *vtable = get_vtable(type);
+  *ptr = allocator->mem_alloc(vtable->fn_type_size());
+  vtable->fn_deserialize(*ptr, allocator, stream);
 }
 
 static
@@ -426,10 +425,27 @@ test_registry(const allocator_t* allocator, const int32_t tabs)
   binary_stream_cleanup(&stream);
 }
 
+
+void
+test_registry_macros(const allocator_t* allocator, const int32_t tabs)
+{
+  PRINT_FUNCTION;
+  uint64_t type_data1 = get_type_data(uint8_t);
+  uint64_t type_data2 = pack_type_data(get_type_id(uint8_t), sizeof(uint8_t));
+  assert(type_data1 == type_data2);
+  uint32_t type_id1 = get_type_id(uint8_t);
+  uint32_t type_id2 = get_type_id_from_data(type_data1);
+  assert(type_id1 == type_id2);
+  uint32_t type_size1 = sizeof(uint8_t);
+  uint32_t type_size2 = get_type_size_from_data(type_data1);
+  assert(type_size1 == type_size2);
+}
+
 void
 test_registry_main(const allocator_t* allocator, const int32_t tabs)
 {
   PRINT_FUNCTION;
 
+  test_registry_macros(allocator, tabs + 1);   NEWLINE;
   test_registry(allocator, tabs + 1);          NEWLINE;
 }

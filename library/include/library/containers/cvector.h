@@ -19,6 +19,7 @@ extern "C" {
 #include <string.h>
 #include <assert.h>
 #include <library/allocator/allocator.h>
+#include <library/type_registry/type_registry.h>
 
 
 // TODO: allow types to provide their (de)serialization and swap functions.
@@ -27,52 +28,56 @@ extern "C" {
 // TODO: add cvector_fullswap_back() functions.
 // TODO: will need accessor variants for const types (cvector_cbegin, etc...)
 
-/**
- * NOTE: non-trivial types (types that have memory allocation as part of their
- * construction), and pointer types (array of pointers to objects), requires
- * custom deallocators (in some instances). This allows us the change to free
- * the types internal memory.
- */
-typedef 
-void (*cvector_elem_cleanup_t)(void *elem_ptr, const allocator_t* allocator);
+// /**
+//  * NOTE: non-trivial types (types that have memory allocation as part of their
+//  * construction), and pointer types (array of pointers to objects), requires
+//  * custom deallocators (in some instances). This allows us the change to free
+//  * the types internal memory.
+//  */
+// typedef 
+// void (*cvector_elem_cleanup_t)(void *elem_ptr, const allocator_t* allocator);
 
-/** NOTE: Used if deep copying elements is required */
-typedef
-void (*cvector_elem_replicate_t)(
-  const void* src, void* dst, const allocator_t* allocator);
+// /** NOTE: Used if deep copying elements is required */
+// typedef
+// void (*cvector_elem_replicate_t)(
+//   const void* src, void* dst, const allocator_t* allocator);
 
 typedef 
 struct cvector_t {
-    size_t elem_size;
-    size_t size;
-    size_t capacity;
-    const allocator_t* allocator;
-    cvector_elem_cleanup_t elem_cleanup;
-    void *data;
+  container_elem_data_t elem_data;
+  size_t size;
+  size_t capacity;
+  const allocator_t* allocator;
+  void *data;
 } cvector_t;
+
+/*
+void cvector_serialize(const void *src, binary_stream_t* stream);
+void cvector_deserialize(
+  void *dst, const allocator_t *allocator, binary_stream_t* stream);
+*/
 
 /** returns a default initialized copy of the struct */
 inline
-cvector_t
-cvector_def()
+void
+cvector_def(void *ptr)
 {
-  cvector_t def;
-  memset(&def, 0, sizeof(cvector_t));
-  return def;
+  memset(ptr, 0, sizeof(cvector_t));
 }
 
 /** returns 1 if the passed struct is the same as the default */
 inline
-int32_t
-cvector_is_def(const cvector_t* vec)
+uint32_t 
+cvector_is_def(const void *ptr)
 {
-  cvector_t def = cvector_def();
+  const cvector_t* vec = (const cvector_t *)ptr;
+  cvector_t def;
+  cvector_def(&def);
   return 
     vec->size == def.size && 
     vec->capacity == def.capacity && 
-    vec->elem_size == def.elem_size && 
-    vec->allocator == def.allocator && 
-    vec->elem_cleanup == def.elem_cleanup && 
+    elem_data_identical(&vec->elem_data, &def.elem_data) &&
+    vec->allocator == def.allocator &&
     vec->data == def.data;
 }
 
@@ -84,14 +89,14 @@ cvector_is_def(const cvector_t* vec)
 void
 cvector_setup(
   cvector_t* vec, 
-  size_t elem_size, 
+  type_data_t type_data,
   size_t capacity, 
-  const allocator_t* allocator, 
-  cvector_elem_cleanup_t elem_cleanup_fn);
+  const allocator_t* allocator);
 
-/** frees all internal memory, call setup again to reuse. */
-void
-cvector_cleanup(cvector_t* vec);
+// NOTE: frees all internal memory, call setup again to reuse. allocator is null
+// as cvector holds an allocator ref.
+void 
+cvector_cleanup(void *ptr, const allocator_t* allocator);
 
 /** 
  * NOTE: will assert if 'src' is not initialized, or if 'dst' is initialized but
@@ -101,14 +106,50 @@ cvector_cleanup(cvector_t* vec);
  */
 void 
 cvector_replicate(
-  const cvector_t *src, 
-  cvector_t *dst, 
-  const allocator_t *allocator, 
-  cvector_elem_replicate_t elem_replicate_fn);
+  const void *src, 
+  void *dst, 
+  const allocator_t *allocator);
 
 /** exchanges the content of the specified vectors, even allocators */
 void
-cvector_fullswap(cvector_t* src, cvector_t* dst);
+cvector_fullswap(void* src, void* dst);
+
+inline
+size_t
+cvector_type_size(void)
+{
+  return sizeof(cvector_t);
+}
+
+inline
+uint32_t 
+cvector_type_id_count(void)
+{
+  return 1;
+}
+
+inline
+void 
+cvector_type_ids(const void *src, type_id_t *ids)
+{
+  assert(src && ids);
+  ids[0] = ((const cvector_t *)src)->elem_data.type_id;
+}
+
+inline
+uint32_t 
+cvector_owns_alloc(void)
+{
+  return 1;
+}
+
+inline
+const allocator_t*
+cvector_get_allocator(const void *vec)
+{
+  assert(vec);
+  return ((const cvector_t *)vec)->allocator;
+}
 
 size_t 
 cvector_capacity(const cvector_t* vec);
@@ -118,12 +159,6 @@ cvector_size(const cvector_t* vec);
 
 size_t
 cvector_elem_size(const cvector_t* vec);
-
-const allocator_t*
-cvector_allocator(const cvector_t* vec);
-
-cvector_elem_cleanup_t
-cvector_elem_cleanup(const cvector_t* vec);
 
 int32_t
 cvector_empty(const cvector_t* vec);
@@ -232,7 +267,7 @@ cvector_resize(cvector_t* vec, size_t count);
         memmove(                                                      \
           (type*)((vec)->data) + (pos) + 1,                           \
           (type*)((vec)->data) + (pos),                               \
-          (vec)->elem_size * ((vec)->size - (pos)));                  \
+          (vec)->elem_data.size * ((vec)->size - (pos)));             \
       }                                                               \
       ((type*)((vec)->data))[(pos)] = (val);                          \
       (vec)->size += 1;                                               \

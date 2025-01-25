@@ -102,16 +102,14 @@ associate_alias(const type_id_t type, const type_id_t alias)
   }
 }
 
-void 
-get_vtable(const type_id_t type, vtable_t *ptr)
+vtable_t * 
+get_vtable(const type_id_t type)
 {
   assert(is_type_registered(type) && "type has to be registered!");
-  assert(ptr != NULL && "ptr cannot be null");
 
   {
     uint32_t key = get_key(type);
     uint32_t index = key_to_index[key];
-    vtable_t *src = (vtable_t *)vtables + index;
-    *ptr = *src;
+    return (vtable_t *)vtables + index;
   }
 }

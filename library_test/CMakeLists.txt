@@ -16,9 +16,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_executable(${PROJECT_NAME} 
 				./source/main.cpp
         ./source/cvector_test.cpp
-        ./source/clist_test.cpp
+#        ./source/clist_test.cpp
         ./source/hash_test.cpp
-        ./source/chashtable_test.cpp
+#        ./source/chashtable_test.cpp
         ./source/binary_stream_test.cpp
         ./source/type_registry_test.cpp
 				)

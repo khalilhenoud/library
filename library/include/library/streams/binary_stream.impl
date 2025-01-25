@@ -21,7 +21,8 @@ binary_stream_def(binary_stream_t *stream)
 {
   assert(stream);
 
-  stream->data = cvector_def();
+  stream->data; 
+  cvector_def(&stream->data);
   stream->pos = STREAM_START_POS;
 }
 
@@ -39,7 +40,8 @@ binary_stream_setup(binary_stream_t *stream, const allocator_t *allocator)
 {
   assert(stream && allocator && binary_stream_is_def(stream));
   cvector_setup(
-    &stream->data, sizeof(uint8_t), STREAM_ALLOC_CHUNK, allocator, NULL);
+    &stream->data, 
+    get_type_data(uint8_t), STREAM_ALLOC_CHUNK, allocator);
 }
 
 inline
@@ -48,7 +50,7 @@ binary_stream_cleanup(binary_stream_t *stream)
 {
   assert(stream && !binary_stream_is_def(stream));
 
-  cvector_cleanup(&stream->data);
+  cvector_cleanup(&stream->data, NULL);
   stream->pos = STREAM_START_POS;
 }
 

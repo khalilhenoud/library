@@ -31,6 +31,14 @@ structs that are typed and easily included), but this won't be for a while. An
 alternative would be to shift the project or part of it to C++ and use eastl to
 provide these functionalities.
 
+NOTES:
+------
+- It is fine to take the address of an inline function, the standard indicates 
+that the compiler will generate another copy of the function. This means that
+when the function is called from the same translation unit (in a non vtable 
+context) the call is inlined, otherwise in a vtable context, it is a dynamic
+call.
+
 type interface:
 ---------------
 #define uint32_t type_id;
@@ -77,7 +85,7 @@ type interface:
                 note that this is the size of the struct itself and not its 
                 contained data, same as sizeof(type);
   declaration:
-    size_t  $type$_size(void);
+    size_t  $type$_type_size(void);
 
 *_alignment     used to determine the alignment of the type, also for allocation
                 purposes. would be equivalent in C++ to alignof(type). some
@@ -97,7 +105,7 @@ type interface:
                 function takes an array of size corresponding to _type_id_count.
                 the caller is responsible for providing the correct sized array.
   declaration:
-    void  $type$_type_ids(type_id *ids);
+    void  $type$_type_ids(const void *src, type_id *ids);
 
 *_owns_alloc    returns 1 if it contains a reference to the allocator it uses
                 internally or 0 otherwise
@@ -151,8 +159,8 @@ you care about and delete the rest;
     void *dst, const allocator_t *allocator, binary_stream_t* stream);
   uint32_t $type$_hash(const void *ptr);
   uint32_t $type$_is_equal(const void *lhs, const void *rhs);
-  size_t $type$_size(void);
-  size_t $type$_alignment(void);
+  size_t $type$_type_size(void);
+  size_t $type$_type_alignment(void);
   uint32_t $type$_type_id_count(void);
   void $type$_type_ids(type_id_t *ids);
   uint32_t $type$_owns_alloc(void);

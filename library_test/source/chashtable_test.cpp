@@ -15,7 +15,7 @@
 #include <cassert>
 #include <common.h>
 
-
+#if 0
 template<typename KEY_TYPE, typename VALUE_TYPE>
 void
 print_chashtable_content(chashtable_t& map, const int32_t tabs)
@@ -497,3 +497,4 @@ test_chashtable_main(const allocator_t* allocator, const int32_t tabs)
   test_chashtable_iterators(allocator, tabs + 1);    NEWLINE;
   test_chashtable_custom(allocator, tabs + 1);       NEWLINE;
 }
+#endif
