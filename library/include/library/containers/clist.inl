@@ -16,44 +16,45 @@ inline
 void
 clist_setup(
   clist_t* list, 
-  size_t elem_size, 
-  const allocator_t* allocator, 
-  clist_elem_cleanup_t elem_cleanup_fn)
+  type_data_t type_data, 
+  const allocator_t* allocator)
 {
   assert(list && allocator);
 
   {
-    list->elem_size = elem_size;
+    list->elem_data = get_cont_elem_data_from_packed(type_data);
     list->size = 0;
     list->allocator = allocator;
-    list->elem_cleanup = elem_cleanup_fn;
     list->nodes = NULL;
   }
 }
 
 inline
 void
-clist_cleanup(clist_t* list)
+clist_cleanup(void *ptr, const allocator_t* allocator)
 {
+  clist_t *list = (clist_t *)ptr;
   assert(list && !clist_is_def(list));
+  assert(!allocator && "this type owns its own allocator!");
 
   while (list->size)
     clist_erase(list, 0);
   
-  list->elem_size = list->size = 0;
+  elem_data_clear(&list->elem_data);
+  list->size = 0;
   list->allocator = NULL;
-  list->elem_cleanup = NULL;
   list->nodes = NULL;
 }
 
 inline
 void 
 clist_replicate(
-  const clist_t *src, 
-  clist_t *dst, 
-  const allocator_t *allocator, 
-  clist_elem_replicate_t elem_replicate_fn)
+  const void *v_src, 
+  void *v_dst, 
+  const allocator_t *allocator)
 {
+  const clist_t *src = (const clist_t *)v_src;
+  clist_t *dst = (clist_t *)v_dst;
   assert(src && !clist_is_def(src));
   assert(dst);
   assert(
@@ -61,13 +62,13 @@ clist_replicate(
     (
       !clist_is_def(dst) && 
       !allocator && 
-      dst->elem_size == src->elem_size && 
-      dst->size == 0 && 
-      dst->elem_cleanup == src->elem_cleanup));
+      elem_data_identical(&dst->elem_data, &src->elem_data) && 
+      dst->size == 0));
 
   if (clist_is_def(dst)) {
     clist_setup(
-      dst, src->elem_size, allocator, src->elem_cleanup);
+      dst, 
+      pack_type_data(src->elem_data.type_id, src->elem_data.size), allocator);
   }
 
   {
@@ -75,14 +76,15 @@ clist_replicate(
     clist_node_t* dst_node;
     size_t i = 0;
     for (; i < src->size; ++i) {
+      fn_replicate_t replicate = elem_data_get_replicate_fn(&src->elem_data);
       src_node = clist_at_cst(src, i);
       clist_insert_empty(dst, i);
       dst_node = clist_at(dst, i);
 
-      if (!elem_replicate_fn)
-        memcpy(dst_node->data, src_node->data, src->elem_size);
+      if (!replicate)
+        memcpy(dst_node->data, src_node->data, src->elem_data.size);
       else
-        elem_replicate_fn(src_node->data, dst_node->data, dst->allocator);
+        replicate(src_node->data, dst_node->data, dst->allocator);
     }
   }
 }
@@ -112,7 +114,7 @@ size_t
 clist_elem_size(const clist_t* list) 
 { 
   assert(list && !clist_is_def(list));  
-  return list->elem_size; 
+  return list->elem_data.size; 
 }
 
 inline
@@ -121,15 +123,7 @@ clist_allocator(const clist_t* list)
 { 
   assert(list && !clist_is_def(list)); 
   return list->allocator; 
-} 
-
-inline
-clist_elem_cleanup_t
-clist_elem_cleanup(const clist_t* list) 
-{ 
-  assert(list && !clist_is_def(list)); 
-  return list->elem_cleanup; 
-} 
+}
 
 inline
 int32_t
@@ -182,6 +176,7 @@ clist_erase(clist_t* list, size_t index)
     clist_node_t* target = clist_at(list, index);
     clist_node_t* previous = target->previous;
     clist_node_t* next = target->next;
+    fn_cleanup_t cleanup = elem_data_get_cleanup_fn(&list->elem_data);
     
     // 1, 2, many nodes scenarios.
     if (previous == target)
@@ -194,8 +189,8 @@ clist_erase(clist_t* list, size_t index)
       list->nodes = (list->nodes == target) ? next : list->nodes;
     }
 
-    if (list->elem_cleanup)
-      list->elem_cleanup(target->data, list->allocator);
+    if (cleanup)
+      cleanup(target->data, list->allocator);
     list->allocator->mem_free(target->data);
     list->allocator->mem_free(target);
     --list->size;

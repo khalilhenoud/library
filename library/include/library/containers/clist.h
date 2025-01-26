@@ -19,18 +19,12 @@ extern "C" {
 #include <string.h>
 #include <assert.h>
 #include <library/allocator/allocator.h>
+#include <library/type_registry/type_registry.h>
 
 
 // TODO: provide a better implementation for list implementation. I suspect the
 // dynamic memory allocation for every node we add is not ideal, that also has
-// an effect on our access patterns.
-
-typedef 
-void (*clist_elem_cleanup_t)(void *elem_ptr, const allocator_t* allocator);
-
-typedef
-void (*clist_elem_replicate_t)(
-  const void* src, void* dst, const allocator_t* allocator);
+// an effect on our access patterns in cache.
 
 typedef struct clist_node_t clist_node_t;
 typedef struct clist_t clist_t;
@@ -52,47 +46,44 @@ struct clist_iterator_t {
 // TODO: consider removing size, this nets us a 32 bytes struct.
 typedef
 struct clist_t {
-  size_t elem_size;
+  container_elem_data_t elem_data;
   size_t size;
   const allocator_t* allocator;
-  clist_elem_cleanup_t elem_cleanup;
   clist_node_t *nodes;
 } clist_t;
 
 /** returns a default initialized copy of the struct */
 inline
-clist_t
-clist_def()
+void 
+clist_def(void *ptr)
 {
-  clist_t def;
-  memset(&def, 0, sizeof(clist_t));
-  return def;
+  memset(ptr, 0, sizeof(clist_t));
 }
 
 /** returns 1 if the passed struct is the same as the default */
 inline
-int32_t
-clist_is_def(const clist_t* list)
+uint32_t 
+clist_is_def(const void *ptr)
 {
-  clist_t def = clist_def();
+  const clist_t *list = (const clist_t *)ptr;
+  clist_t def;
+  clist_def(&def);
   return 
-    list->elem_size == def.elem_size && 
+    elem_data_identical(&list->elem_data, &def.elem_data) && 
     list->size == def.size && 
-    list->allocator == def.allocator && 
-    list->elem_cleanup == def.elem_cleanup && 
+    list->allocator == def.allocator &&
     list->nodes == def.nodes;
 }
 
 void
 clist_setup(
   clist_t* list, 
-  size_t elem_size, 
-  const allocator_t* allocator, 
-  clist_elem_cleanup_t elem_cleanup_fn);
+  type_data_t type_data, 
+  const allocator_t* allocator);
 
 /** frees all internal memory, call setup again to reuse. */
 void
-clist_cleanup(clist_t* list);
+clist_cleanup(void *ptr, const allocator_t* allocator);
 
 /** 
  * NOTE: will assert if 'src' is not initialized, or if 'dst' is initialized but
@@ -101,26 +92,58 @@ clist_cleanup(clist_t* list);
  */
 void 
 clist_replicate(
-  const clist_t *src, 
-  clist_t *dst, 
-  const allocator_t *allocator, 
-  clist_elem_replicate_t elem_replicate_fn);
+  const void *src, 
+  void *dst, 
+  const allocator_t *allocator);
 
 /** exchanges the content of the specified containers, even allocators */
 void
 clist_fullswap(clist_t* src, clist_t* dst);
+
+inline
+size_t 
+clist_type_size(void)
+{
+  return sizeof(clist_t);
+}
+
+inline
+uint32_t 
+clist_type_id_count(void)
+{
+  return 1;
+}
+
+inline
+void 
+clist_type_ids(
+  const void *src, 
+  type_id_t *ids)
+{
+  assert(src && ids);
+  ids[0] = ((const clist_t *)src)->elem_data.type_id;
+}
+
+inline
+uint32_t 
+clist_owns_alloc(void)
+{
+  return 1;
+}
+
+inline
+const allocator_t*
+clist_get_allocator(const void *list)
+{
+  assert(list);
+  return ((const clist_t *)list)->allocator;
+}
 
 size_t
 clist_size(const clist_t* vec);
 
 size_t
 clist_elem_size(const clist_t* vec);
-
-const allocator_t*
-clist_allocator(const clist_t* vec);
-
-clist_elem_cleanup_t
-clist_elem_cleanup(const clist_t* vec);
 
 int32_t
 clist_empty(const clist_t* vec);
@@ -189,7 +212,7 @@ clist_iter_equal(clist_iterator_t left, clist_iterator_t right);
     {                                                                         \
       clist_node_t* to_insert =                                               \
         (clist_node_t*)(list)->allocator->mem_alloc(sizeof(clist_node_t));    \
-      to_insert->data = (list)->allocator->mem_alloc((list)->elem_size);      \
+      to_insert->data = (list)->allocator->mem_alloc((list)->elem_data.size); \
       *((type*)to_insert->data) = (val);                                      \
                                                                               \
       if (!(list)->nodes) {                                                   \
@@ -222,8 +245,8 @@ clist_iter_equal(clist_iterator_t left, clist_iterator_t right);
     {                                                                         \
       clist_node_t* to_insert =                                               \
         (clist_node_t*)(list)->allocator->mem_alloc(sizeof(clist_node_t));    \
-      to_insert->data = (list)->allocator->mem_alloc((list)->elem_size);      \
-      memset(to_insert->data, 0, (list)->elem_size);                          \
+      to_insert->data = (list)->allocator->mem_alloc((list)->elem_data.size); \
+      memset(to_insert->data, 0, (list)->elem_data.size);                     \
                                                                               \
       if (!(list)->nodes) {                                                   \
         (list)->nodes = to_insert;                                            \

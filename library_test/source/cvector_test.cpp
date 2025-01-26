@@ -258,17 +258,17 @@ test_cvector_mem(const allocator_t* allocator, const int32_t tabs)
 }
 
 typedef
-struct custom_t {
+struct vector_custom_t {
   int32_t* data;
   int32_t count;
   int32_t tabs;
-} custom_t;
+} vector_custom_t;
 
 static
 void
 elem_cleanup(void *elem_ptr, const allocator_t* allocator)
 {
-  custom_t* casted = (custom_t*)elem_ptr;
+  vector_custom_t* casted = (vector_custom_t*)elem_ptr;
   if (casted->count && casted->data) {
     std::cout << std::string(casted->tabs, '\t') << "freeing " << 
     casted->count << " elements" << std::endl;
@@ -278,7 +278,7 @@ elem_cleanup(void *elem_ptr, const allocator_t* allocator)
     std::endl;
 }
 
-INITIALIZER(register_custom)
+INITIALIZER(register_vector_custom)
 {
   vtable_t vtable;
   memset(&vtable, 0, sizeof(vtable_t));
@@ -288,7 +288,7 @@ INITIALIZER(register_custom)
   vtable.fn_serialize = NULL;
   vtable.fn_deserialize = NULL;
   vtable.fn_cleanup = elem_cleanup;
-  register_type(get_type_id(custom_t), &vtable);
+  register_type(get_type_id(vector_custom_t), &vtable);
 }
 
 static
@@ -297,24 +297,24 @@ test_cvector_custom(const allocator_t* allocator, const int32_t tabs)
 {
   PRINT_FUNCTION;
 
-  custom_t data;
-  memset(&data, 0, sizeof(custom_t));
+  vector_custom_t data;
+  memset(&data, 0, sizeof(vector_custom_t));
   cvector_t vec; cvector_def(&vec);
-  cvector_setup(&vec, get_type_data(custom_t), 4, allocator);
+  cvector_setup(&vec, get_type_data(vector_custom_t), 4, allocator);
   print_meta(vec, tabs);
-  cvector_push_back(&vec, data, custom_t);
-  cvector_push_back(&vec, data, custom_t);
-  cvector_push_back(&vec, data, custom_t);
+  cvector_push_back(&vec, data, vector_custom_t);
+  cvector_push_back(&vec, data, vector_custom_t);
+  cvector_push_back(&vec, data, vector_custom_t);
 
-  auto* ptr = cvector_as(&vec, 0, custom_t);
+  auto* ptr = cvector_as(&vec, 0, vector_custom_t);
   ptr->count = 3;
   ptr->data = (int32_t*)allocator->mem_cont_alloc(ptr->count, sizeof(int32_t));
   ptr->tabs = tabs;
 
-  ptr = cvector_as(&vec, 1, custom_t);
+  ptr = cvector_as(&vec, 1, vector_custom_t);
   ptr->tabs = tabs;
 
-  ptr = cvector_as(&vec, 2, custom_t);
+  ptr = cvector_as(&vec, 2, vector_custom_t);
   ptr->count = 5;
   ptr->data = (int32_t*)allocator->mem_cont_alloc(ptr->count, sizeof(int32_t));
   ptr->tabs = tabs;

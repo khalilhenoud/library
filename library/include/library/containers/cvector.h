@@ -22,25 +22,10 @@ extern "C" {
 #include <library/type_registry/type_registry.h>
 
 
-// TODO: allow types to provide their (de)serialization and swap functions.
 // TODO: support intial size with default values.
 // TODO: support custom alignment.
 // TODO: add cvector_fullswap_back() functions.
 // TODO: will need accessor variants for const types (cvector_cbegin, etc...)
-
-// /**
-//  * NOTE: non-trivial types (types that have memory allocation as part of their
-//  * construction), and pointer types (array of pointers to objects), requires
-//  * custom deallocators (in some instances). This allows us the change to free
-//  * the types internal memory.
-//  */
-// typedef 
-// void (*cvector_elem_cleanup_t)(void *elem_ptr, const allocator_t* allocator);
-
-// /** NOTE: Used if deep copying elements is required */
-// typedef
-// void (*cvector_elem_replicate_t)(
-//   const void* src, void* dst, const allocator_t* allocator);
 
 typedef 
 struct cvector_t {
@@ -50,12 +35,6 @@ struct cvector_t {
   const allocator_t* allocator;
   void *data;
 } cvector_t;
-
-/*
-void cvector_serialize(const void *src, binary_stream_t* stream);
-void cvector_deserialize(
-  void *dst, const allocator_t *allocator, binary_stream_t* stream);
-*/
 
 /** returns a default initialized copy of the struct */
 inline

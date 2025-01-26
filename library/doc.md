@@ -162,7 +162,7 @@ you care about and delete the rest;
   size_t $type$_type_size(void);
   size_t $type$_type_alignment(void);
   uint32_t $type$_type_id_count(void);
-  void $type$_type_ids(type_id_t *ids);
+  void $type$_type_ids(const void *src, type_id_t *ids);
   uint32_t $type$_owns_alloc(void);
   const allocator_t* $type$_get_alloc(const void *ptr);
   void $type$_cleanup(void *ptr, const allocator_t* allocator);
