@@ -85,6 +85,13 @@ struct container_elem_data_t {
 } container_elem_data_t;
 
 inline
+type_data_t
+get_type_data_from_elem_data(const container_elem_data_t *src)
+{
+  return pack_type_data(src->type_id, src->size);
+}
+
+inline
 uint32_t
 elem_data_identical(
   const container_elem_data_t *left, 
@@ -116,6 +123,26 @@ elem_data_get_replicate_fn(const container_elem_data_t *elem)
   return 
     (elem->vtable == NULL || elem->vtable->fn_replicate == NULL) ? 
     NULL : elem->vtable->fn_replicate;
+}
+
+inline
+fn_hash_t
+elem_data_get_hash_fn(const container_elem_data_t *elem)
+{
+  assert(elem);
+  return 
+    (elem->vtable == NULL || elem->vtable->fn_hash == NULL) ? 
+    NULL : elem->vtable->fn_hash;
+}
+
+inline
+fn_is_equal_t
+elem_data_get_is_equal_fn(const container_elem_data_t *elem)
+{
+  assert(elem);
+    return 
+    (elem->vtable == NULL || elem->vtable->fn_is_equal == NULL) ? 
+    NULL : elem->vtable->fn_is_equal;
 }
 
 inline

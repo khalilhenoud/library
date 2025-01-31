@@ -18,7 +18,7 @@
 #define INVALID 0
  
 
-// we allocate twice the size to minimize collisions (same logic as hashtables).
+// we allocate twice the size to minimize collisions (same logic as hashmaps).
 static
 uint32_t key_to_type[REGISTRY_TABLE_SIZE];
 static
