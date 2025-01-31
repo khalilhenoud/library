@@ -57,6 +57,7 @@ inline
 void 
 clist_def(void *ptr)
 {
+  assert(ptr);
   memset(ptr, 0, sizeof(clist_t));
 }
 

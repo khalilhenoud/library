@@ -41,6 +41,7 @@ inline
 void
 cvector_def(void *ptr)
 {
+  assert(ptr);
   memset(ptr, 0, sizeof(cvector_t));
 }
 

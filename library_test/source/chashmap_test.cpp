@@ -101,7 +101,7 @@ test_chashmap_def(const allocator_t* allocator, const int32_t tabs)
 {
   PRINT_FUNCTION;
 
-  chashmap_t map = chashmap_def();
+  chashmap_t map; chashmap_def(&map);
   print_meta(map, tabs);
   CTABS << PRINT_BOOL(chashmap_is_def(&map)) << std::endl;
 }
@@ -165,7 +165,7 @@ test_chashmap_basics(const allocator_t* allocator, const int32_t tabs)
   PRINT_DESC("defines and populate basic types of hashmaps");
 
   {
-    chashmap_t map = chashmap_def();
+    chashmap_t map; chashmap_def(&map);
     chashmap_setup(
       &map, 
       get_type_data(u64), get_type_data(float), 
@@ -182,14 +182,14 @@ test_chashmap_basics(const allocator_t* allocator, const int32_t tabs)
     print_chashmap_content<u64, float>(map, tabs + 1);
     NEWLINE;
     print_meta(map, tabs);
-    chashmap_cleanup(&map);
+    chashmap_cleanup(&map, NULL);
     NEWLINE;
   }
 
   {
     // NOTE: this case brings up the need to replicate the key and or value upon
     // insertion. something like copy key, copy value.
-    chashmap_t map = chashmap_def();
+    chashmap_t map; chashmap_def(&map);
     chashmap_setup(
       &map, 
       get_type_data(cptr), get_type_data(int32_t), 
@@ -215,7 +215,7 @@ test_chashmap_basics(const allocator_t* allocator, const int32_t tabs)
     print_chashmap_content<cptr, int32_t>(map, tabs + 1);
     NEWLINE;
     print_meta(map, tabs);
-    chashmap_cleanup(&map);
+    chashmap_cleanup(&map, NULL);
     NEWLINE;
   }
 }
@@ -228,7 +228,7 @@ test_chashmap_ops(const allocator_t* allocator, const int32_t tabs)
 
   {
     CTABS << "replicate testing: " << std::endl;
-    chashmap_t left = chashmap_def();
+    chashmap_t left; chashmap_def(&left);
     chashmap_setup(
       &left, 
       get_type_data(cptr), get_type_data(int32_t), 
@@ -253,13 +253,13 @@ test_chashmap_ops(const allocator_t* allocator, const int32_t tabs)
     NEWLINE;
     print_chashmap_content<cptr, int32_t>(left, tabs + 1);
 
-    chashmap_t right = chashmap_def();
+    chashmap_t right; chashmap_def(&right);
     chashmap_replicate(&left, &right, allocator);
     NEWLINE;
     print_meta(right, tabs);
     NEWLINE;
     print_chashmap_content<cptr, int32_t>(right, tabs + 1);
-    chashmap_cleanup(&right);
+    chashmap_cleanup(&right, NULL);
 
     chashmap_setup(
       &right,
@@ -271,13 +271,13 @@ test_chashmap_ops(const allocator_t* allocator, const int32_t tabs)
     NEWLINE;
     print_chashmap_content<cptr, int32_t>(right, tabs + 1);
         
-    chashmap_cleanup(&right);
-    chashmap_cleanup(&left);
+    chashmap_cleanup(&right, NULL);
+    chashmap_cleanup(&left, NULL);
   }
   
   {
     CTABS << "fullswap testing: " << std::endl;
-    chashmap_t left = chashmap_def();
+    chashmap_t left; chashmap_def(&left);
     chashmap_setup(
       &left, 
       get_type_data(cptr), get_type_data(int32_t), 
@@ -288,7 +288,7 @@ test_chashmap_ops(const allocator_t* allocator, const int32_t tabs)
     mstri_insert(&left, "naji", 4);
     mstri_insert(&left, "ibtissam", 5);
 
-    chashmap_t right = chashmap_def();
+    chashmap_t right; chashmap_def(&right);
     chashmap_setup(
       &right, 
       get_type_data(cptr), get_type_data(int32_t), 
@@ -307,8 +307,8 @@ test_chashmap_ops(const allocator_t* allocator, const int32_t tabs)
     print_chashmap_content<cptr, int32_t>(left, tabs + 1);
     print_chashmap_content<cptr, int32_t>(right, tabs + 1);
 
-    chashmap_cleanup(&right);
-    chashmap_cleanup(&left);
+    chashmap_cleanup(&right, NULL);
+    chashmap_cleanup(&left, NULL);
   }
 }
 
@@ -319,7 +319,7 @@ test_chashmap_misc(const allocator_t* allocator, const int32_t tabs)
   PRINT_DESC("misc function testing");
 
   {
-    chashmap_t left = chashmap_def();
+    chashmap_t left; chashmap_def(&left);
     chashmap_setup(
       &left, 
       get_type_data(cptr), get_type_data(int32_t), 
@@ -353,7 +353,7 @@ test_chashmap_misc(const allocator_t* allocator, const int32_t tabs)
     print_chashmap_content<cptr, int32_t>(left, tabs + 1);
     chashmap_erase(&left, "nissan", cptr);
     print_chashmap_content<cptr, int32_t>(left, tabs + 1);
-    chashmap_cleanup(&left);
+    chashmap_cleanup(&left, NULL);
     NEWLINE;
   }
 }
@@ -364,7 +364,7 @@ test_chashmap_iterators(const allocator_t* allocator, const int32_t tabs)
   PRINT_FUNCTION;
   PRINT_DESC("tests for iterators, begin, end, advance, equal, key, value...");
 
-  chashmap_t map = chashmap_def();
+  chashmap_t map; chashmap_def(&map);
   chashmap_setup(
     &map, 
     get_type_data(cptr), get_type_data(int32_t), 
@@ -387,7 +387,7 @@ test_chashmap_iterators(const allocator_t* allocator, const int32_t tabs)
       }
     NEWLINE;
   }
-  chashmap_cleanup(&map);
+  chashmap_cleanup(&map, NULL);
 }
 
 void
@@ -396,7 +396,7 @@ test_chashmap_mem(const allocator_t* allocator, const int32_t tabs)
   PRINT_FUNCTION;
   PRINT_DESC("rehash, reserve testing...");
 
-  chashmap_t map = chashmap_def();
+  chashmap_t map; chashmap_def(&map);
   chashmap_setup(
     &map, 
     get_type_data(u64), get_type_data(float), 
@@ -424,7 +424,7 @@ test_chashmap_mem(const allocator_t* allocator, const int32_t tabs)
   chashmap_reserve(&map, 0);
   print_meta(map, tabs);
   print_chashmap_content<u64, float>(map, tabs + 1);
-  chashmap_cleanup(&map);
+  chashmap_cleanup(&map, NULL);
 }
 
 typedef
@@ -456,7 +456,7 @@ test_chashmap_custom(const allocator_t* allocator, const int32_t tabs)
 
   hashmap_custom_t data;
   memset(&data, 0, sizeof(hashmap_custom_t));
-  chashmap_t map = chashmap_def();
+  chashmap_t map; chashmap_def(&map);
   chashmap_setup(
     &map, 
     get_type_data(u64), get_type_data(hashmap_custom_t), 
@@ -479,7 +479,7 @@ test_chashmap_custom(const allocator_t* allocator, const int32_t tabs)
   ptr->data = (int32_t*)allocator->mem_cont_alloc(ptr->count, sizeof(int32_t));
   ptr->tabs = tabs;
 
-  chashmap_cleanup(&map);
+  chashmap_cleanup(&map, NULL);
 }
 
 INITIALIZER(register_hashmap_custom)

@@ -51,9 +51,11 @@ chashmap_setup(
 
 inline
 void
-chashmap_cleanup(chashmap_t* hashmap)
+chashmap_cleanup(void *p_hashmap, const allocator_t *allocator)
 {
+  chashmap_t *hashmap = (chashmap_t *)p_hashmap;
   assert(hashmap && !chashmap_is_def(hashmap));
+  assert(allocator == NULL);
 
   {
     cvector_cleanup(&hashmap->keys, NULL);
@@ -73,10 +75,13 @@ chashmap_cleanup(chashmap_t* hashmap)
 inline
 void 
 chashmap_replicate(
-  const chashmap_t *src, 
-  chashmap_t *dst, 
+  const void *p_src, 
+  void *p_dst, 
   const allocator_t *allocator)
 {
+  const chashmap_t *src = (const chashmap_t *)p_src;
+  chashmap_t *dst = (chashmap_t *)p_dst;
+
   assert(src && !chashmap_is_def(src));
   assert(dst);
 
@@ -114,10 +119,12 @@ chashmap_replicate(
 
 inline
 void
-chashmap_fullswap(chashmap_t* src, chashmap_t* dst)
+chashmap_fullswap(void *lhs, void *rhs)
 {
-  assert(src && dst);
+  assert(lhs && rhs);
   {
+    chashmap_t *src = (chashmap_t *)lhs;
+    chashmap_t *dst = (chashmap_t *)rhs;
     chashmap_t tmp = *src;
     *src = *dst;
     *dst = tmp;
@@ -138,14 +145,6 @@ chashmap_value_size(const chashmap_t* hashmap)
 {
   assert(hashmap && !chashmap_is_def(hashmap));
   return hashmap->values.elem_data.size;
-}
-
-inline
-const allocator_t*
-chashmap_allocator(const chashmap_t* hashmap)
-{
-  assert(hashmap && !chashmap_is_def(hashmap));
-  return hashmap->allocator;
 }
 
 inline

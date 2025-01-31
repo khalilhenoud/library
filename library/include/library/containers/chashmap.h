@@ -52,20 +52,21 @@ struct chashmap_iterator_t {
 
 /** returns a default initialized copy of the struct */
 inline
-chashmap_t
-chashmap_def()
+void 
+chashmap_def(void *ptr)
 {
-  chashmap_t def;
-  memset(&def, 0, sizeof(chashmap_t));
-  return def;
+  assert(ptr);
+  memset(ptr, 0, sizeof(chashmap_t));
 }
 
 /** returns 1 if the passed struct is the same as the default */
 inline
-int32_t
-chashmap_is_def(const chashmap_t* hashmap)
+uint32_t 
+chashmap_is_def(const void *ptr)
 {
-  chashmap_t def = chashmap_def();
+  chashmap_t def; 
+  chashmap_def(&def);
+  const chashmap_t* hashmap = (const chashmap_t *)ptr;
   return 
     cvector_is_def(&(hashmap->keys)) && 
     cvector_is_def(&(hashmap->values)) && 
@@ -85,27 +86,71 @@ chashmap_setup(
 
 /** frees all internal memory, call setup again to reuse. */
 void
-chashmap_cleanup(chashmap_t* hashmap);
+chashmap_cleanup(
+  void *hashmap, 
+  const allocator_t *allocator);
 
 /** NOTE: follows the rules established by cvector in terms of assertion. */
 void 
 chashmap_replicate(
-  const chashmap_t *src, 
-  chashmap_t *dst, 
+  const void *src, 
+  void *dst, 
   const allocator_t *allocator);
+
+inline
+size_t 
+chashmap_type_size(void)
+{
+  return sizeof(chashmap_t);
+}
+
+inline
+uint32_t 
+chashmap_type_id_count(void)
+{
+  return 2;
+}
+
+inline
+void 
+chashmap_type_ids(const void *src, type_id_t *ids)
+{
+  assert(src && ids);
+  {
+    const chashmap_t *map = (const chashmap_t *)src;
+    ids[0] = map->keys.elem_data.type_id;
+    ids[1] = map->values.elem_data.type_id;
+  }
+}
+
+inline
+uint32_t 
+chashmap_owns_alloc(void)
+{
+  return 1; 
+}
+
+inline
+const allocator_t* 
+chashmap_get_alloc(const void *ptr)
+{
+  assert(ptr && !chashmap_is_def(ptr));
+
+  {
+    const chashmap_t *map = (const chashmap_t *)ptr;
+    return map->allocator;
+  }
+}
 
 /** exchanges the content of the specified containers, even allocators */
 void
-chashmap_fullswap(chashmap_t* src, chashmap_t* dst);
+chashmap_fullswap(void* lhs, void* rhs);
 
 size_t
 chashmap_key_size(const chashmap_t* hashmap);
 
 size_t
 chashmap_value_size(const chashmap_t* hashmap);
-
-const allocator_t*
-chashmap_allocator(const chashmap_t* hashmap);
 
 // returns the cleanup function of the key type
 fn_cleanup_t
