@@ -22,9 +22,30 @@ extern "C" {
 #include <library/type_registry/type_registry.h>
 
 
-// TODO: provide a better implementation for list implementation. I suspect the
-// dynamic memory allocation for every node we add is not ideal, that also has
-// an effect on our access patterns in cache.
+////////////////////////////////////////////////////////////////////////////////
+//| clist_t, * = clist
+//|=============================================================================
+//| OPERATION                   | SUPPORTED
+//|=============================================================================
+//|    *_def                    | YES
+//|    *_is_def                 | YES
+//|    *_replicate              | YES
+//|    *_fullswap               | YES
+//|    *_serialize              |
+//|    *_deserialize            |
+//|    *_hash                   |
+//|    *_is_equal               |
+//|    *_type_size              | YES
+//|    *_type_alignment         |
+//|    *_type_id_count          | YES
+//|    *_type_ids               | YES
+//|    *_owns_alloc             | YES
+//|    *_get_alloc              | YES
+//|    *_cleanup                | YES
+////////////////////////////////////////////////////////////////////////////////
+// TODO:
+//  - mem_alloc for every node is not ideal, provide a better implementation.
+////////////////////////////////////////////////////////////////////////////////
 
 typedef struct clist_node_t clist_node_t;
 typedef struct clist_t clist_t;
@@ -43,7 +64,6 @@ struct clist_iterator_t {
   clist_node_t *last;
 } clist_iterator_t; 
 
-// TODO: consider removing size, this nets us a 32 bytes struct.
 typedef
 struct clist_t {
   container_elem_data_t elem_data;
@@ -52,7 +72,6 @@ struct clist_t {
   clist_node_t *nodes;
 } clist_t;
 
-/** returns a default initialized copy of the struct */
 inline
 void 
 clist_def(void *ptr)
@@ -61,7 +80,6 @@ clist_def(void *ptr)
   memset(ptr, 0, sizeof(clist_t));
 }
 
-/** returns 1 if the passed struct is the same as the default */
 inline
 uint32_t 
 clist_is_def(const void *ptr)
@@ -76,16 +94,6 @@ clist_is_def(const void *ptr)
     list->nodes == def.nodes;
 }
 
-void
-clist_setup(
-  clist_t* list, 
-  type_data_t type_data, 
-  const allocator_t* allocator);
-
-/** frees all internal memory, call setup again to reuse. */
-void
-clist_cleanup(void *ptr, const allocator_t* allocator);
-
 /** 
  * NOTE: will assert if 'src' is not initialized, or if 'dst' is initialized but
  * with non-zero size.
@@ -97,9 +105,8 @@ clist_replicate(
   void *dst, 
   const allocator_t *allocator);
 
-/** exchanges the content of the specified containers, even allocators */
 void
-clist_fullswap(clist_t* src, clist_t* dst);
+clist_fullswap(void* src, void* dst);
 
 inline
 size_t 
@@ -134,11 +141,21 @@ clist_owns_alloc(void)
 
 inline
 const allocator_t*
-clist_get_allocator(const void *list)
+clist_get_alloc(const void *list)
 {
   assert(list);
   return ((const clist_t *)list)->allocator;
 }
+
+void
+clist_cleanup(void *ptr, const allocator_t* allocator);
+
+////////////////////////////////////////////////////////////////////////////////
+void
+clist_setup(
+  clist_t* list, 
+  type_data_t type_data, 
+  const allocator_t* allocator);
 
 size_t
 clist_size(const clist_t* vec);
@@ -190,7 +207,6 @@ clist_advance(clist_iterator_t* iter);
 /** 1 if equal, 0 otherwise */
 int32_t
 clist_iter_equal(clist_iterator_t left, clist_iterator_t right);
-
 
 ////////////////////////////////////////////////////////////////////////////////
 #define clist_deref(iter, type) \

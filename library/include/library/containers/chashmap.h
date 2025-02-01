@@ -22,7 +22,29 @@ extern "C" {
 #include <library/type_registry/type_registry.h>
 
 
+////////////////////////////////////////////////////////////////////////////////
+//| chashmap_t, * = chashmap
+//|=============================================================================
+//| OPERATION                   | SUPPORTED
+//|=============================================================================
+//|    *_def                    | YES
+//|    *_is_def                 | YES
+//|    *_replicate              | YES
+//|    *_fullswap               | YES
+//|    *_serialize              |
+//|    *_deserialize            |
+//|    *_hash                   |
+//|    *_is_equal               |
+//|    *_type_size              | YES
+//|    *_type_alignment         |
+//|    *_type_id_count          | YES
+//|    *_type_ids               | YES
+//|    *_owns_alloc             | YES
+//|    *_get_alloc              | YES
+//|    *_cleanup                | YES
+////////////////////////////////////////////////////////////////////////////////
 // NOTES:
+// - the indices is a vector of uint32_t
 // - The hashmap will replicate the keys when a replicate function is
 //   provided.
 // - The values are inserted by copy only, there is no ownership taken(that
@@ -33,8 +55,8 @@ extern "C" {
 //   where the elements are kept. This will change, as I intend to either add a
 //   stack to indicate gaps in the data-key vector (to improve performance) or a
 //   key-value pair implementation akin to C++ unordered_map.
+////////////////////////////////////////////////////////////////////////////////
 
-// NOTE: the indices is a vector of uint32_t.
 typedef
 struct chashmap_t {
   cvector_t keys;
@@ -50,7 +72,6 @@ struct chashmap_iterator_t {
   size_t index;
 } chashmap_iterator_t;
 
-/** returns a default initialized copy of the struct */
 inline
 void 
 chashmap_def(void *ptr)
@@ -59,7 +80,6 @@ chashmap_def(void *ptr)
   memset(ptr, 0, sizeof(chashmap_t));
 }
 
-/** returns 1 if the passed struct is the same as the default */
 inline
 uint32_t 
 chashmap_is_def(const void *ptr)
@@ -75,27 +95,15 @@ chashmap_is_def(const void *ptr)
     hashmap->allocator == def.allocator;
 }
 
-/** will not allocate until the first use. */
-void
-chashmap_setup(
-  chashmap_t* hashmap, 
-  type_data_t key_type_data,
-  type_data_t elem_type_data,
-  const allocator_t* allocator,
-  const float max_load_factor);
-
-/** frees all internal memory, call setup again to reuse. */
-void
-chashmap_cleanup(
-  void *hashmap, 
-  const allocator_t *allocator);
-
 /** NOTE: follows the rules established by cvector in terms of assertion. */
 void 
 chashmap_replicate(
   const void *src, 
   void *dst, 
   const allocator_t *allocator);
+
+void
+chashmap_fullswap(void* lhs, void* rhs);
 
 inline
 size_t 
@@ -142,9 +150,20 @@ chashmap_get_alloc(const void *ptr)
   }
 }
 
-/** exchanges the content of the specified containers, even allocators */
 void
-chashmap_fullswap(void* lhs, void* rhs);
+chashmap_cleanup(
+  void *hashmap, 
+  const allocator_t *allocator);
+
+////////////////////////////////////////////////////////////////////////////////
+/** will not allocate until the first use. */
+void
+chashmap_setup(
+  chashmap_t* hashmap, 
+  type_data_t key_type_data,
+  type_data_t elem_type_data,
+  const allocator_t* allocator,
+  const float max_load_factor);
 
 size_t
 chashmap_key_size(const chashmap_t* hashmap);
@@ -222,7 +241,6 @@ chashmap_advance(chashmap_iterator_t* iter);
 /** 1 if equal, 0 otherwise */
 int32_t
 chashmap_iter_equal(chashmap_iterator_t left, chashmap_iterator_t right);
-
 
 ////////////////////////////////////////////////////////////////////////////////
 #define chashmap_key(iter, key_type) \

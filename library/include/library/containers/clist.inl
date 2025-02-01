@@ -13,40 +13,6 @@
 
 
 inline
-void
-clist_setup(
-  clist_t* list, 
-  type_data_t type_data, 
-  const allocator_t* allocator)
-{
-  assert(list && allocator);
-
-  {
-    list->elem_data = get_cont_elem_data_from_packed(type_data);
-    list->size = 0;
-    list->allocator = allocator;
-    list->nodes = NULL;
-  }
-}
-
-inline
-void
-clist_cleanup(void *ptr, const allocator_t* allocator)
-{
-  clist_t *list = (clist_t *)ptr;
-  assert(list && !clist_is_def(list));
-  assert(!allocator && "this type owns its own allocator!");
-
-  while (list->size)
-    clist_erase(list, 0);
-  
-  elem_data_clear(&list->elem_data);
-  list->size = 0;
-  list->allocator = NULL;
-  list->nodes = NULL;
-}
-
-inline
 void 
 clist_replicate(
   const void *v_src, 
@@ -91,13 +57,50 @@ clist_replicate(
 
 inline
 void
-clist_fullswap(clist_t* src, clist_t* dst)
+clist_fullswap(void *p_src, void *p_dst)
 {
+  clist_t *src = (clist_t*)p_src;
+  clist_t *dst = (clist_t*)p_dst;
   assert(src && dst);
   {
     clist_t tmp = *src;
     *src = *dst;
     *dst = tmp;
+  }
+}
+
+inline
+void
+clist_cleanup(void *ptr, const allocator_t* allocator)
+{
+  clist_t *list = (clist_t *)ptr;
+  assert(list && !clist_is_def(list));
+  assert(!allocator && "this type owns its own allocator!");
+
+  while (list->size)
+    clist_erase(list, 0);
+  
+  elem_data_clear(&list->elem_data);
+  list->size = 0;
+  list->allocator = NULL;
+  list->nodes = NULL;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+inline
+void
+clist_setup(
+  clist_t* list, 
+  type_data_t type_data, 
+  const allocator_t* allocator)
+{
+  assert(list && allocator);
+
+  {
+    list->elem_data = get_cont_elem_data_from_packed(type_data);
+    list->size = 0;
+    list->allocator = allocator;
+    list->nodes = NULL;
   }
 }
 

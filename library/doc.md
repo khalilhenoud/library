@@ -149,23 +149,46 @@ Template:
 Replace the $type$ in the text below to your type and then define the functions
 you care about and delete the rest;
 
-  void $type$_def(void *ptr);
-  uint32_t $type$_is_def(const void *ptr);
-  void $type$_replicate(
-    const void *src, void *dst, const allocator_t* allocator);
-  void $type$_fullswap(void* lhs, void* rhs);
-  void $type$_serialize(const void *src, binary_stream_t* stream);
-  void $type$_deserialize(
-    void *dst, const allocator_t *allocator, binary_stream_t* stream);
-  uint32_t $type$_hash(const void *ptr);
-  uint32_t $type$_is_equal(const void *lhs, const void *rhs);
-  size_t $type$_type_size(void);
-  size_t $type$_type_alignment(void);
-  uint32_t $type$_type_id_count(void);
-  void $type$_type_ids(const void *src, type_id_t *ids);
-  uint32_t $type$_owns_alloc(void);
-  const allocator_t* $type$_get_alloc(const void *ptr);
-  void $type$_cleanup(void *ptr, const allocator_t* allocator);
+void $type$_def(void *ptr);
+uint32_t $type$_is_def(const void *ptr);
+void $type$_replicate(const void *src, void *dst, const allocator_t* allocator);
+void $type$_fullswap(void* lhs, void* rhs);
+void $type$_serialize(const void *src, binary_stream_t* stream);
+void $type$_deserialize(
+  void *dst, const allocator_t *allocator, binary_stream_t* stream);
+uint32_t $type$_hash(const void *ptr);
+uint32_t $type$_is_equal(const void *lhs, const void *rhs);
+size_t $type$_type_size(void);
+size_t $type$_type_alignment(void);
+uint32_t $type$_type_id_count(void);
+void $type$_type_ids(const void *src, type_id_t *ids);
+uint32_t $type$_owns_alloc(void);
+const allocator_t* $type$_get_alloc(const void *ptr);
+void $type$_cleanup(void *ptr, const allocator_t* allocator);
+
+////////////////////////////////////////////////////////////////////////////////
+//| cvector_t, * = cvector
+//|=============================================================================
+//| OPERATION                   | SUPPORTED
+//|=============================================================================
+//|    *_def                    | YES
+//|    *_is_def                 | 
+//|    *_replicate              |
+//|    *_fullswap               |
+//|    *_serialize              |
+//|    *_deserialize            |
+//|    *_hash                   |
+//|    *_is_equal               |
+//|    *_type_size              |
+//|    *_type_alignment         |
+//|    *_type_id_count          |
+//|    *_type_ids               |
+//|    *_owns_alloc             |
+//|    *_get_alloc              |
+//|    *_cleanup                |
+////////////////////////////////////////////////////////////////////////////////
+// NOTES/TODO/REMARK:
+////////////////////////////////////////////////////////////////////////////////
 
 TODO:
 -----

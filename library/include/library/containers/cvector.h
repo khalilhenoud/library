@@ -22,10 +22,32 @@ extern "C" {
 #include <library/type_registry/type_registry.h>
 
 
-// TODO: support intial size with default values.
-// TODO: support custom alignment.
-// TODO: add cvector_fullswap_back() functions.
-// TODO: will need accessor variants for const types (cvector_cbegin, etc...)
+////////////////////////////////////////////////////////////////////////////////
+//| cvector_t, '*' = cvector
+//|=============================================================================
+//| OPERATION                   | SUPPORTED
+//|=============================================================================
+//|    *_def                    | YES
+//|    *_is_def                 | YES
+//|    *_replicate              | YES
+//|    *_fullswap               | YES
+//|    *_serialize              | 
+//|    *_deserialize            |
+//|    *_hash                   |
+//|    *_is_equal               |
+//|    *_type_size              | YES
+//|    *_type_alignment         |
+//|    *_type_id_count          | YES
+//|    *_type_ids               | YES
+//|    *_owns_alloc             | YES
+//|    *_get_alloc              | YES
+//|    *_cleanup                | YES
+////////////////////////////////////////////////////////////////////////////////
+// TODO:
+//  - support initial size with default values.
+//  - support custom alignment.
+//  - will require accessor variants for const types (cvector_cbegin, etc...)
+////////////////////////////////////////////////////////////////////////////////
 
 typedef 
 struct cvector_t {
@@ -36,7 +58,6 @@ struct cvector_t {
   void *data;
 } cvector_t;
 
-/** returns a default initialized copy of the struct */
 inline
 void
 cvector_def(void *ptr)
@@ -45,7 +66,6 @@ cvector_def(void *ptr)
   memset(ptr, 0, sizeof(cvector_t));
 }
 
-/** returns 1 if the passed struct is the same as the default */
 inline
 uint32_t 
 cvector_is_def(const void *ptr)
@@ -60,23 +80,6 @@ cvector_is_def(const void *ptr)
     vec->allocator == def.allocator &&
     vec->data == def.data;
 }
-
-/**
- * NOTE: capacity can be zero at which point vec will be invalid, and cannot be
- * dereferenced. this is intended behavior. allocation after the fact will
- * remedy this.
- */
-void
-cvector_setup(
-  cvector_t* vec, 
-  type_data_t type_data,
-  size_t capacity, 
-  const allocator_t* allocator);
-
-// NOTE: frees all internal memory, call setup again to reuse. allocator is null
-// as cvector holds an allocator ref.
-void 
-cvector_cleanup(void *ptr, const allocator_t* allocator);
 
 /** 
  * NOTE: will assert if 'src' is not initialized, or if 'dst' is initialized but
@@ -125,11 +128,27 @@ cvector_owns_alloc(void)
 
 inline
 const allocator_t*
-cvector_get_allocator(const void *vec)
+cvector_get_alloc(const void *vec)
 {
   assert(vec);
   return ((const cvector_t *)vec)->allocator;
 }
+
+void 
+cvector_cleanup(void *ptr, const allocator_t* allocator);
+
+////////////////////////////////////////////////////////////////////////////////
+/**
+ * NOTE: capacity can be zero at which point vec will be invalid, and cannot be
+ * dereferenced. this is intended behavior. allocation after the fact will
+ * remedy this.
+ */
+void
+cvector_setup(
+  cvector_t* vec, 
+  type_data_t type_data,
+  size_t capacity, 
+  const allocator_t* allocator);
 
 size_t 
 cvector_capacity(const cvector_t* vec);
@@ -193,7 +212,6 @@ cvector_pop_back(cvector_t* vec);
  */
 void
 cvector_resize(cvector_t* vec, size_t count);
-
 
 ////////////////////////////////////////////////////////////////////////////////
 #define cvector_iterator(type) type *

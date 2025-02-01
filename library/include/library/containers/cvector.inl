@@ -13,57 +13,6 @@
 
 
 inline
-void
-cvector_setup(
-  cvector_t* vec,
-  type_data_t type_data,
-  size_t capacity, 
-  const allocator_t* allocator)
-{
-  assert(vec && allocator);
-
-  {
-    vec->size = 0;
-    vec->elem_data = get_cont_elem_data_from_packed(type_data);
-    vec->capacity = capacity;
-    vec->allocator = allocator;
-
-    vec->data = 
-      capacity ? allocator->mem_alloc(capacity * vec->elem_data.size) : NULL;
-  }
-}
-
-inline
-void
-cvector_cleanup(void *ptr, const allocator_t* allocator)
-{
-  assert(ptr && !cvector_is_def(ptr));
-  assert(!allocator && "type holds its own allocator! pass NULL as param.");
-
-  {
-    cvector_t* vec = (cvector_t *)ptr;
-    fn_cleanup_t cleanup = elem_data_get_cleanup_fn(&vec->elem_data);
-
-    if (cleanup) {
-      size_t i = 0, count = vec->size;
-      uint32_t owns_alloc = 
-        (vec->elem_data.vtable->fn_owns_alloc == NULL) ? 0 : 
-        vec->elem_data.vtable->fn_owns_alloc();
-        
-      for (; i < count; ++i)
-        cleanup(
-          cvector_at(vec, i), owns_alloc ? NULL : vec->allocator);
-    }
-
-    vec->allocator->mem_free(vec->data);
-    vec->data = NULL;
-    vec->allocator = NULL;
-    elem_data_clear(&vec->elem_data);
-    vec->size = vec->capacity = 0;
-  }
-}
-
-inline
 void 
 cvector_replicate(
   const void *v_src, 
@@ -112,6 +61,58 @@ cvector_fullswap(void* src, void* dst)
     cvector_t tmp = *(cvector_t *)src;
     *(cvector_t *)src = *(cvector_t *)dst;
     *(cvector_t *)dst = tmp;
+  }
+}
+
+inline
+void
+cvector_cleanup(void *ptr, const allocator_t* allocator)
+{
+  assert(ptr && !cvector_is_def(ptr));
+  assert(!allocator && "type holds its own allocator! pass NULL as param.");
+
+  {
+    cvector_t* vec = (cvector_t *)ptr;
+    fn_cleanup_t cleanup = elem_data_get_cleanup_fn(&vec->elem_data);
+
+    if (cleanup) {
+      size_t i = 0, count = vec->size;
+      uint32_t owns_alloc = 
+        (vec->elem_data.vtable->fn_owns_alloc == NULL) ? 0 : 
+        vec->elem_data.vtable->fn_owns_alloc();
+        
+      for (; i < count; ++i)
+        cleanup(
+          cvector_at(vec, i), owns_alloc ? NULL : vec->allocator);
+    }
+
+    vec->allocator->mem_free(vec->data);
+    vec->data = NULL;
+    vec->allocator = NULL;
+    elem_data_clear(&vec->elem_data);
+    vec->size = vec->capacity = 0;
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+inline
+void
+cvector_setup(
+  cvector_t* vec,
+  type_data_t type_data,
+  size_t capacity, 
+  const allocator_t* allocator)
+{
+  assert(vec && allocator);
+
+  {
+    vec->size = 0;
+    vec->elem_data = get_cont_elem_data_from_packed(type_data);
+    vec->capacity = capacity;
+    vec->allocator = allocator;
+
+    vec->data = 
+      capacity ? allocator->mem_alloc(capacity * vec->elem_data.size) : NULL;
   }
 }
 

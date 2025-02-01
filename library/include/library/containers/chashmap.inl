@@ -14,59 +14,6 @@
 #include <math.h>
 
 
-inline
-void
-chashmap_setup(
-  chashmap_t *hashmap, 
-  type_data_t key_type_data,
-  type_data_t value_type_data,
-  const allocator_t *allocator,
-  const float max_load_factor)
-{
-  assert(hashmap && allocator);
-
-  {
-    hashmap->max_load_factor = max_load_factor;
-    hashmap->allocator = allocator;
-
-    cvector_setup(&hashmap->keys, key_type_data, 0, allocator);
-    cvector_setup(&hashmap->values, value_type_data, 0, allocator);
-    cvector_setup(&hashmap->indices, get_type_data(uint32_t), 0, allocator);
-
-    assert(
-      hashmap->keys.elem_data.vtable && 
-      hashmap->keys.elem_data.vtable->fn_hash &&
-      "key hash function must exist!");
-
-    assert(
-      ((
-        hashmap->keys.elem_data.vtable->fn_replicate && 
-        hashmap->keys.elem_data.vtable->fn_cleanup) || (
-        !hashmap->keys.elem_data.vtable->fn_replicate && 
-        !hashmap->keys.elem_data.vtable->fn_cleanup)) &&
-        "if key_replicate_fn is provided, key_cleanup_fn must as well and vice"
-        "versa!");
-  }
-}
-
-inline
-void
-chashmap_cleanup(void *p_hashmap, const allocator_t *allocator)
-{
-  chashmap_t *hashmap = (chashmap_t *)p_hashmap;
-  assert(hashmap && !chashmap_is_def(hashmap));
-  assert(allocator == NULL);
-
-  {
-    cvector_cleanup(&hashmap->keys, NULL);
-    cvector_cleanup(&hashmap->values, NULL);
-    cvector_cleanup(&hashmap->indices, NULL);
-
-    hashmap->max_load_factor = 0.f;
-    hashmap->allocator = NULL;
-  }
-}
-
 /** 
  * NOTE: will assert if 'src' is not initialized, or if 'dst' is initialized but
  * with non-zero size. type-critical member variables should also match.
@@ -128,6 +75,60 @@ chashmap_fullswap(void *lhs, void *rhs)
     chashmap_t tmp = *src;
     *src = *dst;
     *dst = tmp;
+  }
+}
+
+inline
+void
+chashmap_cleanup(void *p_hashmap, const allocator_t *allocator)
+{
+  chashmap_t *hashmap = (chashmap_t *)p_hashmap;
+  assert(hashmap && !chashmap_is_def(hashmap));
+  assert(allocator == NULL);
+
+  {
+    cvector_cleanup(&hashmap->keys, NULL);
+    cvector_cleanup(&hashmap->values, NULL);
+    cvector_cleanup(&hashmap->indices, NULL);
+
+    hashmap->max_load_factor = 0.f;
+    hashmap->allocator = NULL;
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+inline
+void
+chashmap_setup(
+  chashmap_t *hashmap, 
+  type_data_t key_type_data,
+  type_data_t value_type_data,
+  const allocator_t *allocator,
+  const float max_load_factor)
+{
+  assert(hashmap && allocator);
+
+  {
+    hashmap->max_load_factor = max_load_factor;
+    hashmap->allocator = allocator;
+
+    cvector_setup(&hashmap->keys, key_type_data, 0, allocator);
+    cvector_setup(&hashmap->values, value_type_data, 0, allocator);
+    cvector_setup(&hashmap->indices, get_type_data(uint32_t), 0, allocator);
+
+    assert(
+      hashmap->keys.elem_data.vtable && 
+      hashmap->keys.elem_data.vtable->fn_hash &&
+      "key hash function must exist!");
+
+    assert(
+      ((
+        hashmap->keys.elem_data.vtable->fn_replicate && 
+        hashmap->keys.elem_data.vtable->fn_cleanup) || (
+        !hashmap->keys.elem_data.vtable->fn_replicate && 
+        !hashmap->keys.elem_data.vtable->fn_cleanup)) &&
+        "if key_replicate_fn is provided, key_cleanup_fn must as well and vice"
+        "versa!");
   }
 }
 
