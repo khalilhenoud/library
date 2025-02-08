@@ -16,6 +16,7 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include <library/internal/module.h>
 
 #define MAX_PATH_LENGTH          512
 #define MAX_DIR_ENTRIES          512
@@ -32,12 +33,11 @@ struct dir_entries_t {
   uint32_t used;
 } dir_entries_t;
 
+LIBRARY_API
 void
 get_subdirectories(
   const char* directory,
   dir_entries_t* entries);
-
-#include "filesystem.impl"
 
 #ifdef __cplusplus
 }

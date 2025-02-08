@@ -8,14 +8,11 @@
  * @copyright Copyright (c) 2024
  * 
  */
-#ifndef LIB_FILESYSTEM_IMPL_H
-#define LIB_FILESYSTEM_IMPL_H
-
 #include <windows.h>
 #include <assert.h>
+#include <library/filesystem/filesystem.h>
 
 
-inline
 void
 get_subdirectories(
   const char* directory,
@@ -62,5 +59,3 @@ get_subdirectories(
     FindClose(hFind);
   }
 }
-
-#endif

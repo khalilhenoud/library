@@ -5,7 +5,8 @@ project(library VERSION 1.0)
 
 # add the executable
 add_library(${PROJECT_NAME} SHARED
-      ./source/streams/binary_stream.cpp
+      ./source/filesystem/filesystem.c
+      ./source/streams/binary_stream.c
 			./source/type_registry/type_registry.c
 			./include/library/internal/module.h)
 
