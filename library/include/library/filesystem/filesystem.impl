@@ -11,10 +11,6 @@
 #ifndef LIB_FILESYSTEM_IMPL_H
 #define LIB_FILESYSTEM_IMPL_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <windows.h>
 #include <assert.h>
 
@@ -66,9 +62,5 @@ get_subdirectories(
     FindClose(hFind);
   }
 }
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

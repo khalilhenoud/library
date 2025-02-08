@@ -127,7 +127,7 @@ best practices:
 ---------------
 1- never serialize the allocator reference even if the type holds its own 
 reference.
-2- the serializer passed to deserialize should be held if the type dictates as 
+2- the allocator passed to deserialize should be held if the type dictates as 
 much.
 3- do not serialize the type hash in the type's own serialize function, that is 
 the responsability of the owner type.
@@ -146,28 +146,19 @@ to a library (see type_registry.c).
 
 Template:
 ---------
-Replace the $type$ in the text below to your type and then define the functions
-you care about and delete the rest;
+#ifndef GUARD_H
+#define GUARD_H
 
-void $type$_def(void *ptr);
-uint32_t $type$_is_def(const void *ptr);
-void $type$_replicate(const void *src, void *dst, const allocator_t* allocator);
-void $type$_fullswap(void* lhs, void* rhs);
-void $type$_serialize(const void *src, binary_stream_t* stream);
-void $type$_deserialize(
-  void *dst, const allocator_t *allocator, binary_stream_t* stream);
-uint32_t $type$_hash(const void *ptr);
-uint32_t $type$_is_equal(const void *lhs, const void *rhs);
-size_t $type$_type_size(void);
-size_t $type$_type_alignment(void);
-uint32_t $type$_type_id_count(void);
-void $type$_type_ids(const void *src, type_id_t *ids);
-uint32_t $type$_owns_alloc(void);
-const allocator_t* $type$_get_alloc(const void *ptr);
-void $type$_cleanup(void *ptr, const allocator_t* allocator);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "whatever_is_required.h"
+#include "whatever_is_required2.h"
+
 
 ////////////////////////////////////////////////////////////////////////////////
-//| cvector_t, * = cvector
+//| $type$_t, * = $type$
 //|=============================================================================
 //| OPERATION                   | SUPPORTED
 //|=============================================================================
@@ -189,6 +180,36 @@ void $type$_cleanup(void *ptr, const allocator_t* allocator);
 ////////////////////////////////////////////////////////////////////////////////
 // NOTES/TODO/REMARK:
 ////////////////////////////////////////////////////////////////////////////////
+type defintion of $type$_t;
+
+void $type$_def(void *ptr);
+uint32_t $type$_is_def(const void *ptr);
+void $type$_replicate(const void *src, void *dst, const allocator_t* allocator);
+void $type$_fullswap(void* lhs, void* rhs);
+void $type$_serialize(const void *src, binary_stream_t* stream);
+void $type$_deserialize(
+  void *dst, const allocator_t *allocator, binary_stream_t* stream);
+uint32_t $type$_hash(const void *ptr);
+uint32_t $type$_is_equal(const void *lhs, const void *rhs);
+size_t $type$_type_size(void);
+size_t $type$_type_alignment(void);
+uint32_t $type$_type_id_count(void);
+void $type$_type_ids(const void *src, type_id_t *ids);
+uint32_t $type$_owns_alloc(void);
+const allocator_t* $type$_get_alloc(const void *ptr);
+void $type$_cleanup(void *ptr, const allocator_t* allocator);
+
+////////////////////////////////////////////////////////////////////////////////
+the rest of the functions
+
+////////////////////////////////////////////////////////////////////////////////
+macro functions
+
+#include "$type$.impl"
+
+#endif
+
+#endif // GUARD_H
 
 TODO:
 -----

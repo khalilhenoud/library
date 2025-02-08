@@ -17,6 +17,7 @@ extern "C" {
 
 #include <stdint.h>
 #include <string.h>
+#include <assert.h>
 #include <library/internal/module.h>
 #include <library/hash/fnv.h>
 
@@ -143,6 +144,26 @@ elem_data_get_is_equal_fn(const container_elem_data_t *elem)
     return 
     (elem->vtable == NULL || elem->vtable->fn_is_equal == NULL) ? 
     NULL : elem->vtable->fn_is_equal;
+}
+
+inline
+fn_serialize_t
+elem_data_get_serialize_fn(const container_elem_data_t *elem)
+{
+  assert(elem);
+    return 
+    (elem->vtable == NULL || elem->vtable->fn_serialize == NULL) ? 
+    NULL : elem->vtable->fn_serialize;
+}
+
+inline
+fn_deserialize_t
+elem_data_get_deserialize_fn(const container_elem_data_t *elem)
+{
+  assert(elem);
+    return 
+    (elem->vtable == NULL || elem->vtable->fn_deserialize == NULL) ? 
+    NULL : elem->vtable->fn_deserialize;
 }
 
 inline

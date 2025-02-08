@@ -49,6 +49,8 @@ extern "C" {
 //  - will require accessor variants for const types (cvector_cbegin, etc...)
 ////////////////////////////////////////////////////////////////////////////////
 
+typedef struct binary_stream_t binary_stream_t;
+
 typedef 
 struct cvector_t {
   container_elem_data_t elem_data;
@@ -93,9 +95,19 @@ cvector_replicate(
   void *dst, 
   const allocator_t *allocator);
 
-/** exchanges the content of the specified vectors, even allocators */
 void
 cvector_fullswap(void* src, void* dst);
+
+void 
+cvector_serialize(
+  const void *src, 
+  binary_stream_t* stream);
+
+void 
+cvector_deserialize(
+  void *dst, 
+  const allocator_t *allocator, 
+  binary_stream_t* stream);
 
 inline
 size_t
