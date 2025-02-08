@@ -31,8 +31,8 @@ extern "C" {
 //|    *_is_def                 | YES
 //|    *_replicate              | YES
 //|    *_fullswap               | YES
-//|    *_serialize              | 
-//|    *_deserialize            |
+//|    *_serialize              | YES
+//|    *_deserialize            | YES
 //|    *_hash                   |
 //|    *_is_equal               |
 //|    *_type_size              | YES

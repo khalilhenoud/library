@@ -31,8 +31,8 @@ extern "C" {
 //|    *_is_def                 | YES
 //|    *_replicate              | YES
 //|    *_fullswap               | YES
-//|    *_serialize              |
-//|    *_deserialize            |
+//|    *_serialize              | YES
+//|    *_deserialize            | YES
 //|    *_hash                   |
 //|    *_is_equal               |
 //|    *_type_size              | YES
@@ -56,6 +56,8 @@ extern "C" {
 //   stack to indicate gaps in the data-key vector (to improve performance) or a
 //   key-value pair implementation akin to C++ unordered_map.
 ////////////////////////////////////////////////////////////////////////////////
+
+typedef struct binary_stream_t binary_stream_t;
 
 typedef
 struct chashmap_t {
@@ -104,6 +106,17 @@ chashmap_replicate(
 
 void
 chashmap_fullswap(void* lhs, void* rhs);
+
+void 
+chashmap_serialize(
+  const void *src, 
+  binary_stream_t* stream);
+
+void 
+chashmap_deserialize(
+  void *dst, 
+  const allocator_t *allocator, 
+  binary_stream_t* stream);
 
 inline
 size_t 

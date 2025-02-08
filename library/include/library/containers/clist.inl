@@ -11,6 +11,8 @@
 #ifndef LIB_LIST_INL
 #define LIB_LIST_INL
 
+#include <library/streams/binary_stream.h>
+
 
 inline
 void 
@@ -66,6 +68,87 @@ clist_fullswap(void *p_src, void *p_dst)
     clist_t tmp = *src;
     *src = *dst;
     *dst = tmp;
+  }
+}
+
+inline
+void
+clist_serialize(
+  const void *p_src,
+  binary_stream_t* stream)
+{
+  const clist_t *src = (const clist_t *)p_src;
+  assert(src && stream);
+
+  {
+    fn_serialize_t serialize = elem_data_get_serialize_fn(&src->elem_data);
+    type_data_t type_data = get_type_data_from_elem_data(&src->elem_data);
+    binary_stream_write(stream, &type_data, sizeof(size_t));
+    binary_stream_write(stream, &src->size, sizeof(size_t));
+
+    if (!src->size)
+      return;
+
+    {
+      clist_iterator_t iter = clist_begin((clist_t*)src);
+      for (
+        ; 
+        !clist_iter_equal(iter, clist_end((clist_t*)src)); 
+        clist_advance(&iter)) {
+        if (serialize)
+          serialize(iter.current->data, stream);
+        else
+          binary_stream_write(stream, iter.current->data, src->elem_data.size);
+      }
+    }
+  }
+}
+
+inline
+void 
+clist_deserialize(
+  void *p_dst, 
+  const allocator_t *allocator, 
+  binary_stream_t *stream)
+{
+  clist_t *dst = (clist_t *)p_dst;
+  assert(dst && clist_is_def(dst) && allocator && stream);
+
+  {
+    const size_t s_s = sizeof(size_t);
+    type_data_t type_data;
+    binary_stream_read(stream, (uint8_t *)&type_data, s_s, s_s);
+    dst->elem_data = get_cont_elem_data_from_packed(type_data);
+    dst->allocator = allocator;
+
+    binary_stream_read(stream, (uint8_t *)&dst->size, s_s, s_s);
+    dst->nodes = NULL;
+
+    if (!dst->size)
+      return;
+
+    {
+      fn_deserialize_t deserialize = 
+        elem_data_get_deserialize_fn(&dst->elem_data);
+      
+      size_t i;
+      for (i = 0; i < dst->size; ++i)
+        clist_insert_empty(dst, i);
+      
+      {
+        clist_iterator_t iter = clist_begin(dst);
+        for (; !clist_iter_equal(iter, clist_end(dst)); clist_advance(&iter)) {
+          if (deserialize)
+            deserialize(iter.current->data, allocator, stream);
+          else
+            binary_stream_read(
+              stream, 
+              (uint8_t *)iter.current->data, 
+              dst->elem_data.size, 
+              dst->elem_data.size);
+        }
+      }
+    }
   }
 }
 

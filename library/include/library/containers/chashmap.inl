@@ -12,6 +12,7 @@
 #define LIB_HASHMAP_INL
 
 #include <math.h>
+#include <library/streams/binary_stream.h>
 
 
 /** 
@@ -76,6 +77,39 @@ chashmap_fullswap(void *lhs, void *rhs)
     *src = *dst;
     *dst = tmp;
   }
+}
+
+inline
+void
+chashmap_serialize(
+  const void *p_src,
+  binary_stream_t *stream)
+{
+  const chashmap_t *src = (const chashmap_t *)p_src;
+  assert(src && stream);
+
+  cvector_serialize(&src->indices, stream);
+  cvector_serialize(&src->keys, stream);
+  cvector_serialize(&src->values, stream);
+  binary_stream_write(stream, &src->max_load_factor, sizeof(float));
+}
+
+inline
+void 
+chashmap_deserialize(
+  void *p_dst, 
+  const allocator_t *allocator, 
+  binary_stream_t *stream)
+{
+  chashmap_t *dst = (chashmap_t *)p_dst;
+  assert(dst && chashmap_is_def(dst) && allocator && stream);
+
+  dst->allocator = allocator;
+  cvector_deserialize(&dst->indices, allocator, stream);
+  cvector_deserialize(&dst->keys, allocator, stream);
+  cvector_deserialize(&dst->values, allocator, stream);
+  binary_stream_read(
+    stream, (uint8_t *)&dst->max_load_factor, sizeof(float), sizeof(float));
 }
 
 inline

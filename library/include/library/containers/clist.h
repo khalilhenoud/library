@@ -31,8 +31,8 @@ extern "C" {
 //|    *_is_def                 | YES
 //|    *_replicate              | YES
 //|    *_fullswap               | YES
-//|    *_serialize              |
-//|    *_deserialize            |
+//|    *_serialize              | YES
+//|    *_deserialize            | YES
 //|    *_hash                   |
 //|    *_is_equal               |
 //|    *_type_size              | YES
@@ -47,6 +47,7 @@ extern "C" {
 //  - mem_alloc for every node is not ideal, provide a better implementation.
 ////////////////////////////////////////////////////////////////////////////////
 
+typedef struct binary_stream_t binary_stream_t;
 typedef struct clist_node_t clist_node_t;
 typedef struct clist_t clist_t;
 
@@ -107,6 +108,17 @@ clist_replicate(
 
 void
 clist_fullswap(void* src, void* dst);
+
+void 
+clist_serialize(
+  const void *src, 
+  binary_stream_t* stream);
+
+void 
+clist_deserialize(
+  void *dst, 
+  const allocator_t *allocator, 
+  binary_stream_t* stream);
 
 inline
 size_t 
