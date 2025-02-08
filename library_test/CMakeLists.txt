@@ -14,6 +14,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # add the executable
 add_executable(${PROJECT_NAME} 
+        ./source/classroom.c
 				./source/main.cpp
         ./source/cvector_test.cpp
         ./source/clist_test.cpp
