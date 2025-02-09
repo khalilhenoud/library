@@ -14,6 +14,8 @@
 #include <stdint.h>
 #include <cassert>
 #include <common.h>
+#include <classroom.h>
+#include <string>
 
 
 template<typename T>
@@ -322,6 +324,51 @@ test_cvector_custom(const allocator_t* allocator, const int32_t tabs)
   cvector_cleanup(&vec, NULL);
 }
 
+static
+void
+test_cvector_serialize(const allocator_t* allocator, const int32_t tabs)
+{
+  PRINT_FUNCTION;
+
+  student_t empty;
+  student_def(&empty);
+  empty.age = 0;
+  empty.allocator = allocator;
+  std::string name = "joe_";
+
+  const uint32_t total = 10;
+
+  cvector_t students, copy;
+  cvector_def(&students);
+  cvector_def(&copy);
+  cvector_setup(&students, get_type_data(student_t), total, allocator);
+  for (uint32_t i = 0; i < total; ++i) {
+    name = "joe_" + std::to_string(i);
+    cvector_push_back(&students, empty, student_t);
+    student_t* elem = cvector_back(&students, student_t);
+    elem->age++;
+    set_student_name(elem, name.c_str());
+  }
+
+  binary_stream_t stream;
+  binary_stream_def(&stream);
+  binary_stream_setup(&stream, allocator);
+
+  cvector_serialize(&students, &stream);
+  cvector_deserialize(&copy, allocator, &stream);
+
+  for (uint32_t i = 0; i < total; ++i) {
+    student_t* elem0 = cvector_as(&students, 0, student_t);
+    student_t* elem1 = cvector_as(&copy, 0, student_t);
+    if (!student_is_equal(elem0, elem1))
+      assert(false && "has to be equal!");
+  }
+
+  cvector_cleanup(&students, NULL);
+  cvector_cleanup(&copy, NULL);
+  binary_stream_cleanup(&stream);
+}
+
 void
 test_cvector_main(const allocator_t* allocator, const int32_t tabs)
 {
@@ -333,4 +380,5 @@ test_cvector_main(const allocator_t* allocator, const int32_t tabs)
   test_cvector_ops(allocator, tabs + 1);          NEWLINE;
   test_cvector_mem(allocator, tabs + 1);          NEWLINE;
   test_cvector_custom(allocator, tabs + 1);       NEWLINE;
+  test_cvector_serialize(allocator, tabs + 1);    NEWLINE;
 }

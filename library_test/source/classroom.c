@@ -149,6 +149,12 @@ student_cleanup(void *ptr, const allocator_t* allocator)
 void 
 set_student_name(student_t *student, const char *name)
 {
+  if (student->name != NULL) {
+    student->allocator->mem_free(student->name);
+    student->name = NULL;
+    student->length = 0;
+  }
+  
   student->length = strlen(name);
   student->name = (char *)student->allocator->mem_alloc(student->length + 1);
   memcpy(student->name, name, student->length + 1);
