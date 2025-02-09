@@ -13,6 +13,8 @@
 #include <library/containers/clist.h>
 #include <stdint.h>
 #include <cassert>
+#include <string>
+#include <classroom.h>
 #include <common.h>
 
 
@@ -303,6 +305,51 @@ INITIALIZER(register_list_custom)
   register_type(get_type_id(list_custom_t), &vtable);
 }
 
+static
+void
+test_clist_serialize(const allocator_t* allocator, const int32_t tabs)
+{
+  PRINT_FUNCTION;
+
+  student_t empty;
+  student_def(&empty);
+  empty.age = 0;
+  empty.allocator = allocator;
+  std::string name = "joe_";
+
+  const uint32_t total = 10;
+
+  clist_t students, copy;
+  clist_def(&students);
+  clist_def(&copy);
+  clist_setup(&students, get_type_data(student_t), allocator);
+  for (uint32_t i = 0; i < total; ++i) {
+    name = "joe_" + std::to_string(i);
+    clist_push_back(&students, empty, student_t);
+    student_t* elem = clist_back(&students, student_t);
+    elem->age += i;
+    set_student_name(elem, name.c_str());
+  }
+
+  binary_stream_t stream;
+  binary_stream_def(&stream);
+  binary_stream_setup(&stream, allocator);
+
+  clist_serialize(&students, &stream);
+  clist_deserialize(&copy, allocator, &stream);
+
+  for (uint32_t i = 0; i < total; ++i) {
+    student_t* elem0 = clist_as(&students, i, student_t);
+    student_t* elem1 = clist_as(&copy, i, student_t);
+    if (!student_is_equal(elem0, elem1))
+      assert(false && "has to be equal!");
+  }
+
+  clist_cleanup(&students, NULL);
+  clist_cleanup(&copy, NULL);
+  binary_stream_cleanup(&stream);
+}
+
 void
 test_clist_main(const allocator_t* allocator, const int32_t tabs)
 {
@@ -314,4 +361,5 @@ test_clist_main(const allocator_t* allocator, const int32_t tabs)
   test_clist_ops(allocator, tabs + 1);          NEWLINE;
   test_clist_mem(allocator, tabs + 1);          NEWLINE;
   test_clist_custom(allocator, tabs + 1);       NEWLINE;
+  test_clist_serialize(allocator, tabs + 1);    NEWLINE;
 }

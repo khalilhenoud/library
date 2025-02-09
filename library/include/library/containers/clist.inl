@@ -116,15 +116,16 @@ clist_deserialize(
 
   {
     const size_t s_s = sizeof(size_t);
+    size_t size = 0;
     type_data_t type_data;
     binary_stream_read(stream, (uint8_t *)&type_data, s_s, s_s);
     dst->elem_data = get_cont_elem_data_from_packed(type_data);
     dst->allocator = allocator;
 
-    binary_stream_read(stream, (uint8_t *)&dst->size, s_s, s_s);
+    binary_stream_read(stream, (uint8_t *)&size, s_s, s_s);
     dst->nodes = NULL;
 
-    if (!dst->size)
+    if (!size)
       return;
 
     {
@@ -132,7 +133,7 @@ clist_deserialize(
         elem_data_get_deserialize_fn(&dst->elem_data);
       
       size_t i;
-      for (i = 0; i < dst->size; ++i)
+      for (i = 0; i < size; ++i)
         clist_insert_empty(dst, i);
       
       {
@@ -275,8 +276,12 @@ clist_erase(clist_t* list, size_t index)
       list->nodes = (list->nodes == target) ? next : list->nodes;
     }
 
-    if (cleanup)
-      cleanup(target->data, list->allocator);
+    if (cleanup) {
+      uint32_t owns_alloc = 
+        (list->elem_data.vtable->fn_owns_alloc == NULL) ? 0 : 
+        list->elem_data.vtable->fn_owns_alloc();
+      cleanup(target->data, owns_alloc ? NULL : list->allocator);
+    }
     list->allocator->mem_free(target->data);
     list->allocator->mem_free(target);
     --list->size;

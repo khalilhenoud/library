@@ -1,4 +1,4 @@
-WIP: This feels like I am recreating parts of C++.
+RANDOM: This feels like I am recreating parts of C++.
 
 Purpose:
 --------

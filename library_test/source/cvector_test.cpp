@@ -346,7 +346,7 @@ test_cvector_serialize(const allocator_t* allocator, const int32_t tabs)
     name = "joe_" + std::to_string(i);
     cvector_push_back(&students, empty, student_t);
     student_t* elem = cvector_back(&students, student_t);
-    elem->age++;
+    elem->age += i;
     set_student_name(elem, name.c_str());
   }
 
@@ -358,8 +358,8 @@ test_cvector_serialize(const allocator_t* allocator, const int32_t tabs)
   cvector_deserialize(&copy, allocator, &stream);
 
   for (uint32_t i = 0; i < total; ++i) {
-    student_t* elem0 = cvector_as(&students, 0, student_t);
-    student_t* elem1 = cvector_as(&copy, 0, student_t);
+    student_t* elem0 = cvector_as(&students, i, student_t);
+    student_t* elem1 = cvector_as(&copy, i, student_t);
     if (!student_is_equal(elem0, elem1))
       assert(false && "has to be equal!");
   }
