@@ -14,6 +14,8 @@
 #include <library/core/core.h>
 #include <stdint.h>
 #include <cassert>
+#include <string>
+#include <classroom.h>
 #include <common.h>
 
 
@@ -515,6 +517,55 @@ INITIALIZER(register_hashmap_u64)
   register_type(get_type_id(u64), &vtable);
 }
 
+
+static
+void
+test_chashmap_serialize(const allocator_t* allocator, const int32_t tabs)
+{
+  PRINT_FUNCTION;
+
+  std::string name = "joe_";
+
+  const u64 total = 10;
+
+  chashmap_t students, copy;
+  chashmap_def(&students);
+  chashmap_def(&copy);
+  chashmap_setup(
+    &students, 
+    get_type_data(u64), 
+    get_type_data(student_t), 
+    allocator, 0.6f);
+  for (u64 i = 0; i < total; ++i) {
+    student_t elem;
+    student_def(&elem);
+    elem.age = i;
+    elem.allocator = allocator;
+    name = "joe_" + std::to_string(i);
+    set_student_name(&elem, name.c_str());
+    chashmap_insert(&students, i, u64, elem, student_t);
+  }
+
+  binary_stream_t stream;
+  binary_stream_def(&stream);
+  binary_stream_setup(&stream, allocator);
+
+  chashmap_serialize(&students, &stream);
+  chashmap_deserialize(&copy, allocator, &stream);
+
+  for (u64 i = 0; i < total; ++i) {
+    student_t* elem0, *elem1; 
+    chashmap_at(&students, i, u64, student_t, elem0);
+    chashmap_at(&copy, i, u64, student_t, elem1);
+    if (!student_is_equal(elem0, elem1))
+      assert(false && "has to be equal!");
+  }
+
+  chashmap_cleanup(&students, NULL);
+  chashmap_cleanup(&copy, NULL);
+  binary_stream_cleanup(&stream);
+}
+
 void
 test_chashmap_main(const allocator_t* allocator, const int32_t tabs)
 {
@@ -527,4 +578,5 @@ test_chashmap_main(const allocator_t* allocator, const int32_t tabs)
   test_chashmap_mem(allocator, tabs + 1);          NEWLINE;
   test_chashmap_iterators(allocator, tabs + 1);    NEWLINE;
   test_chashmap_custom(allocator, tabs + 1);       NEWLINE;
+  test_chashmap_serialize(allocator, tabs + 1);    NEWLINE;
 }
