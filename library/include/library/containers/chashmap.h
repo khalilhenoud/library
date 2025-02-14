@@ -375,7 +375,7 @@ chashmap_iter_equal(chashmap_iterator_t left, chashmap_iterator_t right);
     }                                                                      \
   } while (0)
 
-#include "chashmap.inl"
+#include "chashmap.impl"
 
 #ifdef __cplusplus
 }

@@ -308,7 +308,7 @@ clist_iter_equal(clist_iterator_t left, clist_iterator_t right);
 #define clist_push_front(list__, value__, type__) \
   clist_insert((list__), 0, (value__), type__)
 
-#include "clist.inl"
+#include "clist.impl"
 
 #ifdef __cplusplus
 }

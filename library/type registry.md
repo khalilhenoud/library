@@ -218,11 +218,9 @@ container agnostic. Doing so might require us to require some classification
 functions (less or greater functions) per type that require sorting.
 - Expand the library considerably, I want to support many more stuff.
 
+================================================================================
 MISC:
 -----
-- 
-
-
 NOTE: type interface functions are optional in a lot of cases. for example if
 the replicate function is missing, the elements of such types are replicated
 using memcpy, likewise if setup is missing, the memory is memset to 0.

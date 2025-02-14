@@ -284,7 +284,7 @@ cvector_resize(cvector_t* vec, size_t count);
     }                                                                 \
   } while (0)
 
-#include "cvector.inl"
+#include "cvector.impl"
 
 #ifdef __cplusplus
 }

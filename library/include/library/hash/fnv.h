@@ -29,7 +29,7 @@ hash_fnv1a_32(const void* bytes, size_t length);
 uint64_t
 hash_fnv1a_64(const void* bytes, size_t length);
 
-#include "fnv.inl"
+#include "fnv.impl"
 
 #ifdef __cplusplus
 }
