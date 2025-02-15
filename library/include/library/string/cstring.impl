@@ -54,17 +54,37 @@ cstring_fullswap(void *src, void *dst)
 inline
 void 
 cstring_serialize(
-  const void *src, 
+  const void *_src, 
   binary_stream_t* stream)
-{}
+{
+  const cstring_t *src = (const cstring_t *)_src;
+  assert(src && stream);
+
+  {
+    binary_stream_write(stream, &src->length, sizeof(uint32_t));
+    binary_stream_write(stream, src->str, (size_t)src->length);
+  }
+}
 
 inline
 void 
 cstring_deserialize(
-  void *dst, 
+  void *_dst, 
   const allocator_t *allocator, 
-  binary_stream_t* stream)
-{}
+  binary_stream_t *stream)
+{
+  cstring_t *dst = (cstring_t *)_dst;
+  assert(dst && cstring_is_def(dst) && allocator && stream);
+
+  {
+    const size_t su32 = sizeof(uint32_t);
+    binary_stream_read(stream, (uint8_t *)&dst->length, su32, su32);
+    dst->allocator = allocator;
+    dst->str = (uint8_t *)allocator->mem_alloc(dst->length + 1);
+    memset(dst->str, 0, dst->length + 1);
+    binary_stream_read(stream, dst->str, dst->length, dst->length);
+  }
+}
 
 inline
 uint32_t 

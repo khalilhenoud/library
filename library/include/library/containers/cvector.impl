@@ -69,10 +69,10 @@ cvector_fullswap(void *src, void *dst)
 inline
 void
 cvector_serialize(
-  const void *p_src,
+  const void *_src,
   binary_stream_t* stream)
 {
-  const cvector_t *src = (const cvector_t *)p_src;
+  const cvector_t *src = (const cvector_t *)_src;
   assert(src && stream);
 
   {
@@ -95,11 +95,11 @@ cvector_serialize(
 inline
 void 
 cvector_deserialize(
-  void *p_dst, 
+  void *_dst, 
   const allocator_t *allocator, 
   binary_stream_t *stream)
 {
-  cvector_t *dst = (cvector_t *)p_dst;
+  cvector_t *dst = (cvector_t *)_dst;
   assert(dst && cvector_is_def(dst) && allocator && stream);
 
   {
