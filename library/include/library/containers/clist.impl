@@ -17,12 +17,12 @@
 inline
 void 
 clist_replicate(
-  const void *v_src, 
-  void *v_dst, 
+  const void *_src, 
+  void *_dst, 
   const allocator_t *allocator)
 {
-  const clist_t *src = (const clist_t *)v_src;
-  clist_t *dst = (clist_t *)v_dst;
+  const clist_t *src = (const clist_t *)_src;
+  clist_t *dst = (clist_t *)_dst;
   assert(src && !clist_is_def(src));
   assert(dst);
   assert(

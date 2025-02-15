@@ -1,5 +1,5 @@
 /**
- * @file string.impl
+ * @file cstring.impl
  * @author khalilhenoud@gmail.com
  * @brief 
  * @version 0.1
@@ -11,74 +11,140 @@
 #ifndef LIB_STRING_IMPL_H
 #define LIB_STRING_IMPL_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include <string.h>
-#include <library/allocator/allocator.h>
+#include <library/streams/binary_stream.h>
 
 
 inline
-string_t*
-allocate_string(const char* str, const allocator_t* allocator)
+void 
+cstring_replicate(
+  const void *_src, 
+  void *_dst, 
+  const allocator_t* allocator)
 {
-  string_t* string = (string_t*)allocator->mem_alloc(sizeof(string_t));
+  const cstring_t *src = (const cstring_t *)_src;
+  cstring_t *dst = (cstring_t *)_dst;
+
+  assert(src && !cstring_is_def(src));
+  assert(dst);
+  assert(
+    (cstring_is_def(dst) && allocator) || 
+    (
+      !cstring_is_def(dst) && 
+      !allocator && 
+      dst->str == NULL));
+
+  if (cstring_is_def(dst))
+    cstring_setup(dst, src->str, allocator);
+  else
+    cstring_assign(dst, src->str);
+}
+
+inline
+void 
+cstring_fullswap(void *src, void *dst)
+{
+  assert(src && dst);
+  {
+    cstring_t tmp = *(cstring_t *)src;
+    *(cstring_t *)src = *(cstring_t *)dst;
+    *(cstring_t *)dst = tmp;
+  }
+}
+
+inline
+void 
+cstring_serialize(
+  const void *src, 
+  binary_stream_t* stream)
+{}
+
+inline
+void 
+cstring_deserialize(
+  void *dst, 
+  const allocator_t *allocator, 
+  binary_stream_t* stream)
+{}
+
+inline
+uint32_t 
+cstring_hash(const void *_ptr)
+{
+  const cstring_t *str = (const cstring_t *)_ptr;
+  assert(str && str->str);
+  return hash_fnv1a_32(str->str, str->length);
+}
+
+inline
+uint32_t 
+cstring_is_equal(
+  const void *_lhs, 
+  const void *_rhs)
+{
+  const cstring_t *lhs = (const cstring_t *)_lhs;
+  const cstring_t *rhs = (const cstring_t *)_rhs;
+  assert(lhs && rhs);
+  return 
+    !strcmp(lhs->str, rhs->str) && 
+    lhs->length == rhs->length;
+}
+
+inline
+void 
+cstring_cleanup(void *ptr, const allocator_t* allocator)
+{
+  cstring_t *string = (cstring_t *)ptr;
+  assert(string && !cstring_is_def(string));
+  assert(!allocator && "the type owns its own allocator, pass NULL!");
+
+  if (string->str)
+    string->allocator->mem_free(string->str);
+  cstring_def(string);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+inline
+void 
+cstring_clear(cstring_t *string)
+{
+  assert(string);
+
+  if (string->str)
+    string->allocator->mem_free(string->str);
+  string->length = 0;
+}
+
+inline
+uint32_t 
+cstring_assign(cstring_t *string, const uint8_t *str)
+{
+  assert(string && !cstring_is_def(string));
+  assert(str && "use cstring_clear if that was the intent");
+
+  if (string->str)
+    cstring_clear(string);
+  else {
+    string->length = strlen(str);
+    string->str = (uint8_t *)string->allocator->mem_alloc(string->length + 1);
+    memset(string->str, 0, string->length + 1);
+    memcpy(string->str, str, string->length);
+  }
+}
+
+inline
+void
+cstring_setup(
+  cstring_t *string,
+  const uint8_t *str, 
+  const allocator_t *allocator)
+{
+  assert(string && cstring_is_def(string));
+  assert(allocator);
+
   string->allocator = allocator;
-  string->size = strlen(str);
-  string->str = (char*)allocator->mem_alloc(string->size + 1);
-  memcpy(string->str, str, string->size + 1);
-  return string;
+  if (str)
+    cstring_assign(string, str);
 }
-
-inline
-void
-free_string(string_t* string)
-{
-  if (string->str)
-    string->allocator->mem_free(string->str);
-  string->allocator->mem_free(string);
-}
-
-inline
-uint32_t
-clear_string(string_t* string)
-{
-  uint32_t previous_size = string->size;
-  string->size = 0;
-  if (string->str)
-    string->allocator->mem_free(string->str);
-  string->str = NULL;
-  return previous_size;
-}
-
-inline
-uint32_t
-assign_string(string_t* string, const char* str)
-{
-  uint32_t previous_size = clear_string(string);
-  string->size = strlen(str);
-  string->str = (char*)string->allocator->mem_alloc(string->size + 1);
-  memcpy(string->str, str, string->size + 1);
-}
-
-inline
-void
-copy_string(string_t* target, const string_t* source)
-{
-  clear_string(target);
-  assign_string(target, source->str);
-}
-
-inline
-int32_t
-string_equal(const string_t* left, const string_t* right)
-{
-  return !strcmp(left->str, right->str);
-}
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

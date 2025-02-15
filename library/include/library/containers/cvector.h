@@ -72,21 +72,24 @@ inline
 uint32_t 
 cvector_is_def(const void *ptr)
 {
-  const cvector_t* vec = (const cvector_t *)ptr;
-  cvector_t def;
-  cvector_def(&def);
-  return 
-    vec->size == def.size && 
-    vec->capacity == def.capacity && 
-    elem_data_identical(&vec->elem_data, &def.elem_data) &&
-    vec->allocator == def.allocator &&
-    vec->data == def.data;
+  assert(ptr);
+
+  {
+    const cvector_t* vec = (const cvector_t *)ptr;
+    cvector_t def;
+    cvector_def(&def);
+    return 
+      vec->size == def.size && 
+      vec->capacity == def.capacity && 
+      elem_data_identical(&vec->elem_data, &def.elem_data) &&
+      vec->allocator == def.allocator &&
+      vec->data == def.data;
+  }
 }
 
 /** 
  * NOTE: will assert if 'src' is not initialized, or if 'dst' is initialized but
  * with non-zero size.
- * NOTE: either 'dst' or 'allocator' is NULL, not both (we assert).
  * NOTE: capacity is carried over from the src vector.
  */
 void 
@@ -157,7 +160,7 @@ cvector_cleanup(void *ptr, const allocator_t* allocator);
  */
 void
 cvector_setup(
-  cvector_t* vec, 
+  cvector_t *vec, 
   type_data_t type_data,
   size_t capacity, 
   const allocator_t* allocator);
