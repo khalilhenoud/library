@@ -1,4 +1,6 @@
-RANDOM: This feels like I am recreating parts of C++.
+////////////////////////////////////////////////////////////////////////////////
+//////////////// This feels like I am recreating parts of C++ //////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 Purpose:
 --------
@@ -38,6 +40,15 @@ that the compiler will generate another copy of the function. This means that
 when the function is called from the same translation unit (in a non vtable 
 context) the call is inlined, otherwise in a vtable context, it is a dynamic
 call.
+- Type interface functions are optional in a lot of cases. for example if
+the replicate function is missing, the elements of such types are replicated
+using memcpy, likewise if setup is missing, the memory is memset to 0.
+- Setup functions do not allocate the memory for the instance in question.
+they are responsible for the instance internal initialization (whether that
+contains memory allocation or not is of no relevance). the logic for cleanup is
+similar.
+- The reason why I went with non macro instantiations was compatibility with
+C++. But does this hold, maybe I should make a test and see?
 
 type interface:
 ---------------
@@ -217,24 +228,3 @@ TODO:
 container agnostic. Doing so might require us to require some classification 
 functions (less or greater functions) per type that require sorting.
 - Expand the library considerably, I want to support many more stuff.
-
-================================================================================
-MISC:
------
-NOTE: type interface functions are optional in a lot of cases. for example if
-the replicate function is missing, the elements of such types are replicated
-using memcpy, likewise if setup is missing, the memory is memset to 0.
-
-NOTE: setup functions do not allocate the memory for the instance in question.
-they are responsible for the instance internal initialization (whether that
-contains memory allocation or not is of no relevance). the logic for cleanup is
-similar.
-
-IMPORTANT: 
-I suspect we will need *_allocate *_deallocate variants to support deserializing
-in an agnostic way (the guid is mapped to _allocate which can be used to 
-instantiate an object).
-
-NOTE: the reason why I went with non macro instantiations was compatibility with
-C++. But does this hold, maybe I should make a test and see?
-

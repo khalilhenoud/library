@@ -117,7 +117,7 @@ hash_calc(const void* key)
 uint32_t 
 key_equal(const void* key1, const void* key2)
 {
-  return hash_calc(key1) == hash_calc(key2);
+  return *(uint64_t *)(key1) == *(uint64_t *)(key2);
 }
 
 uint32_t 
