@@ -48,7 +48,7 @@ typedef struct binary_stream_t binary_stream_t;
 
 typedef
 struct cstring_t {
-  uint8_t *str;
+  char *str;
   uint32_t length;
   const allocator_t *allocator;
 } cstring_t;
@@ -139,15 +139,15 @@ cstring_clear(cstring_t* string);
 
 // assign str to the string and return its size.
 uint32_t 
-cstring_assign(cstring_t *string, const uint8_t *str);
+cstring_assign(cstring_t *string, const char *str);
 
 void
 cstring_setup(
   cstring_t *string,
-  const uint8_t *str, 
+  const char *str, 
   const allocator_t *allocator);
 
-#include "string.impl"
+#include "cstring.impl"
 
 #ifdef __cplusplus
 }

@@ -80,9 +80,9 @@ cstring_deserialize(
     const size_t su32 = sizeof(uint32_t);
     binary_stream_read(stream, (uint8_t *)&dst->length, su32, su32);
     dst->allocator = allocator;
-    dst->str = (uint8_t *)allocator->mem_alloc(dst->length + 1);
+    dst->str = (char *)allocator->mem_alloc(dst->length + 1);
     memset(dst->str, 0, dst->length + 1);
-    binary_stream_read(stream, dst->str, dst->length, dst->length);
+    binary_stream_read(stream, (uint8_t *)dst->str, dst->length, dst->length);
   }
 }
 
@@ -132,31 +132,32 @@ cstring_clear(cstring_t *string)
 
   if (string->str)
     string->allocator->mem_free(string->str);
+  string->str = NULL;
   string->length = 0;
 }
 
 inline
 uint32_t 
-cstring_assign(cstring_t *string, const uint8_t *str)
+cstring_assign(cstring_t *string, const char *str)
 {
   assert(string && !cstring_is_def(string));
   assert(str && "use cstring_clear if that was the intent");
 
   if (string->str)
     cstring_clear(string);
-  else {
-    string->length = strlen(str);
-    string->str = (uint8_t *)string->allocator->mem_alloc(string->length + 1);
-    memset(string->str, 0, string->length + 1);
-    memcpy(string->str, str, string->length);
-  }
+  
+  string->length = strlen(str);
+  string->str = (char *)string->allocator->mem_alloc(string->length + 1);
+  memset(string->str, 0, string->length + 1);
+  memcpy(string->str, str, string->length);
+  return string->length;
 }
 
 inline
 void
 cstring_setup(
   cstring_t *string,
-  const uint8_t *str, 
+  const char *str, 
   const allocator_t *allocator)
 {
   assert(string && cstring_is_def(string));

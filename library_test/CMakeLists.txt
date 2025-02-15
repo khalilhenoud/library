@@ -16,6 +16,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_executable(${PROJECT_NAME} 
         ./source/classroom.c
 				./source/main.cpp
+        ./source/cstring_test.cpp
         ./source/cvector_test.cpp
         ./source/clist_test.cpp
         ./source/hash_test.cpp
