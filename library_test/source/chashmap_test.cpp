@@ -222,6 +222,35 @@ test_chashmap_basics(const allocator_t* allocator, const int32_t tabs)
   }
 }
 
+
+void
+test_chashmap_def_basics(const allocator_t* allocator, const int32_t tabs)
+{
+  PRINT_FUNCTION;
+  PRINT_DESC("defines and populate basic pre-registered types of hashmaps");
+
+  {
+    chashmap_t map; chashmap_def(&map);
+    chashmap_setup(
+      &map, 
+      get_type_data(uint64_t), get_type_data(float), 
+      allocator, 0.6f);
+    print_meta(map, tabs);
+    chashmap_insert(&map, 16, uint64_t, 1.12f, float);
+    print_chashmap_content<uint64_t, float>(map, tabs + 1);
+    NEWLINE;
+    print_meta(map, tabs);
+    NEWLINE;
+    for (uint64_t i = 0; i < 20; ++i)
+      chashmap_insert(&map, i, uint64_t, (i * 1.4f), float);
+    print_chashmap_content<uint64_t, float>(map, tabs + 1);
+    NEWLINE;
+    print_meta(map, tabs);
+    chashmap_cleanup(&map, NULL);
+    NEWLINE;
+  }
+}
+
 void
 test_chashmap_ops(const allocator_t* allocator, const int32_t tabs)
 {
@@ -573,6 +602,7 @@ test_chashmap_main(const allocator_t* allocator, const int32_t tabs)
 
   test_chashmap_def(allocator, tabs + 1);          NEWLINE;
   test_chashmap_basics(allocator, tabs + 1);       NEWLINE;
+  test_chashmap_def_basics(allocator, tabs + 1);   NEWLINE;
   test_chashmap_ops(allocator, tabs + 1);          NEWLINE;
   test_chashmap_misc(allocator, tabs + 1);         NEWLINE;
   test_chashmap_mem(allocator, tabs + 1);          NEWLINE;
