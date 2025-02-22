@@ -168,4 +168,32 @@ cstring_setup(
     cstring_assign(string, str);
 }
 
+inline
+cstring_t *
+cstring_create(
+  const char *str, 
+  const allocator_t *allocator)
+{
+  assert(allocator);
+  
+  {
+    cstring_t *string = (cstring_t *)allocator->mem_alloc(sizeof(cstring_t));
+    cstring_def(string);
+    cstring_setup(string, str, allocator);
+    return string;
+  }
+}
+
+inline
+void
+cstring_free(
+  cstring_t *string, 
+  const allocator_t *allocator)
+{
+  assert(string && allocator);
+
+  cstring_cleanup(string, NULL);
+  allocator->mem_free(string);
+}
+
 #endif

@@ -147,6 +147,18 @@ cstring_setup(
   const char *str, 
   const allocator_t *allocator);
 
+// NOTE: allocates and sets up the string.
+cstring_t *
+cstring_create(
+  const char *str, 
+  const allocator_t *allocator);
+
+// NOTE: deallocate the instance after cleanup.
+void
+cstring_free(
+  cstring_t *string, 
+  const allocator_t *allocator);
+
 #include "cstring.impl"
 
 #ifdef __cplusplus
