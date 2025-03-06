@@ -62,7 +62,8 @@ cstring_serialize(
 
   {
     binary_stream_write(stream, &src->length, sizeof(uint32_t));
-    binary_stream_write(stream, src->str, (size_t)src->length);
+    if (src->length)
+      binary_stream_write(stream, src->str, (size_t)src->length);
   }
 }
 
@@ -80,9 +81,12 @@ cstring_deserialize(
     const size_t su32 = sizeof(uint32_t);
     binary_stream_read(stream, (uint8_t *)&dst->length, su32, su32);
     dst->allocator = allocator;
-    dst->str = (char *)allocator->mem_alloc(dst->length + 1);
-    memset(dst->str, 0, dst->length + 1);
-    binary_stream_read(stream, (uint8_t *)dst->str, dst->length, dst->length);
+    dst->str = NULL;
+    if (dst->length) {
+      dst->str = (char *)allocator->mem_alloc(dst->length + 1);
+      memset(dst->str, 0, dst->length + 1);
+      binary_stream_read(stream, (uint8_t *)dst->str, dst->length, dst->length);
+    }
   }
 }
 
