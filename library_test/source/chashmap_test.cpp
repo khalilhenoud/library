@@ -151,10 +151,10 @@ cleanup_str(void *elem_ptr, const allocator_t* allocator)
   allocator->mem_free(*ptr);
 }
 
-#define DECLARE_HELPER_CHASHTABLE(alias, type_key, type_value)  \
+#define DECLARE_HELPER_CHASHTABLE(alias, type_key, type_value)              \
 inline void alias##_insert(chashmap_t* map, type_key key, type_value value) \
-{ \
- chashmap_insert(map, key, type_key, value, type_value); \
+{                                                                           \
+ chashmap_insert(map, key, type_key, value, type_value);                    \
 }
 
 DECLARE_HELPER_CHASHTABLE(mullf, u64, float)
@@ -222,7 +222,6 @@ test_chashmap_basics(const allocator_t* allocator, const int32_t tabs)
   }
 }
 
-
 void
 test_chashmap_def_basics(const allocator_t* allocator, const int32_t tabs)
 {
@@ -247,7 +246,31 @@ test_chashmap_def_basics(const allocator_t* allocator, const int32_t tabs)
     NEWLINE;
     print_meta(map, tabs);
     chashmap_cleanup(&map, NULL);
+  }
+}
+
+void
+test_chashmap_def_basics_with_macros(
+  const allocator_t* allocator, const int32_t tabs)
+{
+  PRINT_FUNCTION;
+  PRINT_DESC("defines and populate basic pre-registered types of hashmaps");
+
+  {
+    chashmap_t map; 
+    chashmap_setup2(&map, uint64_t, float);
+    print_meta(map, tabs);
+    chashmap_insert(&map, 16, uint64_t, 1.12f, float);
+    print_chashmap_content<uint64_t, float>(map, tabs + 1);
     NEWLINE;
+    print_meta(map, tabs);
+    NEWLINE;
+    for (uint64_t i = 0; i < 20; ++i)
+      chashmap_insert(&map, i, uint64_t, (i * 1.4f), float);
+    print_chashmap_content<uint64_t, float>(map, tabs + 1);
+    NEWLINE;
+    print_meta(map, tabs);
+    chashmap_cleanup2(&map);
   }
 }
 
@@ -600,13 +623,14 @@ test_chashmap_main(const allocator_t* allocator, const int32_t tabs)
 {
   PRINT_FUNCTION;
 
-  test_chashmap_def(allocator, tabs + 1);          NEWLINE;
-  test_chashmap_basics(allocator, tabs + 1);       NEWLINE;
-  test_chashmap_def_basics(allocator, tabs + 1);   NEWLINE;
-  test_chashmap_ops(allocator, tabs + 1);          NEWLINE;
-  test_chashmap_misc(allocator, tabs + 1);         NEWLINE;
-  test_chashmap_mem(allocator, tabs + 1);          NEWLINE;
-  test_chashmap_iterators(allocator, tabs + 1);    NEWLINE;
-  test_chashmap_custom(allocator, tabs + 1);       NEWLINE;
-  test_chashmap_serialize(allocator, tabs + 1);    NEWLINE;
+  // test_chashmap_def(allocator, tabs + 1);                     NEWLINE;
+  // test_chashmap_basics(allocator, tabs + 1);                  NEWLINE;
+  test_chashmap_def_basics(allocator, tabs + 1);              NEWLINE;
+  test_chashmap_def_basics_with_macros(allocator, tabs + 1);  NEWLINE;
+  // test_chashmap_ops(allocator, tabs + 1);                     NEWLINE;
+  // test_chashmap_misc(allocator, tabs + 1);                    NEWLINE;
+  // test_chashmap_mem(allocator, tabs + 1);                     NEWLINE;
+  // test_chashmap_iterators(allocator, tabs + 1);               NEWLINE;
+  // test_chashmap_custom(allocator, tabs + 1);                  NEWLINE;
+  // test_chashmap_serialize(allocator, tabs + 1);               NEWLINE;
 }

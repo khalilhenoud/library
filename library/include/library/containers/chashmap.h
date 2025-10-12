@@ -256,6 +256,19 @@ int32_t
 chashmap_iter_equal(chashmap_iterator_t left, chashmap_iterator_t right);
 
 ////////////////////////////////////////////////////////////////////////////////
+#define chashmap_setup2(map__, key_type__, elem_type__) \
+  do {                                                  \
+    chashmap_def((map__));                              \
+    chashmap_setup(                                     \
+      (map__),                                          \
+      get_type_data(key_type__),                        \
+      get_type_data(elem_type__),                       \
+      &g_default_allocator, 0.6f);                      \
+  } while (0)
+
+#define chashmap_cleanup2(map__)  \
+  chashmap_cleanup((map__), NULL)
+
 #define chashmap_key(iter, key_type) \
   ((key_type*)((iter)->map->keys.data) + (iter)->index)
 
