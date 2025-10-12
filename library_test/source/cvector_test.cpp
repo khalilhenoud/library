@@ -112,6 +112,43 @@ test_cvector_basics(const allocator_t* allocator, const int32_t tabs)
   cvector_cleanup(&vec_f64, NULL);
 }
 
+
+void
+test_cvector_basics_with_macro(const allocator_t* allocator, const int32_t tabs)
+{
+  PRINT_FUNCTION;
+  PRINT_DESC("Uses macros to achieve a faster setup/cleanup process..");
+
+  cvector_t vec_i8;
+  cvector_setup2(&vec_i8, char);
+  print_meta(vec_i8, tabs);
+  for (int32_t i = 100; i < 120; ++i)
+    cvector_push_back(&vec_i8, (char)i + 1, char);
+  print_meta(vec_i8, tabs);
+  print_cvector_content<char>(vec_i8, tabs);
+  cvector_cleanup2(&vec_i8);
+  NEWLINE;
+
+  cvector_t vec_i32;
+  cvector_setup2(&vec_i32, int32_t);
+  print_meta(vec_i32, tabs);
+  for (int32_t i = 0; i < 10; ++i)
+    cvector_push_back(&vec_i32, (int32_t)i + 1, int32_t);
+  print_meta(vec_i32, tabs);
+  print_cvector_content<int32_t>(vec_i32, tabs);
+  cvector_cleanup2(&vec_i32);
+  NEWLINE;
+
+  cvector_t vec_f64;
+  cvector_setup2(&vec_f64, double);
+  print_meta(vec_f64, tabs);
+  for (int32_t i = 20; i < 35; ++i)
+    cvector_push_back(&vec_f64, (double)i + 1.75 * i, double);
+  print_meta(vec_f64, tabs);
+  print_cvector_content<double>(vec_f64, tabs);
+  cvector_cleanup2(&vec_f64);
+}
+
 void
 test_cvector_iterators(const allocator_t* allocator, const int32_t tabs)
 {
@@ -374,11 +411,12 @@ test_cvector_main(const allocator_t* allocator, const int32_t tabs)
 {
   PRINT_FUNCTION;
 
-  test_cvector_def(allocator, tabs + 1);          NEWLINE;
-  test_cvector_basics(allocator, tabs + 1);       NEWLINE;
-  test_cvector_iterators(allocator, tabs + 1);    NEWLINE;
-  test_cvector_ops(allocator, tabs + 1);          NEWLINE;
-  test_cvector_mem(allocator, tabs + 1);          NEWLINE;
-  test_cvector_custom(allocator, tabs + 1);       NEWLINE;
-  test_cvector_serialize(allocator, tabs + 1);    NEWLINE;
+  test_cvector_def(allocator, tabs + 1);                    NEWLINE;
+  test_cvector_basics(allocator, tabs + 1);                 NEWLINE;
+  test_cvector_basics_with_macro(allocator, tabs + 1);      NEWLINE;
+  test_cvector_iterators(allocator, tabs + 1);              NEWLINE;
+  test_cvector_ops(allocator, tabs + 1);                    NEWLINE;
+  test_cvector_mem(allocator, tabs + 1);                    NEWLINE;
+  test_cvector_custom(allocator, tabs + 1);                 NEWLINE;
+  test_cvector_serialize(allocator, tabs + 1);              NEWLINE;
 }

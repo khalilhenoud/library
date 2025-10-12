@@ -231,6 +231,19 @@ cvector_resize(cvector_t* vec, size_t count);
 ////////////////////////////////////////////////////////////////////////////////
 #define cvector_iterator(type) type *
 
+/** helper macro to speed up initialization */
+#define cvector_setup2(vec__, type__)                                         \
+  do {                                                                        \
+    cvector_def((vec__));                                                     \
+    cvector_setup((vec__), get_type_data(type__), 16, &g_default_allocator);  \
+  } while (0)
+
+/** helper macro to speed up cleanup */
+#define cvector_cleanup2(vec__)         \
+  do {                                  \
+    cvector_cleanup((vec__), NULL);     \
+  } while (0)
+
 /** adds an element to the end of the vector */
 #define cvector_push_back(vec__, value__, type__)                     \
   do {                                                                \
