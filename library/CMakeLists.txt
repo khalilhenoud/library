@@ -5,6 +5,7 @@ project(library VERSION 1.0)
 
 # add the executable
 add_library(${PROJECT_NAME} SHARED
+      ./source/allocator/allocator.c
       ./source/filesystem/io.c
       ./source/filesystem/filesystem.c
       ./source/memory/memory.c

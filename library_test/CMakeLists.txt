@@ -14,6 +14,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # add the executable
 add_executable(${PROJECT_NAME} 
+        ./source/default_allocator_test.cpp
         ./source/memory_test.cpp
         ./source/classroom.c
 				./source/main.cpp
