@@ -108,6 +108,42 @@ test_clist_basics(const allocator_t* allocator, const int32_t tabs)
 }
 
 void
+test_clist_basics_with_macros(const allocator_t* allocator, const int32_t tabs)
+{
+  PRINT_FUNCTION;
+  PRINT_DESC("defines and populate basic types of lists with macro helpers");
+
+  clist_t list_i8;
+  clist_setup2(&list_i8, char);
+  print_meta(list_i8, tabs);
+  for (int32_t i = 100; i < 120; ++i)
+    clist_push_back(&list_i8, (char)i + 1, char);
+  print_meta(list_i8, tabs);
+  print_clist_content<char>(list_i8, tabs);
+  clist_cleanup2(&list_i8);
+  NEWLINE;
+
+  clist_t list_i32;
+  clist_setup2(&list_i32, int32_t);
+  print_meta(list_i32, tabs);
+  for (int32_t i = 0; i < 10; ++i)
+    clist_push_back(&list_i32, (int32_t)i + 1, int32_t);
+  print_meta(list_i32, tabs);
+  print_clist_content<int32_t>(list_i32, tabs);
+  clist_cleanup2(&list_i32);
+  NEWLINE;
+
+  clist_t list_f64;
+  clist_setup2(&list_f64, double);
+  print_meta(list_f64, tabs);
+  for (int32_t i = 20; i < 35; ++i)
+    clist_push_back(&list_f64, (double)i + 1.75 * i, double);
+  print_meta(list_f64, tabs);
+  print_clist_content<double>(list_f64, tabs);
+  clist_cleanup2(&list_f64);
+}
+
+void
 test_clist_iterators(const allocator_t* allocator, const int32_t tabs)
 {
   PRINT_FUNCTION;
@@ -355,11 +391,12 @@ test_clist_main(const allocator_t* allocator, const int32_t tabs)
 {
   PRINT_FUNCTION;
 
-  test_clist_def(allocator, tabs + 1);          NEWLINE;
-  test_clist_basics(allocator, tabs + 1);       NEWLINE;
-  test_clist_iterators(allocator, tabs + 1);    NEWLINE;
-  test_clist_ops(allocator, tabs + 1);          NEWLINE;
-  test_clist_mem(allocator, tabs + 1);          NEWLINE;
-  test_clist_custom(allocator, tabs + 1);       NEWLINE;
-  test_clist_serialize(allocator, tabs + 1);    NEWLINE;
+  test_clist_def(allocator, tabs + 1);                NEWLINE;
+  test_clist_basics(allocator, tabs + 1);             NEWLINE;
+  test_clist_basics_with_macros(allocator, tabs + 1); NEWLINE;
+  test_clist_iterators(allocator, tabs + 1);          NEWLINE;
+  test_clist_ops(allocator, tabs + 1);                NEWLINE;
+  test_clist_mem(allocator, tabs + 1);                NEWLINE;
+  test_clist_custom(allocator, tabs + 1);             NEWLINE;
+  test_clist_serialize(allocator, tabs + 1);          NEWLINE;
 }

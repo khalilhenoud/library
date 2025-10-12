@@ -239,10 +239,8 @@ cvector_resize(cvector_t* vec, size_t count);
   } while (0)
 
 /** helper macro to speed up cleanup */
-#define cvector_cleanup2(vec__)         \
-  do {                                  \
-    cvector_cleanup((vec__), NULL);     \
-  } while (0)
+#define cvector_cleanup2(vec__) \
+  cvector_cleanup((vec__), NULL)
 
 /** adds an element to the end of the vector */
 #define cvector_push_back(vec__, value__, type__)                     \

@@ -221,6 +221,16 @@ int32_t
 clist_iter_equal(clist_iterator_t left, clist_iterator_t right);
 
 ////////////////////////////////////////////////////////////////////////////////
+/** helper functionality to speed up setup process */
+#define clist_setup2(list__, type__)                                    \
+  do {                                                                  \
+    clist_def((list__));                                                \
+    clist_setup((list__), get_type_data(type__), &g_default_allocator); \
+  } while (0)
+
+#define clist_cleanup2(list__)  \
+  clist_cleanup((list__), NULL)
+
 #define clist_deref(iter, type) \
   (type*)((iter)->current->data)
 

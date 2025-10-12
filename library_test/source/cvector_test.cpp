@@ -114,7 +114,8 @@ test_cvector_basics(const allocator_t* allocator, const int32_t tabs)
 
 
 void
-test_cvector_basics_with_macro(const allocator_t* allocator, const int32_t tabs)
+test_cvector_basics_with_macros(
+  const allocator_t* allocator, const int32_t tabs)
 {
   PRINT_FUNCTION;
   PRINT_DESC("Uses macros to achieve a faster setup/cleanup process..");
@@ -413,7 +414,7 @@ test_cvector_main(const allocator_t* allocator, const int32_t tabs)
 
   test_cvector_def(allocator, tabs + 1);                    NEWLINE;
   test_cvector_basics(allocator, tabs + 1);                 NEWLINE;
-  test_cvector_basics_with_macro(allocator, tabs + 1);      NEWLINE;
+  test_cvector_basics_with_macros(allocator, tabs + 1);     NEWLINE;
   test_cvector_iterators(allocator, tabs + 1);              NEWLINE;
   test_cvector_ops(allocator, tabs + 1);                    NEWLINE;
   test_cvector_mem(allocator, tabs + 1);                    NEWLINE;
