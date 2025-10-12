@@ -7,6 +7,7 @@ project(library VERSION 1.0)
 add_library(${PROJECT_NAME} SHARED
       ./source/filesystem/io.c
       ./source/filesystem/filesystem.c
+      ./source/memory/memory.c
       ./source/streams/binary_stream.c
       ./source/type_registry/default_registry.c
 			./source/type_registry/type_registry.c

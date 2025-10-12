@@ -88,6 +88,9 @@ test_registry_main(const allocator_t *allocator, const int32_t tabs = 0);
 void
 test_cstring_main(const allocator_t *allocator, const int32_t tabs = 0);
 
+void
+test_memory_main(const int32_t tabs = 0);
+
 int 
 main(int argc, char *argv[])
 {
@@ -105,6 +108,7 @@ main(int argc, char *argv[])
   test_hash_main(&allocator);
   test_chashmap_main(&allocator);
   test_cstring_main(&allocator);
+  test_memory_main();
   
   std::cout << "allocation remaining: " << allocated.size() << std::endl;
   assert(allocated.size() == 0);
