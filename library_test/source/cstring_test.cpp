@@ -60,6 +60,24 @@ test_cstring_basics(const allocator_t* allocator, const int32_t tabs)
 }
 
 void
+test_cstring_basics_default_allocator(const int32_t tabs)
+{
+  PRINT_FUNCTION;
+  PRINT_DESC("basic tests for cstring with the default allocator");
+
+  cstring_t *str = cstring_create2("I was here and now I am not :)");
+  print_all(*str, tabs);
+  print_cstring_content(*str, tabs);
+  cstring_free2(str);
+
+  cstring_t str2;
+  cstring_setup2(&str2, "This is test number 2!");
+  print_all(str2, tabs);
+  print_cstring_content(str2, tabs);
+  cstring_cleanup2(&str2);
+}
+
+void
 test_cstring_ops(const allocator_t* allocator, const int32_t tabs)
 {
   PRINT_FUNCTION;
@@ -168,8 +186,9 @@ test_cstring_main(const allocator_t* allocator, const int32_t tabs)
 {
   PRINT_FUNCTION;
 
-  test_cstring_def(allocator, tabs + 1);          NEWLINE;
-  test_cstring_basics(allocator, tabs + 1);       NEWLINE;
-  test_cstring_ops(allocator, tabs + 1);          NEWLINE;
-  test_cstring_serialize(allocator, tabs + 1);    NEWLINE;
+  test_cstring_def(allocator, tabs + 1);                        NEWLINE;
+  test_cstring_basics(allocator, tabs + 1);                     NEWLINE;
+  test_cstring_basics_default_allocator(tabs + 1);              NEWLINE;
+  test_cstring_ops(allocator, tabs + 1);                        NEWLINE;
+  test_cstring_serialize(allocator, tabs + 1);                  NEWLINE;
 }

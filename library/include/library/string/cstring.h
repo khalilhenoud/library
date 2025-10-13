@@ -133,6 +133,9 @@ cstring_cleanup(void *ptr, const allocator_t* allocator);
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void 
+cstring_cleanup2(void *ptr);
+
 // clears the internal string.
 void 
 cstring_clear(cstring_t* string);
@@ -147,17 +150,28 @@ cstring_setup(
   const char *str, 
   const allocator_t *allocator);
 
+void
+cstring_setup2(
+  cstring_t *string, 
+  const char *str);
+
 // NOTE: allocates and sets up the string.
 cstring_t *
 cstring_create(
   const char *str, 
   const allocator_t *allocator);
 
+cstring_t *
+cstring_create2(const char *str);
+
 // NOTE: deallocate the instance after cleanup.
 void
 cstring_free(
   cstring_t *string, 
   const allocator_t *allocator);
+
+void
+cstring_free2(cstring_t *string);
 
 #include "cstring.impl"
 

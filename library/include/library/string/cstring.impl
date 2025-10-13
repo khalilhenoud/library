@@ -130,6 +130,13 @@ cstring_cleanup(void *ptr, const allocator_t* allocator)
 
 inline
 void 
+cstring_cleanup2(void *ptr)
+{
+  cstring_cleanup(ptr, NULL);
+}
+
+inline
+void 
 cstring_clear(cstring_t *string)
 {
   assert(string);
@@ -173,6 +180,16 @@ cstring_setup(
 }
 
 inline
+void
+cstring_setup2(
+  cstring_t *string, 
+  const char *str)
+{
+  cstring_def(string);
+  cstring_setup(string, str, &g_default_allocator);
+}
+
+inline
 cstring_t *
 cstring_create(
   const char *str, 
@@ -189,6 +206,13 @@ cstring_create(
 }
 
 inline
+cstring_t *
+cstring_create2(const char *str)
+{
+  return cstring_create(str, &g_default_allocator);
+}
+
+inline
 void
 cstring_free(
   cstring_t *string, 
@@ -198,6 +222,13 @@ cstring_free(
 
   cstring_cleanup(string, NULL);
   allocator->mem_free(string);
+}
+
+inline
+void
+cstring_free2(cstring_t *string)
+{
+  cstring_free(string, &g_default_allocator);
 }
 
 #endif
