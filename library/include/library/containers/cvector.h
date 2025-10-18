@@ -56,7 +56,7 @@ struct cvector_t {
   container_elem_data_t elem_data;
   size_t size;
   size_t capacity;
-  const allocator_t* allocator;
+  const allocator_t *allocator;
   void *data;
 } cvector_t;
 
