@@ -244,7 +244,9 @@ cvector_grow(cvector_t* vec, size_t new_capacity)
       vec->data = NULL;
       vec->capacity = new_capacity;
     } else {
-      void* new_ptr = vec->allocator->mem_realloc(vec->data, to_realloc);
+      void* new_ptr = vec->capacity ? 
+        vec->allocator->mem_realloc(vec->data, to_realloc) : 
+        vec->allocator->mem_alloc(to_realloc);
       assert(new_ptr);
       vec->data = new_ptr;
       vec->capacity = new_capacity;
