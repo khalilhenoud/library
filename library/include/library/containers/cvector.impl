@@ -87,7 +87,7 @@ cvector_serialize(
       size_t i = 0;
       for (; i < src->size; ++i)
         serialize(data + i * src->elem_data.size, stream);
-    } else
+    } else if (src->size)
       binary_stream_write(stream, src->data, src->size * src->elem_data.size);
   }
 }
@@ -122,7 +122,7 @@ cvector_deserialize(
         size_t i = 0;
         for (; i < dst->size; ++i)
           deserialize(data + i * dst->elem_data.size, allocator, stream);
-      } else
+      } else if (dst->size)
         binary_stream_read(
           stream, 
           (uint8_t *)dst->data, 
