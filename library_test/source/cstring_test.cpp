@@ -52,7 +52,6 @@ test_cstring_basics(const allocator_t* allocator, const int32_t tabs)
   PRINT_DESC("basic tests for cstring");
 
   cstring_t str;
-  cstring_def(&str);
   cstring_setup(&str, "I am here :)", allocator);
   print_all(str, tabs);
   print_cstring_content(str, tabs);
@@ -85,7 +84,7 @@ test_cstring_ops(const allocator_t* allocator, const int32_t tabs)
 
   {
     CTABS << "replicate testing: " << std::endl;
-    cstring_t left; cstring_def(&left);
+    cstring_t left;
     cstring_setup(&left, "Allen is here", allocator);
     print_cstring_content(left, tabs);
 
@@ -104,10 +103,10 @@ test_cstring_ops(const allocator_t* allocator, const int32_t tabs)
   
   {
     CTABS << "fullswap testing: " << std::endl;
-    cstring_t left; cstring_def(&left);
+    cstring_t left;
     cstring_setup(&left, "Samurai was here", allocator);
 
-    cstring_t right; cstring_def(&right);
+    cstring_t right;
     cstring_setup(&right, "Ninja was here", allocator);
     
     print_cstring_content(left, tabs);
@@ -124,7 +123,7 @@ test_cstring_ops(const allocator_t* allocator, const int32_t tabs)
 
   {
     CTABS << "clear, assign testing: " << std::endl;
-    cstring_t str; cstring_def(&str);
+    cstring_t str;
     cstring_setup(&str, "Warrior was here", allocator);
     print_cstring_content(str, tabs);
     cstring_assign(&str, "Xena was here");
@@ -137,7 +136,7 @@ test_cstring_ops(const allocator_t* allocator, const int32_t tabs)
   {
     CTABS << "hash testing: " << std::endl;
     uint32_t hash = 0;
-    cstring_t str; cstring_def(&str);
+    cstring_t str;
     cstring_setup(&str, "Warrior was here", allocator);
     print_cstring_content(str, tabs);
     hash = cstring_hash(&str);
@@ -160,8 +159,9 @@ test_cstring_serialize(const allocator_t* allocator, const int32_t tabs)
 {
   PRINT_FUNCTION;
 
-  cstring_t str; cstring_def(&str);
-  cstring_t copy; cstring_def(&copy);
+  cstring_t str;
+  cstring_t copy; 
+  cstring_def(&copy);
   cstring_setup(&str, "This string is to be serialized", allocator);
   print_cstring_content(str, tabs);
 

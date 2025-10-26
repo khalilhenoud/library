@@ -171,8 +171,7 @@ cstring_setup(
   const char *str, 
   const allocator_t *allocator)
 {
-  assert(string && cstring_is_def(string));
-  assert(allocator);
+  assert(string && allocator);
 
   string->allocator = allocator;
   if (str)
@@ -185,7 +184,6 @@ cstring_setup2(
   cstring_t *string, 
   const char *str)
 {
-  cstring_def(string);
   cstring_setup(string, str, &g_default_allocator);
 }
 
@@ -199,7 +197,6 @@ cstring_create(
   
   {
     cstring_t *string = (cstring_t *)allocator->mem_alloc(sizeof(cstring_t));
-    cstring_def(string);
     cstring_setup(string, str, allocator);
     return string;
   }
