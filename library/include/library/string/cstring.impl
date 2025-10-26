@@ -174,6 +174,7 @@ cstring_setup(
   assert(string && allocator);
 
   string->allocator = allocator;
+  string->str = NULL;
   if (str)
     cstring_assign(string, str);
 }
