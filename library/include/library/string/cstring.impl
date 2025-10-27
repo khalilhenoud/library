@@ -175,6 +175,7 @@ cstring_setup(
 
   string->allocator = allocator;
   string->str = NULL;
+  string->length = 0;
   if (str)
     cstring_assign(string, str);
 }
