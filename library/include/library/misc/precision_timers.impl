@@ -1,0 +1,37 @@
+/**
+ * @file precision_timers.impl
+ * @author khalilhenoud@gmail.com
+ * @brief 
+ * @version 0.1
+ * @date 2025-11-08
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
+#ifndef LIB_PRECISION_TIMERS_IMPL
+#define LIB_PRECISION_TIMERS_IMPL
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <windows.h>
+
+
+void
+set_periodic_timers_resolution(uint32_t ms)
+{
+  timeBeginPeriod(ms);
+}
+
+void
+end_periodic_timers_resolution(uint32_t ms)
+{
+  timeEndPeriod(ms);
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

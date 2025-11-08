@@ -14,5 +14,10 @@ add_library(${PROJECT_NAME} SHARED
 			./source/type_registry/type_registry.c
 			./include/library/internal/module.h)
 
+# winmm is required for timeGetTime(), used by frameratecontroller. library is
+# currently tied to windows, in the future this will change and this might need
+# revisiting.
+target_link_libraries(${PROJECT_NAME} PUBLIC winmm)
+
 target_include_directories(${PROJECT_NAME} PUBLIC 
 			"${PROJECT_SOURCE_DIR}/include")
