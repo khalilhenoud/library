@@ -76,6 +76,11 @@ LIBRARY_API
 int32_t
 set_cursor_position(int32_t x, int32_t y);
 
+////////////////////////////////////////////////////////////////////////////////
+LIBRARY_API
+void
+sleep(uint64_t ms);
+
 #ifdef __cplusplus
 }
 #endif

@@ -93,3 +93,10 @@ set_cursor_position(int32_t x, int32_t y)
 {
   return SetCursorPos(x, y);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+void
+sleep(uint64_t ms)
+{
+  Sleep(ms);
+}

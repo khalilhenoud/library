@@ -176,7 +176,7 @@ controller_end(framerate_controller_t *controller)
       double ms_sleep = 
         controller->internal.target_frame_ms - (duration_ms + BUFFER_TIME_MS);
 
-      Sleep((uint64_t)ms_sleep); 
+      sleep((uint64_t)ms_sleep); 
     }
 
     return previous_fps;
