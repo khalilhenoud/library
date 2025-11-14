@@ -28,6 +28,7 @@ get_screen_height()
   return GetSystemMetrics(SM_CYFULLSCREEN);
 }
 
+////////////////////////////////////////////////////////////////////////////////
 void
 set_periodic_timers_resolution(uint32_t ms)
 {
@@ -40,6 +41,25 @@ end_periodic_timers_resolution(uint32_t ms)
   timeEndPeriod(ms);
 }
 
+uint64_t
+time_get_time()
+{
+  return timeGetTime();
+}
+
+int32_t
+get_performance_frequency(uint64_t *frequency)
+{
+  return QueryPerformanceFrequency((LARGE_INTEGER*)frequency);
+}
+
+int32_t
+get_performance_counter(uint64_t *counter)
+{
+  return QueryPerformanceCounter((LARGE_INTEGER*)counter);
+}
+
+////////////////////////////////////////////////////////////////////////////////
 int32_t
 get_keyboard_state(uint8_t key_states[256])
 {

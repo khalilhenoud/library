@@ -16,9 +16,13 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include <library/internal/module.h>
 
 #define BUFFER_TIME_MS                1
 
+
+typedef struct allocator_t allocator_t;
+typedef struct framerate_controller_t framerate_controller_t;
 
 typedef
 enum framerate_duration_t {
@@ -27,53 +31,40 @@ enum framerate_duration_t {
   FPS_DURATION_COUNT
 } framerate_duration_t;
 
-typedef
-struct framerate_controller_internal_t {
-  double current_fps;
-
-  // cast to DWORD when working with timegettime.
-  uint64_t start;
-  uint64_t end;
-  uint64_t target_frame_ms;
-
-  // performance counter specific
-  uint64_t ticks_per_second;
-  uint32_t freq_counters_supported;
-} framerate_controller_internal_t;
-
-typedef
-struct framerate_controller_t {
-  uint64_t target_fps;
-  uint32_t locked;
-  framerate_controller_internal_t internal;
-} framerate_controller_t;
-
-
-void
-initialize_controller(
-  framerate_controller_t* controller, 
+LIBRARY_API
+framerate_controller_t *
+controller_allocate(
+  const allocator_t *allocator, 
   uint64_t target_fps, 
   uint32_t locked);
 
+LIBRARY_API
+void
+controller_free(
+  framerate_controller_t *controller,
+  const allocator_t *allocator);
+
+LIBRARY_API
 float
-controller_start(framerate_controller_t* controller);
+controller_start(framerate_controller_t *controller);
 
+LIBRARY_API
 double
-controller_end(framerate_controller_t* controller);
+controller_end(framerate_controller_t *controller);
 
+LIBRARY_API
 double
-get_current_fps(framerate_controller_t* controller);
+get_current_fps(framerate_controller_t *controller);
 
+LIBRARY_API
 void
 lock_fps(
-  framerate_controller_t* controller, 
+  framerate_controller_t *controller, 
   uint64_t target_fps);
 
+LIBRARY_API
 void
-unlock_fps(framerate_controller_t* controller);
-
-
-#include "framerate_controller.impl"
+unlock_fps(framerate_controller_t *controller);
 
 #ifdef __cplusplus
 }

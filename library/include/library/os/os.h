@@ -43,6 +43,18 @@ LIBRARY_API
 void
 end_periodic_timers_resolution(uint32_t ms);
 
+LIBRARY_API
+uint64_t
+time_get_time();
+
+LIBRARY_API
+int32_t
+get_performance_frequency(uint64_t *frequency);
+
+LIBRARY_API
+int32_t
+get_performance_counter(uint64_t *counter);
+
 ////////////////////////////////////////////////////////////////////////////////
 LIBRARY_API
 int32_t
