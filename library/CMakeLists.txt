@@ -8,6 +8,7 @@ add_library(${PROJECT_NAME} SHARED
       ./source/allocator/allocator.c
       ./source/filesystem/io.c
       ./source/filesystem/filesystem.c
+      ./source/os/os.c
       ./source/memory/memory.c
       ./source/streams/binary_stream.c
       ./source/type_registry/default_registry.c
