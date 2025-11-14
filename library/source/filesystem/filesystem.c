@@ -8,35 +8,35 @@
  * @copyright Copyright (c) 2024
  * 
  */
-#include <windows.h>
 #include <assert.h>
+#include <library/os/os.h>
 #include <library/filesystem/filesystem.h>
 
 
 void
 get_subdirectories(
-  const char* directory,
-  dir_entries_t* entries)
+  const char *directory,
+  dir_entries_t *entries)
 {
   assert(directory && entries);
 
   {
-    WIN32_FIND_DATA ffd;
-    HANDLE hFind;
-    DWORD dwError = 0;
+    file_find_data_t ffd;
+    file_handle_t hFind;
+    uint64_t error = 0;
     entries->used = 0;
 
-    hFind = FindFirstFile(directory, &ffd);
+    hFind = find_first_file(directory, &ffd);
 
-    if (hFind == INVALID_HANDLE_VALUE)
+    if (hFind == INVALID_HANDLE)
       assert(0 && "get_subdirectories failed on first attempt!");
 
     // get all sub directories names.
     do {
         if (
-          ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY &&
-          strcmp(ffd.cFileName, ".") && 
-          strcmp(ffd.cFileName, "..")) {
+          ffd.file_attributes & FILE_IS_DIRECTORY &&
+          strcmp(ffd.name, ".") && 
+          strcmp(ffd.name, "..")) {
           memset(
             entries->dir_names[entries->used], 
             0, 
@@ -44,18 +44,18 @@ get_subdirectories(
 
           memcpy(
             entries->dir_names[entries->used], 
-            ffd.cFileName, 
-            strlen(ffd.cFileName));
+            ffd.name, 
+            strlen(ffd.name));
 
           entries->used++;
         }
-    } while (FindNextFile(hFind, &ffd) != 0);
+    } while (find_next_file(hFind, &ffd) != 0);
   
-    dwError = GetLastError();
+    error = get_last_error();
     assert(
-      dwError == ERROR_NO_MORE_FILES && 
+      error == LIBRARY_ERROR_NO_MORE_FILES && 
       "unknown error in get_subdirectories!");
 
-    FindClose(hFind);
+    find_close(hFind);
   }
 }

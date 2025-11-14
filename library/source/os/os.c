@@ -100,3 +100,37 @@ sleep(uint64_t ms)
 {
   Sleep(ms);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+file_handle_t
+find_first_file(const char *file, file_find_data_t *file_data)
+{
+  file_handle_t handle = INVALID_HANDLE;
+  WIN32_FIND_DATA ffd;
+  handle = (file_handle_t)FindFirstFile(file, &ffd);
+  file_data->name = ffd.cFileName;
+  file_data->file_attributes = ffd.dwFileAttributes;
+  return handle;
+}
+
+int32_t
+find_next_file(file_handle_t handle, file_find_data_t *file_data)
+{
+  WIN32_FIND_DATA ffd;
+  int32_t result = FindNextFile((HANDLE)handle, &ffd);
+  file_data->name = ffd.cFileName;
+  file_data->file_attributes = ffd.dwFileAttributes;
+  return result;
+}
+
+int32_t
+find_close(file_handle_t handle)
+{
+  return FindClose((HWND)handle);
+}
+
+uint64_t
+get_last_error()
+{
+  return GetLastError();
+}

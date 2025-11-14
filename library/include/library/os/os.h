@@ -18,12 +18,29 @@ extern "C" {
 #include <stdint.h>
 #include <library/internal/module.h>
 
+#define INVALID_HANDLE ((uintptr_t)(-1))
+#define LIBRARY_ERROR_NO_MORE_FILES       18L
+
 
 typedef
 struct cursor_pos_t {
   int64_t x;
   int64_t y;
 } cursor_pos_t;
+
+typedef
+uintptr_t file_handle_t;
+
+typedef
+struct file_find_data_t {
+  const char *name;
+  uint64_t file_attributes;
+} file_find_data_t;
+
+typedef
+enum file_attributes_t {
+  FILE_IS_DIRECTORY            = 0x00000010
+} file_attributes_t;
 
 ////////////////////////////////////////////////////////////////////////////////
 LIBRARY_API
@@ -80,6 +97,23 @@ set_cursor_position(int32_t x, int32_t y);
 LIBRARY_API
 void
 sleep(uint64_t ms);
+
+////////////////////////////////////////////////////////////////////////////////
+LIBRARY_API
+file_handle_t
+find_first_file(const char *file, file_find_data_t *file_data);
+
+LIBRARY_API
+int32_t
+find_next_file(file_handle_t handle, file_find_data_t *file_data);
+
+LIBRARY_API
+int32_t
+find_close(file_handle_t handle);
+
+LIBRARY_API
+uint64_t
+get_last_error();
 
 #ifdef __cplusplus
 }
