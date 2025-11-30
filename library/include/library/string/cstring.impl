@@ -1,12 +1,12 @@
 /**
  * @file cstring.impl
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2024-02-06
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 #ifndef LIB_STRING_IMPL_H
 #define LIB_STRING_IMPL_H
@@ -15,10 +15,10 @@
 
 
 inline
-void 
+void
 cstring_replicate(
-  const void *_src, 
-  void *_dst, 
+  const void *_src,
+  void *_dst,
   const allocator_t* allocator)
 {
   const cstring_t *src = (const cstring_t *)_src;
@@ -27,10 +27,10 @@ cstring_replicate(
   assert(src && !cstring_is_def(src));
   assert(dst);
   assert(
-    (cstring_is_def(dst) && allocator) || 
+    (cstring_is_def(dst) && allocator) ||
     (
-      !cstring_is_def(dst) && 
-      !allocator && 
+      !cstring_is_def(dst) &&
+      !allocator &&
       dst->str == NULL));
 
   if (cstring_is_def(dst))
@@ -40,7 +40,7 @@ cstring_replicate(
 }
 
 inline
-void 
+void
 cstring_fullswap(void *src, void *dst)
 {
   assert(src && dst);
@@ -52,9 +52,9 @@ cstring_fullswap(void *src, void *dst)
 }
 
 inline
-void 
+void
 cstring_serialize(
-  const void *_src, 
+  const void *_src,
   binary_stream_t* stream)
 {
   const cstring_t *src = (const cstring_t *)_src;
@@ -68,10 +68,10 @@ cstring_serialize(
 }
 
 inline
-void 
+void
 cstring_deserialize(
-  void *_dst, 
-  const allocator_t *allocator, 
+  void *_dst,
+  const allocator_t *allocator,
   binary_stream_t *stream)
 {
   cstring_t *dst = (cstring_t *)_dst;
@@ -91,7 +91,7 @@ cstring_deserialize(
 }
 
 inline
-uint32_t 
+uint32_t
 cstring_hash(const void *_ptr)
 {
   const cstring_t *str = (const cstring_t *)_ptr;
@@ -100,21 +100,21 @@ cstring_hash(const void *_ptr)
 }
 
 inline
-uint32_t 
+uint32_t
 cstring_is_equal(
-  const void *_lhs, 
+  const void *_lhs,
   const void *_rhs)
 {
   const cstring_t *lhs = (const cstring_t *)_lhs;
   const cstring_t *rhs = (const cstring_t *)_rhs;
   assert(lhs && rhs);
-  return 
-    !strcmp(lhs->str, rhs->str) && 
+  return
+    !strcmp(lhs->str, rhs->str) &&
     lhs->length == rhs->length;
 }
 
 inline
-void 
+void
 cstring_cleanup(void *ptr, const allocator_t* allocator)
 {
   cstring_t *string = (cstring_t *)ptr;
@@ -129,14 +129,14 @@ cstring_cleanup(void *ptr, const allocator_t* allocator)
 ////////////////////////////////////////////////////////////////////////////////
 
 inline
-void 
+void
 cstring_cleanup2(void *ptr)
 {
   cstring_cleanup(ptr, NULL);
 }
 
 inline
-void 
+void
 cstring_clear(cstring_t *string)
 {
   assert(string);
@@ -148,7 +148,7 @@ cstring_clear(cstring_t *string)
 }
 
 inline
-uint32_t 
+uint32_t
 cstring_assign(cstring_t *string, const char *str)
 {
   assert(string && !cstring_is_def(string));
@@ -156,7 +156,7 @@ cstring_assign(cstring_t *string, const char *str)
 
   if (string->str)
     cstring_clear(string);
-  
+
   string->length = strlen(str);
   string->str = (char *)string->allocator->mem_alloc(string->length + 1);
   memset(string->str, 0, string->length + 1);
@@ -168,7 +168,7 @@ inline
 void
 cstring_setup(
   cstring_t *string,
-  const char *str, 
+  const char *str,
   const allocator_t *allocator)
 {
   assert(string && allocator);
@@ -183,7 +183,7 @@ cstring_setup(
 inline
 void
 cstring_setup2(
-  cstring_t *string, 
+  cstring_t *string,
   const char *str)
 {
   cstring_setup(string, str, &g_default_allocator);
@@ -192,11 +192,11 @@ cstring_setup2(
 inline
 cstring_t *
 cstring_create(
-  const char *str, 
+  const char *str,
   const allocator_t *allocator)
 {
   assert(allocator);
-  
+
   {
     cstring_t *string = (cstring_t *)allocator->mem_alloc(sizeof(cstring_t));
     cstring_setup(string, str, allocator);
@@ -214,7 +214,7 @@ cstring_create2(const char *str)
 inline
 void
 cstring_free(
-  cstring_t *string, 
+  cstring_t *string,
   const allocator_t *allocator)
 {
   assert(string && allocator);

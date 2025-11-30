@@ -1,12 +1,12 @@
 /**
  * @file memory.c
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2025-10-11
- * 
+ *
  * @copyright Copyright (c) 2025
- * 
+ *
  */
 #include <assert.h>
 #include <stdlib.h>
@@ -37,29 +37,29 @@ set_realloc_callback(realloc_callback_t callback)
 }
 #endif
 
-void* 
+void*
 mem_aligned_alloc(size_t alignment, size_t size)
 {
   assert(0 && "mem_aligned_alloc is not implemented!");
   return NULL;
 }
 
-void 
+void
 mem_free_sized(void *ptr, size_t size)
 {
   assert(0 && "mem_free_sized is not implemented!");
 }
 
-void 
+void
 mem_free_aligned_sized(
-  void *ptr, 
-  size_t alignment, 
+  void *ptr,
+  size_t alignment,
   size_t size)
 {
   assert(0 && "mem_free_aligned_sized is not implemented!");
 }
 
-void* 
+void*
 mem_cont_alloc(size_t nmemb, size_t size)
 {
 #if LIBRARY_ALLOCATION_CALLBACKS
@@ -73,7 +73,7 @@ mem_cont_alloc(size_t nmemb, size_t size)
 #endif
 }
 
-void 
+void
 mem_free(void *ptr)
 {
 #if LIBRARY_ALLOCATION_CALLBACKS
@@ -84,7 +84,7 @@ mem_free(void *ptr)
   free(ptr);
 }
 
-void* 
+void*
 mem_alloc(size_t size)
 {
 #if LIBRARY_ALLOCATION_CALLBACKS
@@ -98,9 +98,9 @@ mem_alloc(size_t size)
 #endif
 }
 
-void* 
+void*
 mem_realloc(
-  void *ptr, 
+  void *ptr,
   size_t size)
 {
 #if LIBRARY_ALLOCATION_CALLBACKS

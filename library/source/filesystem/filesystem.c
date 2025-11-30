@@ -1,16 +1,16 @@
 /**
  * @file filesystem.impl
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2024-01-06
- * 
+ *
  * @copyright Copyright (c) 2024
- * 
+ *
  */
 #include <assert.h>
-#include <library/os/os.h>
 #include <library/filesystem/filesystem.h>
+#include <library/os/os.h>
 
 
 void
@@ -35,25 +35,25 @@ get_subdirectories(
     do {
         if (
           ffd.file_attributes & FILE_IS_DIRECTORY &&
-          strcmp(ffd.name, ".") && 
+          strcmp(ffd.name, ".") &&
           strcmp(ffd.name, "..")) {
           memset(
-            entries->dir_names[entries->used], 
-            0, 
+            entries->dir_names[entries->used],
+            0,
             sizeof(entries->dir_names[entries->used]));
 
           memcpy(
-            entries->dir_names[entries->used], 
-            ffd.name, 
+            entries->dir_names[entries->used],
+            ffd.name,
             strlen(ffd.name));
 
           entries->used++;
         }
     } while (find_next_file(hFind, &ffd) != 0);
-  
+
     error = get_last_error();
     assert(
-      error == LIBRARY_ERROR_NO_MORE_FILES && 
+      error == LIBRARY_ERROR_NO_MORE_FILES &&
       "unknown error in get_subdirectories!");
 
     find_close(hFind);

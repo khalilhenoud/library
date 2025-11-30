@@ -1,12 +1,12 @@
 /**
  * @file cvector.impl
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2024-08-20
- * 
+ *
  * @copyright Copyright (c) 2024
- * 
+ *
  */
 #ifndef LIB_VECTOR_INL
 #define LIB_VECTOR_INL
@@ -15,10 +15,10 @@
 
 
 inline
-void 
+void
 cvector_replicate(
-  const void *_src, 
-  void *_dst, 
+  const void *_src,
+  void *_dst,
   const allocator_t *allocator)
 {
   const cvector_t *src = (const cvector_t *)_src;
@@ -27,17 +27,17 @@ cvector_replicate(
   assert(src && !cvector_is_def(src));
   assert(dst);
   assert(
-    (cvector_is_def(dst) && allocator) || 
+    (cvector_is_def(dst) && allocator) ||
     (
-      !cvector_is_def(dst) && 
-      !allocator && 
+      !cvector_is_def(dst) &&
+      !allocator &&
       cvector_empty(dst) &&
       elem_data_identical(&dst->elem_data, &src->elem_data)));
 
   if (cvector_is_def(dst)) {
     cvector_setup(
-      dst, 
-      pack_type_data(src->elem_data.type_id, src->elem_data.size), 
+      dst,
+      pack_type_data(src->elem_data.type_id, src->elem_data.size),
       src->capacity, allocator);
   } else
     cvector_grow(dst, src->capacity);
@@ -83,7 +83,7 @@ cvector_serialize(
     binary_stream_write(stream, &src->capacity, sizeof(size_t));
 
     if (serialize) {
-      const uint8_t *data = (const uint8_t *)src->data; 
+      const uint8_t *data = (const uint8_t *)src->data;
       size_t i = 0;
       for (; i < src->size; ++i)
         serialize(data + i * src->elem_data.size, stream);
@@ -93,10 +93,10 @@ cvector_serialize(
 }
 
 inline
-void 
+void
 cvector_deserialize(
-  void *_dst, 
-  const allocator_t *allocator, 
+  void *_dst,
+  const allocator_t *allocator,
   binary_stream_t *stream)
 {
   cvector_t *dst = (cvector_t *)_dst;
@@ -118,14 +118,14 @@ cvector_deserialize(
       dst->data = allocator->mem_alloc(dst->capacity * dst->elem_data.size);
 
       if (deserialize) {
-        uint8_t *data = (uint8_t *)dst->data; 
+        uint8_t *data = (uint8_t *)dst->data;
         size_t i = 0;
         for (; i < dst->size; ++i)
           deserialize(data + i * dst->elem_data.size, allocator, stream);
       } else if (dst->size)
         binary_stream_read(
-          stream, 
-          (uint8_t *)dst->data, 
+          stream,
+          (uint8_t *)dst->data,
           dst->size * dst->elem_data.size, dst->size * dst->elem_data.size);
     }
   }
@@ -144,10 +144,10 @@ cvector_cleanup(void *ptr, const allocator_t* allocator)
 
     if (cleanup) {
       size_t i = 0, count = vec->size;
-      uint32_t owns_alloc = 
-        (vec->elem_data.vtable->fn_owns_alloc == NULL) ? 0 : 
+      uint32_t owns_alloc =
+        (vec->elem_data.vtable->fn_owns_alloc == NULL) ? 0 :
         vec->elem_data.vtable->fn_owns_alloc();
-        
+
       for (; i < count; ++i)
         cleanup(
           cvector_at(vec, i), owns_alloc ? NULL : vec->allocator);
@@ -167,7 +167,7 @@ void
 cvector_setup(
   cvector_t* vec,
   type_data_t type_data,
-  size_t capacity, 
+  size_t capacity,
   const allocator_t* allocator)
 {
   assert(vec && allocator);
@@ -178,40 +178,40 @@ cvector_setup(
     vec->capacity = capacity;
     vec->allocator = allocator;
 
-    vec->data = 
+    vec->data =
       capacity ? allocator->mem_alloc(capacity * vec->elem_data.size) : NULL;
   }
 }
 
 inline
-size_t 
-cvector_capacity(const cvector_t* vec) 
-{ 
-  assert(vec && !cvector_is_def(vec)); 
-  return vec->capacity; 
+size_t
+cvector_capacity(const cvector_t* vec)
+{
+  assert(vec && !cvector_is_def(vec));
+  return vec->capacity;
 }
 
 inline
 size_t
-cvector_size(const cvector_t* vec) 
-{ 
-  assert(vec && !cvector_is_def(vec)); 
-  return vec->size; 
+cvector_size(const cvector_t* vec)
+{
+  assert(vec && !cvector_is_def(vec));
+  return vec->size;
 }
 
 inline
 size_t
-cvector_elem_size(const cvector_t* vec) 
-{ 
-  assert(vec && !cvector_is_def(vec));  
-  return vec->elem_data.size; 
+cvector_elem_size(const cvector_t* vec)
+{
+  assert(vec && !cvector_is_def(vec));
+  return vec->elem_data.size;
 }
 
 inline
 int32_t
-cvector_empty(const cvector_t* vec) 
-{ 
-  assert(vec && !cvector_is_def(vec)); 
+cvector_empty(const cvector_t* vec)
+{
+  assert(vec && !cvector_is_def(vec));
   return vec->size == 0;
 }
 
@@ -234,7 +234,7 @@ cvector_grow(cvector_t* vec, size_t new_capacity)
 {
   assert(vec && !cvector_is_def(vec));
   assert(
-    new_capacity >= vec->size && 
+    new_capacity >= vec->size &&
     "cannot shrink beyond the current elem count!");
 
   {
@@ -244,8 +244,8 @@ cvector_grow(cvector_t* vec, size_t new_capacity)
       vec->data = NULL;
       vec->capacity = new_capacity;
     } else {
-      void* new_ptr = vec->capacity ? 
-        vec->allocator->mem_realloc(vec->data, to_realloc) : 
+      void* new_ptr = vec->capacity ?
+        vec->allocator->mem_realloc(vec->data, to_realloc) :
         vec->allocator->mem_alloc(to_realloc);
       assert(new_ptr);
       vec->data = new_ptr;
@@ -302,10 +302,10 @@ cvector_erase(cvector_t* vec, size_t index)
     fn_cleanup_t cleanup = elem_data_get_cleanup_fn(&vec->elem_data);
     if (cleanup)
       cleanup(cvector_at(vec, index), vec->allocator);
-    --vec->size; 
+    --vec->size;
     memmove(
-      cvector_at_unchecked(vec, index), 
-      cvector_at_unchecked(vec, index + 1), 
+      cvector_at_unchecked(vec, index),
+      cvector_at_unchecked(vec, index + 1),
       vec->elem_data.size * (vec->size - index));
   }
 }

@@ -1,19 +1,19 @@
 /**
  * @file default_registry.c
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2025-02-15
- * 
+ *
  * @copyright Copyright (c) 2025
- * 
+ *
  */
-#include <library/core/core.h>
-#include <library/type_registry/type_registry.h>
-#include <library/containers/cvector.h>
-#include <library/containers/clist.h>
 #include <library/containers/chashmap.h>
+#include <library/containers/clist.h>
+#include <library/containers/cvector.h>
+#include <library/core/core.h>
 #include <library/string/cstring.h>
+#include <library/type_registry/type_registry.h>
 
 
 INITIALIZER(register_cvector_t)
@@ -104,14 +104,14 @@ INITIALIZER(register_cstring_t)
   register_type(get_type_id(cstring_t), &vtable);
 }
 
-uint32_t 
+uint32_t
 type_equal_1b(const void* key1, const void* key2)
 {
   return *(uint8_t *)(key1) == *(uint8_t *)(key2);
 }
 
 size_t type_size_1b(void) { return 1; }
-uint32_t 
+uint32_t
 hash_1bytes(const void *_ptr)
 {
   assert(_ptr);
@@ -121,14 +121,14 @@ hash_1bytes(const void *_ptr)
   }
 }
 
-uint32_t 
+uint32_t
 type_equal_2b(const void* key1, const void* key2)
 {
   return *(uint16_t *)(key1) == *(uint16_t *)(key2);
 }
 
 size_t type_size_2b(void) { return 2; }
-uint32_t 
+uint32_t
 hash_2bytes(const void *_ptr)
 {
   assert(_ptr);
@@ -138,20 +138,20 @@ hash_2bytes(const void *_ptr)
   }
 }
 
-uint32_t 
+uint32_t
 type_equal_4b(const void* key1, const void* key2)
 {
   return *(uint32_t *)(key1) == *(uint32_t *)(key2);
 }
 
-uint32_t 
+uint32_t
 type_equal_4bf(const void* key1, const void* key2)
 {
   return *(float *)(key1) == *(float *)(key2);
 }
 
 size_t type_size_4b(void) { return 4; }
-uint32_t 
+uint32_t
 hash_4bytes(const void *_ptr)
 {
   assert(_ptr);
@@ -161,20 +161,20 @@ hash_4bytes(const void *_ptr)
   }
 }
 
-uint32_t 
+uint32_t
 type_equal_8b(const void* key1, const void* key2)
 {
   return *(uint64_t *)(key1) == *(uint64_t *)(key2);
 }
 
-uint32_t 
+uint32_t
 type_equal_8bf(const void* key1, const void* key2)
 {
   return *(double *)(key1) == *(double *)(key2);
 }
 
 size_t type_size_8b(void) { return 8; }
-uint32_t 
+uint32_t
 hash_8bytes(const void *_ptr)
 {
   assert(_ptr);

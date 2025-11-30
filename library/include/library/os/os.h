@@ -4,9 +4,9 @@
  * @brief wrapper to all non-window specific os functions
  * @version 0.1
  * @date 2025-11-11
- * 
+ *
  * @copyright Copyright (c) 2025
- * 
+ *
  */
 #ifndef LIBRARY_OS_H
 #define LIBRARY_OS_H

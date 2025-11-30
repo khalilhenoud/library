@@ -1,22 +1,22 @@
 /**
  * @file type_registry.c
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2024-12-31
- * 
+ *
  * @copyright Copyright (c) 2024
- * 
+ *
  */
-#include <stdio.h>
 #include <assert.h>
+#include <stdio.h>
 #include <library/type_registry/type_registry.h>
 
 #define REGISTRY_TABLE_SIZE 2048
 #define REGISTRY_MAX_SIZE 1024
 #define ALIASES_LIMIT 256
 #define INVALID 0
- 
+
 
 // we allocate twice the size to minimize collisions (same logic as hashmaps).
 static
@@ -24,10 +24,10 @@ uint32_t key_to_type[REGISTRY_TABLE_SIZE];
 static
 uint32_t key_to_index[REGISTRY_TABLE_SIZE];
 
-static 
+static
 uint8_t vtables[REGISTRY_MAX_SIZE * sizeof(vtable_t)];
 
-static 
+static
 uint32_t total_registered;
 
 static
@@ -69,7 +69,7 @@ is_type_registered(const type_id_t type)
   return (key_to_type[get_key(type)] == type) ? 1 : 0;
 }
 
-void 
+void
 register_type(const type_id_t type, const vtable_t *src)
 {
   assert(total_registered < REGISTRY_MAX_SIZE && "no more space to register!");
@@ -85,7 +85,7 @@ register_type(const type_id_t type, const vtable_t *src)
   }
 }
 
-void 
+void
 associate_alias(const type_id_t type, const type_id_t alias)
 {
   assert(total_aliases < ALIASES_LIMIT && "exceeded aliases limit!");
@@ -102,7 +102,7 @@ associate_alias(const type_id_t type, const type_id_t alias)
   }
 }
 
-vtable_t * 
+vtable_t *
 get_vtable(const type_id_t type)
 {
   assert(is_type_registered(type) && "type has to be registered!");

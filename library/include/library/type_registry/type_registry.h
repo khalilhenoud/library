@@ -1,12 +1,12 @@
 /**
  * @file type_registry.h
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2024-12-31
- * 
+ *
  * @copyright Copyright (c) 2024
- * 
+ *
  */
 #ifndef TYPE_REGISTRY_H
 #define TYPE_REGISTRY_H
@@ -15,9 +15,9 @@
 extern "C" {
 #endif
 
+#include <assert.h>
 #include <stdint.h>
 #include <string.h>
-#include <assert.h>
 #include <library/internal/module.h>
 #include <library/hash/fnv.h>
 
@@ -26,7 +26,7 @@ extern "C" {
   ((uint64_t)hash_fnv1a_32(#type, strlen(#type)) | (sizeof(type) << 32))
 #define pack_type_data(type_hash, type_size) \
   ((uint64_t)(type_hash) | ((type_size) << 32))
-#define get_type_id_from_data(type_data) ((type_data) & ((1ull << 32) - 1)) 
+#define get_type_id_from_data(type_data) ((type_data) & ((1ull << 32) - 1))
 #define get_type_size_from_data(type_data) ((type_data) >> 32)
 
 
@@ -75,7 +75,7 @@ struct vtable_t {
   fn_cleanup_t        fn_cleanup;
 } vtable_t;
 
-// NOTE: some types are not registered, meaning no vtable can be queried. to 
+// NOTE: some types are not registered, meaning no vtable can be queried. to
 // work with containers, we require at least the type size.
 // size is useful for quick access and caching (one less function call).
 typedef
@@ -95,14 +95,14 @@ get_type_data_from_elem_data(const container_elem_data_t *src)
 inline
 uint32_t
 elem_data_identical(
-  const container_elem_data_t *left, 
+  const container_elem_data_t *left,
   const container_elem_data_t *right)
 {
   assert(left && right && "cannot be null!");
 
-  return 
-    left->size == right->size && 
-    left->type_id == right->type_id && 
+  return
+    left->size == right->size &&
+    left->type_id == right->type_id &&
     left->vtable == right->vtable;
 }
 
@@ -111,8 +111,8 @@ fn_cleanup_t
 elem_data_get_cleanup_fn(const container_elem_data_t *elem)
 {
   assert(elem);
-  return 
-    (elem->vtable == NULL || elem->vtable->fn_cleanup == NULL) ? 
+  return
+    (elem->vtable == NULL || elem->vtable->fn_cleanup == NULL) ?
     NULL : elem->vtable->fn_cleanup;
 }
 
@@ -121,8 +121,8 @@ fn_replicate_t
 elem_data_get_replicate_fn(const container_elem_data_t *elem)
 {
   assert(elem);
-  return 
-    (elem->vtable == NULL || elem->vtable->fn_replicate == NULL) ? 
+  return
+    (elem->vtable == NULL || elem->vtable->fn_replicate == NULL) ?
     NULL : elem->vtable->fn_replicate;
 }
 
@@ -131,8 +131,8 @@ fn_hash_t
 elem_data_get_hash_fn(const container_elem_data_t *elem)
 {
   assert(elem);
-  return 
-    (elem->vtable == NULL || elem->vtable->fn_hash == NULL) ? 
+  return
+    (elem->vtable == NULL || elem->vtable->fn_hash == NULL) ?
     NULL : elem->vtable->fn_hash;
 }
 
@@ -141,8 +141,8 @@ fn_is_equal_t
 elem_data_get_is_equal_fn(const container_elem_data_t *elem)
 {
   assert(elem);
-    return 
-    (elem->vtable == NULL || elem->vtable->fn_is_equal == NULL) ? 
+    return
+    (elem->vtable == NULL || elem->vtable->fn_is_equal == NULL) ?
     NULL : elem->vtable->fn_is_equal;
 }
 
@@ -151,8 +151,8 @@ fn_serialize_t
 elem_data_get_serialize_fn(const container_elem_data_t *elem)
 {
   assert(elem);
-    return 
-    (elem->vtable == NULL || elem->vtable->fn_serialize == NULL) ? 
+    return
+    (elem->vtable == NULL || elem->vtable->fn_serialize == NULL) ?
     NULL : elem->vtable->fn_serialize;
 }
 
@@ -161,8 +161,8 @@ fn_deserialize_t
 elem_data_get_deserialize_fn(const container_elem_data_t *elem)
 {
   assert(elem);
-    return 
-    (elem->vtable == NULL || elem->vtable->fn_deserialize == NULL) ? 
+    return
+    (elem->vtable == NULL || elem->vtable->fn_deserialize == NULL) ?
     NULL : elem->vtable->fn_deserialize;
 }
 
@@ -177,7 +177,7 @@ elem_data_clear(container_elem_data_t *elem)
 }
 
 LIBRARY_API
-void 
+void
 register_type(const type_id_t type, const vtable_t *ptr);
 
 LIBRARY_API
@@ -189,11 +189,11 @@ void
 associate_alias(const type_id_t registered, const type_id_t alias);
 
 LIBRARY_API
-vtable_t * 
+vtable_t *
 get_vtable(const type_id_t type);
 
 inline
-container_elem_data_t 
+container_elem_data_t
 get_cont_elem_data(type_id_t id, size_t size)
 {
   container_elem_data_t data;
@@ -214,11 +214,11 @@ get_cont_elem_data(type_id_t id, size_t size)
 }
 
 inline
-container_elem_data_t 
+container_elem_data_t
 get_cont_elem_data_from_packed(type_data_t type_data)
 {
   return get_cont_elem_data(
-    get_type_id_from_data(type_data), 
+    get_type_id_from_data(type_data),
     get_type_size_from_data(type_data));
 }
 

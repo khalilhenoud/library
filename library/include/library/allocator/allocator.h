@@ -1,12 +1,12 @@
 /**
  * @file allocator.h
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2023-01-02
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 #ifndef ALLOCATOR_H
 #define ALLOCATOR_H
@@ -19,7 +19,7 @@ extern "C" {
 
 
 // TODO: add stack array allocator
-typedef 
+typedef
 struct allocator_t {
   void* (*mem_alloc)(size_t size);
   void (*mem_free)(void *ptr);
@@ -29,7 +29,7 @@ struct allocator_t {
 } allocator_t;
 
 // export a default allocator
-LIBRARY_API 
+LIBRARY_API
 extern const allocator_t g_default_allocator;
 
 #ifdef __cplusplus

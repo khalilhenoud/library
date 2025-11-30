@@ -1,21 +1,21 @@
 /**
  * @file core.h
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2024-12-31
- * 
+ *
  * @copyright Copyright (c) 2024
- * 
+ *
  */
 #ifndef CORE_H
 #define CORE_H
 
 #ifndef __FUNCTION_NAME__
     #ifdef WIN32
-        #define __FUNCTION_NAME__   __FUNCTION__  
+        #define __FUNCTION_NAME__   __FUNCTION__
     #else
-        #define __FUNCTION_NAME__   __func__ 
+        #define __FUNCTION_NAME__   __func__
     #endif
 #endif
 

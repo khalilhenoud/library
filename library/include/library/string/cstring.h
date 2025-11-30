@@ -1,12 +1,12 @@
 /**
  * @file string.h
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2023-12-22
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 #ifndef LIB_STRING_H
 #define LIB_STRING_H
@@ -15,8 +15,8 @@
 extern "C" {
 #endif
 
-#include <stdint.h>
 #include <assert.h>
+#include <stdint.h>
 #include <string.h>
 #include <library/allocator/allocator.h>
 #include <library/hash/fnv.h>
@@ -54,7 +54,7 @@ struct cstring_t {
 } cstring_t;
 
 inline
-void 
+void
 cstring_def(void *ptr)
 {
   assert(ptr);
@@ -62,7 +62,7 @@ cstring_def(void *ptr)
 }
 
 inline
-uint32_t 
+uint32_t
 cstring_is_def(const void *ptr)
 {
   assert(ptr);
@@ -73,54 +73,54 @@ cstring_is_def(const void *ptr)
   }
 }
 
-/** 
+/**
  * NOTE: will assert if 'src' is not initialized, or if 'dst' is initialized but
  * with non-zero size.
  */
-void 
+void
 cstring_replicate(
-  const void *src, 
-  void *dst, 
+  const void *src,
+  void *dst,
   const allocator_t* allocator);
 
-void 
+void
 cstring_fullswap(void* lhs, void* rhs);
 
-void 
+void
 cstring_serialize(
-  const void *src, 
+  const void *src,
   binary_stream_t* stream);
 
-void 
+void
 cstring_deserialize(
-  void *dst, 
-  const allocator_t *allocator, 
+  void *dst,
+  const allocator_t *allocator,
   binary_stream_t* stream);
 
-uint32_t 
+uint32_t
 cstring_hash(const void *ptr);
 
-uint32_t 
+uint32_t
 cstring_is_equal(
-  const void *lhs, 
+  const void *lhs,
   const void *rhs);
 
 inline
-size_t 
+size_t
 cstring_type_size(void)
 {
   return sizeof(cstring_t);
 }
 
 inline
-uint32_t 
+uint32_t
 cstring_owns_alloc(void)
 {
   return 1;
 }
 
 inline
-const allocator_t* 
+const allocator_t*
 cstring_get_alloc(const void *ptr)
 {
   const cstring_t *cstr = (const cstring_t *)ptr;
@@ -128,37 +128,37 @@ cstring_get_alloc(const void *ptr)
   return cstr->allocator;
 }
 
-void 
+void
 cstring_cleanup(void *ptr, const allocator_t* allocator);
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void 
+void
 cstring_cleanup2(void *ptr);
 
 // clears the internal string.
-void 
+void
 cstring_clear(cstring_t* string);
 
 // assign str to the string and return its size.
-uint32_t 
+uint32_t
 cstring_assign(cstring_t *string, const char *str);
 
 void
 cstring_setup(
   cstring_t *string,
-  const char *str, 
+  const char *str,
   const allocator_t *allocator);
 
 void
 cstring_setup2(
-  cstring_t *string, 
+  cstring_t *string,
   const char *str);
 
 // NOTE: allocates and sets up the string.
 cstring_t *
 cstring_create(
-  const char *str, 
+  const char *str,
   const allocator_t *allocator);
 
 cstring_t *
@@ -167,7 +167,7 @@ cstring_create2(const char *str);
 // NOTE: deallocate the instance after cleanup.
 void
 cstring_free(
-  cstring_t *string, 
+  cstring_t *string,
   const allocator_t *allocator);
 
 void

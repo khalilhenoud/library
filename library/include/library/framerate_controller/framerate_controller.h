@@ -1,12 +1,12 @@
 /**
  * @file framerate_controller.h
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2023-01-23
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 #ifndef FRAMERATE_CONTROLLER_H
 #define FRAMERATE_CONTROLLER_H
@@ -34,8 +34,8 @@ enum framerate_duration_t {
 LIBRARY_API
 framerate_controller_t *
 controller_allocate(
-  const allocator_t *allocator, 
-  uint64_t target_fps, 
+  const allocator_t *allocator,
+  uint64_t target_fps,
   uint32_t locked);
 
 LIBRARY_API
@@ -59,7 +59,7 @@ get_current_fps(framerate_controller_t *controller);
 LIBRARY_API
 void
 lock_fps(
-  framerate_controller_t *controller, 
+  framerate_controller_t *controller,
   uint64_t target_fps);
 
 LIBRARY_API

@@ -1,12 +1,12 @@
 /**
  * @file binary_stream.h
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2024-12-24
- * 
+ *
  * @copyright Copyright (c) 2024
- * 
+ *
  */
 #ifndef LIB_BINARY_STREAM_H
 #define LIB_BINARY_STREAM_H
@@ -66,9 +66,9 @@ binary_stream_write(binary_stream_t *stream, const void *src, size_t length);
 LIBRARY_API
 uint32_t
 binary_stream_read(
-  binary_stream_t *stream, 
-  uint8_t buffer[], 
-  size_t buffer_size, 
+  binary_stream_t *stream,
+  uint8_t buffer[],
+  size_t buffer_size,
   uint32_t to_read);
 
 #ifdef __cplusplus

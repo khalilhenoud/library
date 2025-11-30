@@ -4,9 +4,9 @@
  * @brief hash table (linear probing)
  * @version 0.1
  * @date 2024-09-21
- * 
+ *
  * @copyright Copyright (c) 2024
- * 
+ *
  */
 #ifndef LIB_HASHMAP_H
 #define LIB_HASHMAP_H
@@ -15,8 +15,8 @@
 extern "C" {
 #endif
 
-#include <stdint.h>
 #include <assert.h>
+#include <stdint.h>
 #include <library/allocator/allocator.h>
 #include <library/containers/cvector.h>
 #include <library/type_registry/type_registry.h>
@@ -75,7 +75,7 @@ struct chashmap_iterator_t {
 } chashmap_iterator_t;
 
 inline
-void 
+void
 chashmap_def(void *ptr)
 {
   assert(ptr);
@@ -83,57 +83,57 @@ chashmap_def(void *ptr)
 }
 
 inline
-uint32_t 
+uint32_t
 chashmap_is_def(const void *ptr)
 {
-  chashmap_t def; 
+  chashmap_t def;
   chashmap_def(&def);
   const chashmap_t* hashmap = (const chashmap_t *)ptr;
-  return 
-    cvector_is_def(&(hashmap->keys)) && 
-    cvector_is_def(&(hashmap->values)) && 
-    cvector_is_def(&(hashmap->indices)) && 
+  return
+    cvector_is_def(&(hashmap->keys)) &&
+    cvector_is_def(&(hashmap->values)) &&
+    cvector_is_def(&(hashmap->indices)) &&
     hashmap->max_load_factor == def.max_load_factor &&
     hashmap->allocator == def.allocator;
 }
 
 /** NOTE: follows the rules established by cvector in terms of assertion. */
-void 
+void
 chashmap_replicate(
-  const void *src, 
-  void *dst, 
+  const void *src,
+  void *dst,
   const allocator_t *allocator);
 
 void
 chashmap_fullswap(void* lhs, void* rhs);
 
-void 
+void
 chashmap_serialize(
-  const void *src, 
+  const void *src,
   binary_stream_t* stream);
 
-void 
+void
 chashmap_deserialize(
-  void *dst, 
-  const allocator_t *allocator, 
+  void *dst,
+  const allocator_t *allocator,
   binary_stream_t* stream);
 
 inline
-size_t 
+size_t
 chashmap_type_size(void)
 {
   return sizeof(chashmap_t);
 }
 
 inline
-uint32_t 
+uint32_t
 chashmap_type_id_count(void)
 {
   return 2;
 }
 
 inline
-void 
+void
 chashmap_type_ids(const void *src, type_id_t *ids)
 {
   assert(src && ids);
@@ -145,14 +145,14 @@ chashmap_type_ids(const void *src, type_id_t *ids)
 }
 
 inline
-uint32_t 
+uint32_t
 chashmap_owns_alloc(void)
 {
-  return 1; 
+  return 1;
 }
 
 inline
-const allocator_t* 
+const allocator_t*
 chashmap_get_alloc(const void *ptr)
 {
   assert(ptr && !chashmap_is_def(ptr));
@@ -165,14 +165,14 @@ chashmap_get_alloc(const void *ptr)
 
 void
 chashmap_cleanup(
-  void *hashmap, 
+  void *hashmap,
   const allocator_t *allocator);
 
 ////////////////////////////////////////////////////////////////////////////////
 /** will not allocate until the first use. */
 void
 chashmap_setup(
-  chashmap_t* hashmap, 
+  chashmap_t* hashmap,
   type_data_t key_type_data,
   type_data_t elem_type_data,
   const allocator_t* allocator,
@@ -227,7 +227,7 @@ chashmap_max_load_factor(chashmap_t* hashmap);
 // sets the max load factor, might trigger a rehash
 void
 chashmap_set_max_load_factor(
-  chashmap_t* hashmap, 
+  chashmap_t* hashmap,
   const float max_load_factor);
 
 // reserves a certain number of buckets and rehashes the table
@@ -274,7 +274,7 @@ chashmap_iter_equal(chashmap_iterator_t left, chashmap_iterator_t right);
 
 #define chashmap_value(iter, value_type) \
   ((value_type*)((iter)->map->values.data) + (iter)->index)
-  
+
 
 #define CHASHTABLE_INVALID_INDEX ((uint32_t)-1)
 #define CHASHTABLE_INIT_SIZE 16

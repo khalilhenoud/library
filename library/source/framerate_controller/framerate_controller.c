@@ -1,12 +1,12 @@
 /**
  * @file framerate_controller.c
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2024-01-13
- * 
+ *
  * @copyright Copyright (c) 2024
- * 
+ *
  */
 #include <assert.h>
 #include <math.h>
@@ -52,7 +52,7 @@ populate_at_start(framerate_controller_t *controller)
   assert(controller);
 
   if (controller->internal.freq_counters_supported) {
-    controller->internal.freq_counters_supported = 
+    controller->internal.freq_counters_supported =
       get_performance_frequency(&controller->internal.ticks_per_second);
     get_performance_counter(&controller->internal.start);
   } else
@@ -75,12 +75,12 @@ inline
 double
 get_cycle_duration(
   framerate_controller_t *controller,
-  uint64_t start, 
+  uint64_t start,
   uint64_t end,
   framerate_duration_t format)
 {
   assert(controller);
-  
+
   {
     double mult = format == FPS_DURATION_MS ? 1000. : 1.;
     if (controller->internal.freq_counters_supported) {
@@ -96,8 +96,8 @@ get_cycle_duration(
 static
 void
 initialize_controller(
-  framerate_controller_t *controller, 
-  uint64_t target_fps, 
+  framerate_controller_t *controller,
+  uint64_t target_fps,
   uint32_t locked)
 {
   assert(controller);
@@ -106,7 +106,7 @@ initialize_controller(
   controller->locked = locked;
 
   controller->internal.ticks_per_second = 0;
-  controller->internal.freq_counters_supported = 
+  controller->internal.freq_counters_supported =
     get_performance_frequency(&controller->internal.ticks_per_second);
 
   populate_at_start(controller);
@@ -117,8 +117,8 @@ initialize_controller(
 
 framerate_controller_t *
 controller_allocate(
-  const allocator_t *allocator, 
-  uint64_t target_fps, 
+  const allocator_t *allocator,
+  uint64_t target_fps,
   uint32_t locked)
 {
   framerate_controller_t *controller = allocator->mem_alloc(
@@ -129,7 +129,7 @@ controller_allocate(
 
 void
 controller_free(
-  framerate_controller_t *controller, 
+  framerate_controller_t *controller,
   const allocator_t *allocator)
 {
   assert(controller);
@@ -145,9 +145,9 @@ controller_start(framerate_controller_t *controller)
     uint64_t prior_start = controller->internal.start;
     populate_at_start(controller);
     return get_cycle_duration(
-      controller, 
-      prior_start, 
-      controller->internal.start, 
+      controller,
+      prior_start,
+      controller->internal.start,
       FPS_DURATION_SECONDS);
   }
 }
@@ -161,27 +161,27 @@ controller_end(framerate_controller_t *controller)
     double duration_ms = 1.;
     double previous_fps = controller->internal.current_fps;
     populate_at_end(controller);
-    duration_ms = 
+    duration_ms =
       get_cycle_duration(
-        controller, 
-        controller->internal.start, 
-        controller->internal.end, 
+        controller,
+        controller->internal.start,
+        controller->internal.end,
         FPS_DURATION_MS);
     duration_ms = is_zero(duration_ms) ? 1. : duration_ms;
     controller->internal.current_fps = 1000. / duration_ms;
 
     if (
-      controller->locked && 
+      controller->locked &&
       controller->internal.target_frame_ms > (duration_ms + BUFFER_TIME_MS)) {
-      double ms_sleep = 
+      double ms_sleep =
         controller->internal.target_frame_ms - (duration_ms + BUFFER_TIME_MS);
 
-      sleep((uint64_t)ms_sleep); 
+      sleep((uint64_t)ms_sleep);
     }
 
     return previous_fps;
   }
-} 
+}
 
 double
 get_current_fps(framerate_controller_t *controller)
@@ -192,7 +192,7 @@ get_current_fps(framerate_controller_t *controller)
 
 void
 lock_fps(
-  framerate_controller_t *controller, 
+  framerate_controller_t *controller,
   uint64_t target_fps)
 {
   assert(controller);

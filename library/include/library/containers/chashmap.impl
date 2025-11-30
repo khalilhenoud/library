@@ -1,12 +1,12 @@
 /**
  * @file chashmap.impl
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2024-09-21
- * 
+ *
  * @copyright Copyright (c) 2024
- * 
+ *
  */
 #ifndef LIB_HASHMAP_INL
 #define LIB_HASHMAP_INL
@@ -15,16 +15,16 @@
 #include <library/streams/binary_stream.h>
 
 
-/** 
+/**
  * NOTE: will assert if 'src' is not initialized, or if 'dst' is initialized but
  * with non-zero size. type-critical member variables should also match.
  * NOTE: either 'dst' is def or 'allocator' is NULL, not both (we assert).
  */
 inline
-void 
+void
 chashmap_replicate(
-  const void *p_src, 
-  void *p_dst, 
+  const void *p_src,
+  void *p_dst,
   const allocator_t *allocator)
 {
   const chashmap_t *src = (const chashmap_t *)p_src;
@@ -34,22 +34,22 @@ chashmap_replicate(
   assert(dst);
 
   assert(
-    (chashmap_is_def(dst) && allocator) || 
+    (chashmap_is_def(dst) && allocator) ||
     (
-      !chashmap_is_def(dst) && 
-      !allocator && 
+      !chashmap_is_def(dst) &&
+      !allocator &&
       dst->indices.size == 0 &&
-      dst->values.size == 0 && 
+      dst->values.size == 0 &&
       elem_data_identical(&dst->values.elem_data, &src->values.elem_data) &&
-      dst->keys.size == 0 && 
+      dst->keys.size == 0 &&
       elem_data_identical(&dst->keys.elem_data, &src->keys.elem_data)));
 
   if (chashmap_is_def(dst)) {
     chashmap_setup(
-      dst, 
-      get_type_data_from_elem_data(&src->keys.elem_data), 
+      dst,
+      get_type_data_from_elem_data(&src->keys.elem_data),
       get_type_data_from_elem_data(&src->values.elem_data),
-      allocator, 
+      allocator,
       src->max_load_factor);
   } else {
     cvector_grow(&dst->indices, src->indices.capacity);
@@ -95,10 +95,10 @@ chashmap_serialize(
 }
 
 inline
-void 
+void
 chashmap_deserialize(
-  void *p_dst, 
-  const allocator_t *allocator, 
+  void *p_dst,
+  const allocator_t *allocator,
   binary_stream_t *stream)
 {
   chashmap_t *dst = (chashmap_t *)p_dst;
@@ -134,7 +134,7 @@ chashmap_cleanup(void *p_hashmap, const allocator_t *allocator)
 inline
 void
 chashmap_setup(
-  chashmap_t *hashmap, 
+  chashmap_t *hashmap,
   type_data_t key_type_data,
   type_data_t value_type_data,
   const allocator_t *allocator,
@@ -151,15 +151,15 @@ chashmap_setup(
     cvector_setup(&hashmap->indices, get_type_data(uint32_t), 0, allocator);
 
     assert(
-      hashmap->keys.elem_data.vtable && 
+      hashmap->keys.elem_data.vtable &&
       hashmap->keys.elem_data.vtable->fn_hash &&
       "key hash function must exist!");
 
     assert(
       ((
-        hashmap->keys.elem_data.vtable->fn_replicate && 
+        hashmap->keys.elem_data.vtable->fn_replicate &&
         hashmap->keys.elem_data.vtable->fn_cleanup) || (
-        !hashmap->keys.elem_data.vtable->fn_replicate && 
+        !hashmap->keys.elem_data.vtable->fn_replicate &&
         !hashmap->keys.elem_data.vtable->fn_cleanup)) &&
         "if key_replicate_fn is provided, key_cleanup_fn must as well and vice"
         "versa!");
@@ -265,7 +265,7 @@ chashmap_max_load_factor(chashmap_t* hashmap)
 inline
 void
 chashmap_set_max_load_factor(
-  chashmap_t* hashmap, 
+  chashmap_t* hashmap,
   const float max_load_factor)
 {
   assert(hashmap && !chashmap_is_def(hashmap));
@@ -291,16 +291,16 @@ chashmap_rehash(chashmap_t* hashmap, size_t count)
     cvector_grow(&hashmap->keys, count);
     cvector_resize(&hashmap->indices, count);
     cvector_grow(&hashmap->indices, count);
-    
-    for (i = 0; i < count; ++i) 
+
+    for (i = 0; i < count; ++i)
       *cvector_as(&hashmap->indices, i, uint32_t) = CHASHTABLE_INVALID_INDEX;
-    
+
     // iterate over the keys, hash them and set the index where it needs to be.
     for (i = 0, total = cvector_size(&hashmap->keys); i < total; ++i) {
       hashed = (uint32_t)(chashmap_hash_calc(hashmap)(
         cvector_at(&hashmap->keys, i)) % count);
       while (
-        *cvector_as(&hashmap->indices, hashed, uint32_t) != 
+        *cvector_as(&hashmap->indices, hashed, uint32_t) !=
         CHASHTABLE_INVALID_INDEX)
         hashed = (hashed + 1) % count;
       *cvector_as(&hashmap->indices, hashed, uint32_t) = i;

@@ -1,12 +1,12 @@
 /**
  * @file fnv.impl
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2024-09-04
- * 
+ *
  * @copyright Copyright (c) 2024
- * 
+ *
  */
 #ifndef LIB_HASH_FNV_H
 #define LIB_HASH_FNV_H
@@ -23,7 +23,7 @@ hash_fnv1a_32(const void* bytes, size_t length)
     hash ^= ((unsigned char *)bytes)[i];
     hash *= FNV32_PRIME;
   }
-  
+
   return hash;
 }
 

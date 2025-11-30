@@ -1,12 +1,12 @@
 /**
  * @file clist.impl
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2024-08-28
- * 
+ *
  * @copyright Copyright (c) 2024
- * 
+ *
  */
 #ifndef LIB_LIST_INL
 #define LIB_LIST_INL
@@ -15,10 +15,10 @@
 
 
 inline
-void 
+void
 clist_replicate(
-  const void *_src, 
-  void *_dst, 
+  const void *_src,
+  void *_dst,
   const allocator_t *allocator)
 {
   const clist_t *src = (const clist_t *)_src;
@@ -26,16 +26,16 @@ clist_replicate(
   assert(src && !clist_is_def(src));
   assert(dst);
   assert(
-    (clist_is_def(dst) && allocator) || 
+    (clist_is_def(dst) && allocator) ||
     (
-      !clist_is_def(dst) && 
-      !allocator && 
-      elem_data_identical(&dst->elem_data, &src->elem_data) && 
+      !clist_is_def(dst) &&
+      !allocator &&
+      elem_data_identical(&dst->elem_data, &src->elem_data) &&
       dst->size == 0));
 
   if (clist_is_def(dst)) {
     clist_setup(
-      dst, 
+      dst,
       pack_type_data(src->elem_data.type_id, src->elem_data.size), allocator);
   }
 
@@ -92,8 +92,8 @@ clist_serialize(
     {
       clist_iterator_t iter = clist_begin((clist_t*)src);
       for (
-        ; 
-        !clist_iter_equal(iter, clist_end((clist_t*)src)); 
+        ;
+        !clist_iter_equal(iter, clist_end((clist_t*)src));
         clist_advance(&iter)) {
         if (serialize)
           serialize(iter.current->data, stream);
@@ -105,10 +105,10 @@ clist_serialize(
 }
 
 inline
-void 
+void
 clist_deserialize(
-  void *p_dst, 
-  const allocator_t *allocator, 
+  void *p_dst,
+  const allocator_t *allocator,
   binary_stream_t *stream)
 {
   clist_t *dst = (clist_t *)p_dst;
@@ -129,13 +129,13 @@ clist_deserialize(
       return;
 
     {
-      fn_deserialize_t deserialize = 
+      fn_deserialize_t deserialize =
         elem_data_get_deserialize_fn(&dst->elem_data);
-      
+
       size_t i;
       for (i = 0; i < size; ++i)
         clist_insert_empty(dst, i);
-      
+
       {
         clist_iterator_t iter = clist_begin(dst);
         for (; !clist_iter_equal(iter, clist_end(dst)); clist_advance(&iter)) {
@@ -143,9 +143,9 @@ clist_deserialize(
             deserialize(iter.current->data, allocator, stream);
           else
             binary_stream_read(
-              stream, 
-              (uint8_t *)iter.current->data, 
-              dst->elem_data.size, 
+              stream,
+              (uint8_t *)iter.current->data,
+              dst->elem_data.size,
               dst->elem_data.size);
         }
       }
@@ -163,7 +163,7 @@ clist_cleanup(void *ptr, const allocator_t* allocator)
 
   while (list->size)
     clist_erase(list, 0);
-  
+
   elem_data_clear(&list->elem_data);
   list->size = 0;
   list->allocator = NULL;
@@ -174,8 +174,8 @@ clist_cleanup(void *ptr, const allocator_t* allocator)
 inline
 void
 clist_setup(
-  clist_t* list, 
-  type_data_t type_data, 
+  clist_t* list,
+  type_data_t type_data,
   const allocator_t* allocator)
 {
   assert(list && allocator);
@@ -190,38 +190,38 @@ clist_setup(
 
 inline
 size_t
-clist_size(const clist_t* list) 
-{ 
-  assert(list && !clist_is_def(list)); 
+clist_size(const clist_t* list)
+{
+  assert(list && !clist_is_def(list));
   return list->size;
 }
 
 inline
 size_t
-clist_elem_size(const clist_t* list) 
-{ 
-  assert(list && !clist_is_def(list));  
-  return list->elem_data.size; 
+clist_elem_size(const clist_t* list)
+{
+  assert(list && !clist_is_def(list));
+  return list->elem_data.size;
 }
 
 inline
 const allocator_t*
-clist_allocator(const clist_t* list) 
-{ 
-  assert(list && !clist_is_def(list)); 
-  return list->allocator; 
+clist_allocator(const clist_t* list)
+{
+  assert(list && !clist_is_def(list));
+  return list->allocator;
 }
 
 inline
 int32_t
-clist_empty(const clist_t* list) 
-{ 
-  assert(list && !clist_is_def(list)); 
+clist_empty(const clist_t* list)
+{
+  assert(list && !clist_is_def(list));
   return list->size == 0;
 }
 
 inline
-clist_node_t* 
+clist_node_t*
 clist_at(clist_t *list, size_t index)
 {
   assert(list && !clist_is_def(list));
@@ -237,7 +237,7 @@ clist_at(clist_t *list, size_t index)
 }
 
 inline
-const clist_node_t* 
+const clist_node_t*
 clist_at_cst(const clist_t *list, size_t index)
 {
   assert(list && !clist_is_def(list));
@@ -264,7 +264,7 @@ clist_erase(clist_t* list, size_t index)
     clist_node_t* previous = target->previous;
     clist_node_t* next = target->next;
     fn_cleanup_t cleanup = elem_data_get_cleanup_fn(&list->elem_data);
-    
+
     // 1, 2, many nodes scenarios.
     if (previous == target)
       list->nodes = NULL;
@@ -277,8 +277,8 @@ clist_erase(clist_t* list, size_t index)
     }
 
     if (cleanup) {
-      uint32_t owns_alloc = 
-        (list->elem_data.vtable->fn_owns_alloc == NULL) ? 0 : 
+      uint32_t owns_alloc =
+        (list->elem_data.vtable->fn_owns_alloc == NULL) ? 0 :
         list->elem_data.vtable->fn_owns_alloc();
       cleanup(target->data, owns_alloc ? NULL : list->allocator);
     }
@@ -337,7 +337,7 @@ clist_iterator_t
 clist_end(clist_t* list)
 {
   assert(list);
-  { 
+  {
     clist_iterator_t iter;
     iter.list = list;
     iter.current = iter.last = NULL;
@@ -349,9 +349,9 @@ inline
 int32_t
 clist_iter_equal(clist_iterator_t left, clist_iterator_t right)
 {
-  return 
-    left.list == right.list && 
-    left.last == right.last && 
+  return
+    left.list == right.list &&
+    left.last == right.last &&
     left.current == right.current;
 }
 

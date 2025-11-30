@@ -1,12 +1,12 @@
 /**
  * @file io.c
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2025-03-10
- * 
+ *
  * @copyright Copyright (c) 2025
- * 
+ *
  */
 #include <assert.h>
 #include <stdio.h>
@@ -23,8 +23,8 @@ open_file(
   char cstr_flags[8];
   int32_t read = (flags & FILE_OPEN_MODE_READ) / FILE_OPEN_MODE_READ;
   int32_t write = (flags & FILE_OPEN_MODE_WRITE) / FILE_OPEN_MODE_WRITE;
-  int32_t write_no_overwrite = 
-    (flags & FILE_OPEN_MODE_WRITE_NO_OVERWRITE) / 
+  int32_t write_no_overwrite =
+    (flags & FILE_OPEN_MODE_WRITE_NO_OVERWRITE) /
     FILE_OPEN_MODE_WRITE_NO_OVERWRITE;
   int32_t append = (flags & FILE_OPEN_MODE_APPEND) / FILE_OPEN_MODE_APPEND;
 

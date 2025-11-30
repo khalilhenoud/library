@@ -1,12 +1,12 @@
 /**
  * @file io.h
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2025-03-10
- * 
+ *
  * @copyright Copyright (c) 2025
- * 
+ *
  */
 #ifndef LIB_FILE_IO_H
 #define LIB_FILE_IO_H
@@ -21,7 +21,7 @@ extern "C" {
 
 typedef uintptr_t file_handle_t;
 
-typedef 
+typedef
 enum file_open_flags_t {
   FILE_OPEN_MODE_INVALID = 1,
   FILE_OPEN_MODE_READ = 1 << 1,

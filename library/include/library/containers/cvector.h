@@ -4,9 +4,9 @@
  * @brief generic vector
  * @version 0.1
  * @date 2024-08-10
- * 
+ *
  * @copyright Copyright (c) 2024
- * 
+ *
  */
 #ifndef LIB_VECTOR_H
 #define LIB_VECTOR_H
@@ -15,9 +15,9 @@
 extern "C" {
 #endif
 
+#include <assert.h>
 #include <stdint.h>
 #include <string.h>
-#include <assert.h>
 #include <library/allocator/allocator.h>
 #include <library/type_registry/type_registry.h>
 
@@ -51,7 +51,7 @@ extern "C" {
 
 typedef struct binary_stream_t binary_stream_t;
 
-typedef 
+typedef
 struct cvector_t {
   container_elem_data_t elem_data;
   size_t size;
@@ -69,7 +69,7 @@ cvector_def(void *ptr)
 }
 
 inline
-uint32_t 
+uint32_t
 cvector_is_def(const void *ptr)
 {
   assert(ptr);
@@ -78,38 +78,38 @@ cvector_is_def(const void *ptr)
     const cvector_t* vec = (const cvector_t *)ptr;
     cvector_t def;
     cvector_def(&def);
-    return 
-      vec->size == def.size && 
-      vec->capacity == def.capacity && 
+    return
+      vec->size == def.size &&
+      vec->capacity == def.capacity &&
       elem_data_identical(&vec->elem_data, &def.elem_data) &&
       vec->allocator == def.allocator &&
       vec->data == def.data;
   }
 }
 
-/** 
+/**
  * NOTE: will assert if 'src' is not initialized, or if 'dst' is initialized but
  * with non-zero size.
  * NOTE: capacity is carried over from the src vector.
  */
-void 
+void
 cvector_replicate(
-  const void *src, 
-  void *dst, 
+  const void *src,
+  void *dst,
   const allocator_t *allocator);
 
 void
 cvector_fullswap(void* src, void* dst);
 
-void 
+void
 cvector_serialize(
-  const void *src, 
+  const void *src,
   binary_stream_t* stream);
 
-void 
+void
 cvector_deserialize(
-  void *dst, 
-  const allocator_t *allocator, 
+  void *dst,
+  const allocator_t *allocator,
   binary_stream_t* stream);
 
 inline
@@ -120,14 +120,14 @@ cvector_type_size(void)
 }
 
 inline
-uint32_t 
+uint32_t
 cvector_type_id_count(void)
 {
   return 1;
 }
 
 inline
-void 
+void
 cvector_type_ids(const void *src, type_id_t *ids)
 {
   assert(src && ids);
@@ -135,7 +135,7 @@ cvector_type_ids(const void *src, type_id_t *ids)
 }
 
 inline
-uint32_t 
+uint32_t
 cvector_owns_alloc(void)
 {
   return 1;
@@ -149,7 +149,7 @@ cvector_get_alloc(const void *vec)
   return ((const cvector_t *)vec)->allocator;
 }
 
-void 
+void
 cvector_cleanup(void *ptr, const allocator_t* allocator);
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -160,12 +160,12 @@ cvector_cleanup(void *ptr, const allocator_t* allocator);
  */
 void
 cvector_setup(
-  cvector_t *vec, 
+  cvector_t *vec,
   type_data_t type_data,
-  size_t capacity, 
+  size_t capacity,
   const allocator_t* allocator);
 
-size_t 
+size_t
 cvector_capacity(const cvector_t* vec);
 
 size_t
@@ -199,8 +199,8 @@ cvector_erase(cvector_t* vec, size_t index);
 void
 cvector_clear(cvector_t* vec);
 
-/** 
- * reserves 'count' * 'elem_size' in terms of capacity, internal use. 
+/**
+ * reserves 'count' * 'elem_size' in terms of capacity, internal use.
  * NOTE: this can be used to reduce overall capacity as in shrink_to_fit()
  */
 void
@@ -220,7 +220,7 @@ cvector_shrink_to_fit(cvector_t* vec);
 void
 cvector_pop_back(cvector_t* vec);
 
-/** 
+/**
  * resizes the container to contain 'count' elements, the elements are 0
  * initialized.
  * TODO: provide a variant that takes an initializer function
@@ -259,8 +259,8 @@ cvector_resize(cvector_t* vec, size_t count);
 #define cvector_begin(vec, type) \
   ((type*)(vec)->data)
 
-/** 
- * returns the address to one past the last element of the array 
+/**
+ * returns the address to one past the last element of the array
  * NOTE: this is legal, dereferencing this pointer is undefined behavior
  */
 #define cvector_end(vec, type) \

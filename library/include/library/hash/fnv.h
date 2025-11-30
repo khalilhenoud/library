@@ -4,9 +4,9 @@
  * @brief fnv1a 32 bit and 64 bit version
  * @version 0.1
  * @date 2024-09-04
- * 
+ *
  * @copyright Copyright (c) 2024
- * 
+ *
  */
 #ifndef HASH_FNV_H
 #define HASH_FNV_H

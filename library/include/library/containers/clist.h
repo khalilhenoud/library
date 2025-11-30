@@ -4,9 +4,9 @@
  * @brief generic list
  * @version 0.1
  * @date 2024-08-28
- * 
+ *
  * @copyright Copyright (c) 2024
- * 
+ *
  */
 #ifndef LIB_LIST_H
 #define LIB_LIST_H
@@ -15,9 +15,9 @@
 extern "C" {
 #endif
 
+#include <assert.h>
 #include <stdint.h>
 #include <string.h>
-#include <assert.h>
 #include <library/allocator/allocator.h>
 #include <library/type_registry/type_registry.h>
 
@@ -63,7 +63,7 @@ struct clist_iterator_t {
   clist_t *list;
   clist_node_t *current;
   clist_node_t *last;
-} clist_iterator_t; 
+} clist_iterator_t;
 
 typedef
 struct clist_t {
@@ -74,7 +74,7 @@ struct clist_t {
 } clist_t;
 
 inline
-void 
+void
 clist_def(void *ptr)
 {
   assert(ptr);
@@ -82,62 +82,62 @@ clist_def(void *ptr)
 }
 
 inline
-uint32_t 
+uint32_t
 clist_is_def(const void *ptr)
 {
   const clist_t *list = (const clist_t *)ptr;
   clist_t def;
   clist_def(&def);
-  return 
-    elem_data_identical(&list->elem_data, &def.elem_data) && 
-    list->size == def.size && 
+  return
+    elem_data_identical(&list->elem_data, &def.elem_data) &&
+    list->size == def.size &&
     list->allocator == def.allocator &&
     list->nodes == def.nodes;
 }
 
-/** 
+/**
  * NOTE: will assert if 'src' is not initialized, or if 'dst' is initialized but
  * with non-zero size.
  * NOTE: either 'dst' is def or 'allocator' is NULL, not both (we assert).
  */
-void 
+void
 clist_replicate(
-  const void *src, 
-  void *dst, 
+  const void *src,
+  void *dst,
   const allocator_t *allocator);
 
 void
 clist_fullswap(void* src, void* dst);
 
-void 
+void
 clist_serialize(
-  const void *src, 
+  const void *src,
   binary_stream_t* stream);
 
-void 
+void
 clist_deserialize(
-  void *dst, 
-  const allocator_t *allocator, 
+  void *dst,
+  const allocator_t *allocator,
   binary_stream_t* stream);
 
 inline
-size_t 
+size_t
 clist_type_size(void)
 {
   return sizeof(clist_t);
 }
 
 inline
-uint32_t 
+uint32_t
 clist_type_id_count(void)
 {
   return 1;
 }
 
 inline
-void 
+void
 clist_type_ids(
-  const void *src, 
+  const void *src,
   type_id_t *ids)
 {
   assert(src && ids);
@@ -145,7 +145,7 @@ clist_type_ids(
 }
 
 inline
-uint32_t 
+uint32_t
 clist_owns_alloc(void)
 {
   return 1;
@@ -165,8 +165,8 @@ clist_cleanup(void *ptr, const allocator_t* allocator);
 ////////////////////////////////////////////////////////////////////////////////
 void
 clist_setup(
-  clist_t* list, 
-  type_data_t type_data, 
+  clist_t* list,
+  type_data_t type_data,
   const allocator_t* allocator);
 
 size_t
@@ -179,18 +179,18 @@ int32_t
 clist_empty(const clist_t* vec);
 
 /** returns the node at index, internal use only. */
-clist_node_t* 
+clist_node_t*
 clist_at(clist_t *list, size_t index);
-const clist_node_t* 
+const clist_node_t*
 clist_at_cst(const clist_t *list, size_t index);
 
 /** removes the node at index from the list. */
 void
 clist_erase(clist_t* list, size_t index);
 
-/** 
- * erases all data in the list. 
- * NOTE: allocator and elem_cleanup are maintained, meaning the container is 
+/**
+ * erases all data in the list.
+ * NOTE: allocator and elem_cleanup are maintained, meaning the container is
  * still valid after clear is called.
  */
 void
