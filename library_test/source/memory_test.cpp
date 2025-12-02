@@ -1,17 +1,17 @@
 /**
  * @file memory_test.cpp
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2025-10-11
- * 
+ *
  * @copyright Copyright (c) 2025
- * 
+ *
  */
 #include <cassert>
-#include <common.h>
 #include <cstdint>
 #include <vector>
+#include <common.h>
 #include <library/memory/memory.h>
 
 
@@ -32,23 +32,23 @@ realloc_callback(void *old_block, void *block)
   std::cout << "re_allocated: " << old_block << ", to: " << block << std::endl;
   allocated.erase(
     std::remove_if(
-      allocated.begin(), 
-      allocated.end(), 
-      [=](uintptr_t elem) { return (uintptr_t)old_block == elem; }), 
+      allocated.begin(),
+      allocated.end(),
+      [=](uintptr_t elem) { return (uintptr_t)old_block == elem; }),
     allocated.end());
   allocated.push_back(uintptr_t(block));
 }
 
 static
-void 
+void
 free_callback(void *block)
 {
   std::cout << "freed: " << block << std::endl;
   allocated.erase(
     std::remove_if(
-      allocated.begin(), 
-      allocated.end(), 
-      [=](uintptr_t elem) { return (uintptr_t)block == elem; }), 
+      allocated.begin(),
+      allocated.end(),
+      [=](uintptr_t elem) { return (uintptr_t)block == elem; }),
     allocated.end());
 }
 

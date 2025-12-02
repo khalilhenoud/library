@@ -1,19 +1,19 @@
 /**
  * @file classroom.c
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2025-02-08
- * 
+ *
  * @copyright Copyright (c) 2025
- * 
+ *
  */
 #include <assert.h>
-#include "classroom.h"
+#include <classroom.h>
 #include <library/allocator/allocator.h>
+#include <library/core/core.h>
 #include <library/streams/binary_stream.h>
 #include <library/type_registry/type_registry.h>
-#include <library/core/core.h>
 
 
 void
@@ -29,21 +29,21 @@ student_def(void *ptr)
   }
 }
 
-uint32_t 
+uint32_t
 student_is_def(const void *ptr)
 {
   assert(ptr);
   {
     const student_t *typed = (const student_t *)ptr;
-    return 
-      typed->name == NULL && 
-      typed->length == 0 && 
-      typed->age == 0 && 
+    return
+      typed->name == NULL &&
+      typed->length == 0 &&
+      typed->age == 0 &&
       typed->allocator == NULL;
   }
 }
 
-uint32_t 
+uint32_t
 student_is_equal(const void *lhs, const void *rhs)
 {
   assert(lhs && rhs);
@@ -51,14 +51,14 @@ student_is_equal(const void *lhs, const void *rhs)
   {
     const student_t *left = (const student_t *)lhs;
     const student_t *right = (const student_t *)rhs;
-    return 
-      !strcmp(left->name, right->name) && 
+    return
+      !strcmp(left->name, right->name) &&
       left->length == right->length &&
       left->age == right->age;
   }
 }
 
-void 
+void
 student_fullswap(void* lhs, void* rhs)
 {
   assert(lhs && rhs);
@@ -78,7 +78,7 @@ student_fullswap(void* lhs, void* rhs)
   }
 }
 
-void 
+void
 student_serialize(const void *src, binary_stream_t* stream)
 {
   assert(src && stream);
@@ -90,10 +90,10 @@ student_serialize(const void *src, binary_stream_t* stream)
   binary_stream_write(stream, student->name, (size_t)student->length);
 }
 
-void 
+void
 student_deserialize(
-  void *dst, 
-  const allocator_t *allocator, 
+  void *dst,
+  const allocator_t *allocator,
   binary_stream_t* stream)
 {
   assert(dst && allocator && stream);
@@ -106,24 +106,24 @@ student_deserialize(
   binary_stream_read(stream, (uint8_t *)&student->length, s_u32, s_u32);
   student->name = (char *)allocator->mem_alloc(student->length + 1);
   memset(student->name, 0, student->length + 1);
-  
+
   binary_stream_read(
     stream, (uint8_t *)student->name, student->length + 1, student->length);
 }
 
-size_t 
+size_t
 student_size(void)
 {
   return sizeof(student_t);
 }
 
-uint32_t 
+uint32_t
 student_owns_alloc(void)
 {
   return 1;
 }
 
-const allocator_t* 
+const allocator_t*
 student_get_alloc(const void *ptr)
 {
   assert(ptr);
@@ -134,7 +134,7 @@ student_get_alloc(const void *ptr)
   }
 }
 
-void 
+void
 student_cleanup(void *ptr, const allocator_t* allocator)
 {
   // student contains its own allocator, the passed one has to be null.
@@ -146,7 +146,7 @@ student_cleanup(void *ptr, const allocator_t* allocator)
   }
 }
 
-void 
+void
 set_student_name(student_t *student, const char *name)
 {
   if (student->name != NULL) {
@@ -154,7 +154,7 @@ set_student_name(student_t *student, const char *name)
     student->name = NULL;
     student->length = 0;
   }
-  
+
   student->length = strlen(name);
   student->name = (char *)student->allocator->mem_alloc(student->length + 1);
   memcpy(student->name, name, student->length + 1);
@@ -189,19 +189,19 @@ classroom_def(void *ptr)
   }
 }
 
-uint32_t 
+uint32_t
 classroom_is_def(const void *ptr)
 {
   assert(ptr);
   {
     const classroom_t *typed = (const classroom_t *)ptr;
-    return 
-      typed->count == 0 && 
+    return
+      typed->count == 0 &&
       typed->students == NULL;
   }
 }
 
-uint32_t 
+uint32_t
 classroom_is_equal(const void *lhs, const void *rhs)
 {
   assert(lhs && rhs);
@@ -221,7 +221,7 @@ classroom_is_equal(const void *lhs, const void *rhs)
   }
 }
 
-void 
+void
 classroom_serialize(const void *src, binary_stream_t* stream)
 {
   assert(src && stream);
@@ -233,10 +233,10 @@ classroom_serialize(const void *src, binary_stream_t* stream)
     student_serialize(classroom->students + i, stream);
 }
 
-void 
+void
 classroom_deserialize(
-  void *dst, 
-  const allocator_t *allocator, 
+  void *dst,
+  const allocator_t *allocator,
   binary_stream_t* stream)
 {
   assert(dst && allocator && stream);
@@ -251,26 +251,26 @@ classroom_deserialize(
     student_deserialize(classroom->students + i, allocator, stream);
 }
 
-size_t 
+size_t
 classroom_size(void)
 {
   return sizeof(classroom_t);
 }
 
-uint32_t 
+uint32_t
 classroom_owns_alloc(void)
 {
   return 0;
 }
 
-const allocator_t* 
+const allocator_t*
 classroom_get_alloc(const void *ptr)
 {
   assert(ptr);
   return NULL;
 }
 
-void 
+void
 classroom_cleanup(void *ptr, const allocator_t* allocator)
 {
   assert(ptr && allocator);

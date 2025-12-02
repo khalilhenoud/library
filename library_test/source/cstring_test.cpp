@@ -1,20 +1,20 @@
 /**
  * @file cstring_test.cpp
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2025-02-15
- * 
+ *
  * @copyright Copyright (c) 2025
- * 
+ *
  */
+#include <cassert>
+#include <cstdint>
+#include <string>
+#include <common.h>
 #include <library/allocator/allocator.h>
 #include <library/core/core.h>
 #include <library/string/cstring.h>
-#include <common.h>
-#include <stdint.h>
-#include <cassert>
-#include <string>
 
 
 void
@@ -26,11 +26,11 @@ print_cstring_content(cstring_t& str, const int32_t tabs)
 
 static
 void
-print_all(cstring_t& str, const int32_t tabs) 
+print_all(cstring_t& str, const int32_t tabs)
 {
-  CTABS << 
-  "str(length: " << str.length <<   
-  ", str: " << (str.length ? str.str : "empty") <<   
+  CTABS <<
+  "str(length: " << str.length <<
+  ", str: " << (str.length ? str.str : "empty") <<
   ", allocator: " << (uint64_t)(str.allocator) <<
   ")" << std::endl;
 }
@@ -96,11 +96,11 @@ test_cstring_ops(const allocator_t* allocator, const int32_t tabs)
     cstring_setup(&right, NULL, allocator);
     cstring_replicate(&left, &right, NULL);
     print_cstring_content(right, tabs);
-    
+
     cstring_cleanup(&right, NULL);
     cstring_cleanup(&left, NULL);
   }
-  
+
   {
     CTABS << "fullswap testing: " << std::endl;
     cstring_t left;
@@ -108,7 +108,7 @@ test_cstring_ops(const allocator_t* allocator, const int32_t tabs)
 
     cstring_t right;
     cstring_setup(&right, "Ninja was here", allocator);
-    
+
     print_cstring_content(left, tabs);
     print_cstring_content(right, tabs);
 
@@ -160,7 +160,7 @@ test_cstring_serialize(const allocator_t* allocator, const int32_t tabs)
   PRINT_FUNCTION;
 
   cstring_t str;
-  cstring_t copy; 
+  cstring_t copy;
   cstring_def(&copy);
   cstring_setup(&str, "This string is to be serialized", allocator);
   print_cstring_content(str, tabs);

@@ -4,17 +4,17 @@
  * @brief tests for fnv1a hash
  * @version 0.1
  * @date 2024-09-05
- * 
+ *
  * @copyright Copyright (c) 2024
- * 
+ *
  */
+#include <algorithm>
+#include <cassert>
+#include <cstdint>
+#include <string>
+#include <common.h>
 #include <library/allocator/allocator.h>
 #include <library/hash/fnv.h>
-#include <stdint.h>
-#include <cassert>
-#include <string>
-#include <algorithm>
-#include <common.h>
 
 #define LEN(x) (sizeof(x)-1)
 /* TEST macro does not include trailing NUL byte in the test vector */
@@ -668,7 +668,7 @@ test_in_depth_32(const allocator_t* allocator, const int32_t tabs)
     uint32_t hash = hash_fnv1a_32(vec32.ptr->str, vec32.ptr->len);
     std::string str = { vec32.ptr->str, vec32.ptr->len };
     std::replace( str.begin(), str.end(), '\n', ' ');
-    str = str.length() > 10 ? (str.substr(0, 20) + std::string("...")) : str; 
+    str = str.length() > 10 ? (str.substr(0, 20) + std::string("...")) : str;
     CTABS << "string to hash: \"" << str << "\"" << std::endl;
     CTABS << " hash= " << hash << ", ref hash= " << vec32.hash << std::endl;
     if (hash != vec32.hash) {
@@ -692,7 +692,7 @@ test_in_depth_64(const allocator_t* allocator, const int32_t tabs)
     uint64_t hash = hash_fnv1a_64(vec64.ptr->str, vec64.ptr->len);
     std::string str = { vec64.ptr->str, vec64.ptr->len };
     std::replace( str.begin(), str.end(), '\n', ' ');
-    str = str.length() > 10 ? (str.substr(0, 20) + std::string("...")) : str; 
+    str = str.length() > 10 ? (str.substr(0, 20) + std::string("...")) : str;
     CTABS << "string to hash: \"" << str << "\"" << std::endl;
     CTABS << " hash= " << hash << ", ref hash= " << vec64.hash << std::endl;
     if (hash != vec64.hash) {

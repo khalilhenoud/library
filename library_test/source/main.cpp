@@ -1,19 +1,19 @@
 /**
  * @file main.cpp
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2023-07-22
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
-#include <library/allocator/allocator.h>
-#include <malloc.h>
+#include <algorithm>
 #include <cassert>
+#include <cstdlib>
 #include <iostream>
 #include <vector>
-#include <algorithm>
+#include <library/allocator/allocator.h>
 #include <library/core/core.h>
 
 
@@ -24,7 +24,7 @@ INITIALIZER(test)
 
 std::vector<uintptr_t> allocated;
 
-void* 
+void*
 allocate(size_t size)
 {
   void* block = malloc(size);
@@ -32,22 +32,22 @@ allocate(size_t size)
   return block;
 }
 
-void* 
+void*
 reallocate(void* old_block, size_t size)
 {
   void* block = realloc(old_block, size);
   assert(block);
   allocated.erase(
     std::remove_if(
-      allocated.begin(), 
-      allocated.end(), 
-      [=](uintptr_t elem) { return (uintptr_t)old_block == elem; }), 
+      allocated.begin(),
+      allocated.end(),
+      [=](uintptr_t elem) { return (uintptr_t)old_block == elem; }),
     allocated.end());
   allocated.push_back(uintptr_t(block));
   return block;
 }
 
-void* 
+void*
 container_allocate(size_t count, size_t elem_size)
 {
   void* block = calloc(count, elem_size);
@@ -55,14 +55,14 @@ container_allocate(size_t count, size_t elem_size)
   return block;
 }
 
-void 
+void
 free_block(void* block)
 {
   allocated.erase(
     std::remove_if(
-      allocated.begin(), 
-      allocated.end(), 
-      [=](uintptr_t elem) { return (uintptr_t)block == elem; }), 
+      allocated.begin(),
+      allocated.end(),
+      [=](uintptr_t elem) { return (uintptr_t)block == elem; }),
     allocated.end());
   free(block);
 }
@@ -94,7 +94,7 @@ test_memory_main(const int32_t tabs = 0);
 void
 test_default_allocator_main(const int32_t tabs = 0);
 
-int 
+int
 main(int argc, char *argv[])
 {
   allocator_t allocator;
@@ -113,7 +113,7 @@ main(int argc, char *argv[])
   test_cstring_main(&allocator);
   test_memory_main();
   test_default_allocator_main();
-  
+
   std::cout << "allocation remaining: " << allocated.size() << std::endl;
   assert(allocated.size() == 0);
 

@@ -1,12 +1,12 @@
 /**
  * @file classroom.h
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2025-02-08
- * 
+ *
  * @copyright Copyright (c) 2025
- * 
+ *
  */
 #ifndef CLASSROOM_H
 #define CLASSROOM_H
@@ -32,40 +32,40 @@ struct student_t {
 void
 student_def(void *ptr);
 
-uint32_t 
+uint32_t
 student_is_def(const void *ptr);
 
-uint32_t 
+uint32_t
 student_is_equal(const void *lhs, const void *rhs);
 
-void 
+void
 student_fullswap(void* lhs, void* rhs);
 
-void 
+void
 student_serialize(const void *src, binary_stream_t* stream);
 
-void 
+void
 student_deserialize(
-  void *dst, 
-  const allocator_t *allocator, 
+  void *dst,
+  const allocator_t *allocator,
   binary_stream_t* stream);
 
-size_t 
+size_t
 student_size(void);
 
-uint32_t 
+uint32_t
 student_owns_alloc(void);
 
-const allocator_t* 
+const allocator_t*
 student_get_alloc(const void *ptr);
 
-void 
+void
 student_cleanup(void *ptr, const allocator_t* allocator);
 
-void 
+void
 set_student_name(student_t *student, const char *name);
 
-typedef 
+typedef
 struct {
   uint32_t count;
   student_t *students;
@@ -74,31 +74,31 @@ struct {
 void
 classroom_def(void *ptr);
 
-uint32_t 
+uint32_t
 classroom_is_def(const void *ptr);
 
-uint32_t 
+uint32_t
 classroom_is_equal(const void *lhs, const void *rhs);
 
-void 
+void
 classroom_serialize(const void *src, binary_stream_t* stream);
 
-void 
+void
 classroom_deserialize(
-  void *dst, 
-  const allocator_t *allocator, 
+  void *dst,
+  const allocator_t *allocator,
   binary_stream_t* stream);
 
-size_t 
+size_t
 classroom_size(void);
 
-uint32_t 
+uint32_t
 classroom_owns_alloc(void);
 
-const allocator_t* 
+const allocator_t*
 classroom_get_alloc(const void *ptr);
 
-void 
+void
 classroom_cleanup(void *ptr, const allocator_t* allocator);
 
 #ifdef __cplusplus

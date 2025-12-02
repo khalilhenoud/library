@@ -1,21 +1,21 @@
 /**
  * @file binary_stream_test.cpp
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2024-12-28
- * 
+ *
  * @copyright Copyright (c) 2024
- * 
+ *
  */
-#include <library/allocator/allocator.h>
-#include <library/streams/binary_stream.h>
-#include <cstdint>
 #include <cassert>
 #include <common.h>
+#include <cstdint>
+#include <library/allocator/allocator.h>
+#include <library/streams/binary_stream.h>
 
 
-typedef 
+typedef
 struct {
   uint32_t i;
   uint32_t k;
@@ -26,8 +26,8 @@ struct {
 static
 void
 serialize_test(
-  binary_stream_t *stream, 
-  const test_struct_t &src, 
+  binary_stream_t *stream,
+  const test_struct_t &src,
   const int32_t tabs)
 {
   PRINT_FUNCTION;
@@ -41,8 +41,8 @@ serialize_test(
 static
 void
 deserialize_test(
-  binary_stream_t *stream, 
-  test_struct_t &dst, 
+  binary_stream_t *stream,
+  test_struct_t &dst,
   const int32_t tabs)
 {
   PRINT_FUNCTION;
@@ -63,7 +63,7 @@ print_test(const test_struct_t &src, const int32_t tabs)
 {
   PRINT_FUNCTION;
 
-  CTABS << src.i << ", " << src.k << ", " << src.l << ", " << src.c << 
+  CTABS << src.i << ", " << src.k << ", " << src.l << ", " << src.c <<
     std::endl;
 }
 
@@ -106,7 +106,7 @@ print_array(int32_t data[size], const int32_t tabs)
 
   for (uint32_t i = 0; i < size; i += incr) {
     CTABS;
-    for (uint32_t k = i, j = 0; k < size && j < incr; ++k, ++j) 
+    for (uint32_t k = i, j = 0; k < size && j < incr; ++k, ++j)
       std::cout << data[k] << " ";
     NEWLINE;
   }

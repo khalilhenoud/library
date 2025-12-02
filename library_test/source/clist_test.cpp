@@ -1,21 +1,21 @@
 /**
  * @file clist_test.cpp
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2024-08-29
- * 
+ *
  * @copyright Copyright (c) 2024
- * 
+ *
  */
-#include <library/allocator/allocator.h>
-#include <library/core/core.h>
-#include <library/containers/clist.h>
-#include <stdint.h>
 #include <cassert>
+#include <cstdint>
 #include <string>
 #include <classroom.h>
 #include <common.h>
+#include <library/allocator/allocator.h>
+#include <library/containers/clist.h>
+#include <library/core/core.h>
 
 
 template<typename T>
@@ -30,14 +30,14 @@ print_clist_content(clist_t& list, const int32_t tabs)
 
 static
 void
-print_meta(clist_t& list, const int32_t tabs) 
+print_meta(clist_t& list, const int32_t tabs)
 {
-  CTABS << 
-  "list(size: " << list.size << 
+  CTABS <<
+  "list(size: " << list.size <<
   ", elem_size: " << list.elem_data.size <<
   ", allocator: " << (uint64_t)(list.allocator) <<
-  ", elem_cleanup: " << (uint64_t)(elem_data_get_cleanup_fn(&list.elem_data)) << 
-  ", nodes: " << (uint64_t)(list.nodes) << ")" << 
+  ", elem_cleanup: " << (uint64_t)(elem_data_get_cleanup_fn(&list.elem_data)) <<
+  ", nodes: " << (uint64_t)(list.nodes) << ")" <<
   std::endl;
 }
 
@@ -157,10 +157,10 @@ test_clist_iterators(const allocator_t* allocator, const int32_t tabs)
 
   CTABS << "values: ";
   for (
-    clist_iterator_t iter = clist_begin(&list); 
-    !clist_iter_equal(iter, clist_end(&list)); 
+    clist_iterator_t iter = clist_begin(&list);
+    !clist_iter_equal(iter, clist_end(&list));
     clist_advance(&iter)) {
-      std::cout << *clist_deref(&iter, double) << " "; 
+      std::cout << *clist_deref(&iter, double) << " ";
     }
   NEWLINE;
   CTABS << "front: " << *clist_front(&list, double) << std::endl;
@@ -211,7 +211,7 @@ test_clist_ops(const allocator_t* allocator, const int32_t tabs)
     clist_replicate(&left, &right, NULL);
     print_clist_content<int32_t>(right, tabs);
     print_meta(right, tabs);
-    
+
     clist_cleanup(&right, NULL);
     clist_cleanup(&left, NULL);
   }
@@ -228,7 +228,7 @@ test_clist_ops(const allocator_t* allocator, const int32_t tabs)
     clist_setup(&right, get_type_data(int32_t), allocator);
     for (int32_t i = 120; i < 130; ++i)
       clist_push_back(&right, i + 1, int32_t);
-    
+
     print_clist_content<int32_t>(left, tabs);
     print_clist_content<int32_t>(right, tabs);
 
@@ -270,11 +270,11 @@ test_clist_mem(const allocator_t* allocator, const int32_t tabs)
     print_meta(list, tabs);
     for (int32_t i = 0; i < 20; ++i)
       clist_insert(&list, 0, i, int32_t);
-    
+
     print_meta(list, tabs);
     print_clist_content<int32_t>(list, tabs);
   }
-  clist_cleanup(&list, NULL); 
+  clist_cleanup(&list, NULL);
 }
 
 typedef
@@ -285,16 +285,16 @@ struct list_custom_t {
 } list_custom_t;
 
 static
-void 
+void
 elem_cleanup(void *elem_ptr, const allocator_t* allocator)
 {
   list_custom_t* casted = (list_custom_t*)elem_ptr;
   if (casted->count && casted->data) {
-    std::cout << std::string(casted->tabs, '\t') << "freeing " << 
+    std::cout << std::string(casted->tabs, '\t') << "freeing " <<
     casted->count << " elements" << std::endl;
     allocator->mem_free(casted->data);
   } else
-    std::cout << std::string(casted->tabs, '\t') << "nothing to free" << 
+    std::cout << std::string(casted->tabs, '\t') << "nothing to free" <<
     std::endl;
 }
 

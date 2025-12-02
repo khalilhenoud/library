@@ -1,12 +1,12 @@
 /**
  * @file common.h
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2024-12-04
- * 
+ *
  * @copyright Copyright (c) 2024
- * 
+ *
  */
 #pragma once
 
@@ -14,9 +14,9 @@
 
 #ifndef __FUNCTION_NAME__
     #ifdef WIN32   //WINDOWS
-        #define __FUNCTION_NAME__   __FUNCTION__  
+        #define __FUNCTION_NAME__   __FUNCTION__
     #else          //*NIX
-        #define __FUNCTION_NAME__   __func__ 
+        #define __FUNCTION_NAME__   __func__
     #endif
 #endif
 

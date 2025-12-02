@@ -1,21 +1,21 @@
 /**
  * @file type_registry_test.cpp
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2025-01-12
- * 
+ *
  * @copyright Copyright (c) 2025
- * 
+ *
  */
+#include <cassert>
+#include <cstdint>
+#include <classroom.h>
+#include <common.h>
 #include <library/allocator/allocator.h>
+#include <library/core/core.h>
 #include <library/streams/binary_stream.h>
 #include <library/type_registry/type_registry.h>
-#include <library/core/core.h>
-#include <cstdint>
-#include <cassert>
-#include <common.h>
-#include <classroom.h>
 
 
 static
@@ -31,8 +31,8 @@ serialize_generic(type_id_t type, void *ptr, binary_stream_t *stream)
 static
 void
 deserialize_generic(
-  void **ptr, 
-  const allocator_t* allocator, 
+  void **ptr,
+  const allocator_t* allocator,
   binary_stream_t *stream)
 {
   type_id_t type;
@@ -47,11 +47,11 @@ deserialize_generic(
 static
 void
 print_student(
-  student_t &student, 
-  const int32_t tabs, 
+  student_t &student,
+  const int32_t tabs,
   const bool omit_function_header = false)
 {
-  if (!omit_function_header) 
+  if (!omit_function_header)
     PRINT_FUNCTION;
 
   CTABS << "student(age:" << student.age << ", name:" << student.name << ")";
@@ -78,11 +78,11 @@ test_registry(const allocator_t* allocator, const int32_t tabs)
   PRINT_FUNCTION;
 
   student_t mario, luigi, peach, bowser;
-  student_def(&mario), student_def(&luigi), student_def(&peach), 
+  student_def(&mario), student_def(&luigi), student_def(&peach),
   student_def(&bowser);
-  mario.allocator = luigi.allocator = peach.allocator = bowser.allocator = 
+  mario.allocator = luigi.allocator = peach.allocator = bowser.allocator =
   allocator;
-  
+
   mario.age = 10; luigi.age = 11; peach.age = 9; bowser.age = 15;
   set_student_name(&mario, "super mario odyssey!");
   set_student_name(&luigi, "luigi land 2");
@@ -104,7 +104,7 @@ test_registry(const allocator_t* allocator, const int32_t tabs)
   binary_stream_setup(&stream, allocator);
 
   // bowser + classroom { mario, luigi, peach } = 2 elements.
-  const uint32_t entries = 2; 
+  const uint32_t entries = 2;
   void* elements[entries] = { NULL, NULL };
   serialize_generic(get_type_id(student_t), &bowser, &stream);
   serialize_generic(get_type_id(classroom_t), &classroom, &stream);
@@ -128,7 +128,7 @@ test_registry(const allocator_t* allocator, const int32_t tabs)
 
   student_cleanup(&bowser, NULL);
   classroom_cleanup(&classroom, allocator);
-  
+
   assert(stream.pos == STREAM_EOF);
   binary_stream_cleanup(&stream);
 }

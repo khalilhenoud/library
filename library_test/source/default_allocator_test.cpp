@@ -1,19 +1,19 @@
 /**
  * @file default_allocator_test.cpp
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2025-10-12
- * 
+ *
  * @copyright Copyright (c) 2025
- * 
+ *
  */
 #include <cassert>
-#include <common.h>
 #include <cstdint>
 #include <vector>
-#include <library/memory/memory.h>
+#include <common.h>
 #include <library/allocator/allocator.h>
+#include <library/memory/memory.h>
 
 
 static std::vector<uintptr_t> allocated;
@@ -31,22 +31,22 @@ realloc_callback(void *old_block, void *block)
 {
   allocated.erase(
     std::remove_if(
-      allocated.begin(), 
-      allocated.end(), 
-      [=](uintptr_t elem) { return (uintptr_t)old_block == elem; }), 
+      allocated.begin(),
+      allocated.end(),
+      [=](uintptr_t elem) { return (uintptr_t)old_block == elem; }),
     allocated.end());
   allocated.push_back(uintptr_t(block));
 }
 
 static
-void 
+void
 free_callback(void *block)
 {
   allocated.erase(
     std::remove_if(
-      allocated.begin(), 
-      allocated.end(), 
-      [=](uintptr_t elem) { return (uintptr_t)block == elem; }), 
+      allocated.begin(),
+      allocated.end(),
+      [=](uintptr_t elem) { return (uintptr_t)block == elem; }),
     allocated.end());
 }
 

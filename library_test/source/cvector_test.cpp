@@ -1,21 +1,21 @@
 /**
  * @file cvector_test.cpp
  * @author khalilhenoud@gmail.com
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2024-08-19
- * 
+ *
  * @copyright Copyright (c) 2024
- * 
+ *
  */
-#include <library/allocator/allocator.h>
-#include <library/core/core.h>
-#include <library/containers/cvector.h>
-#include <stdint.h>
 #include <cassert>
-#include <common.h>
-#include <classroom.h>
+#include <cstdint>
 #include <string>
+#include <classroom.h>
+#include <common.h>
+#include <library/allocator/allocator.h>
+#include <library/containers/cvector.h>
+#include <library/core/core.h>
 
 
 template<typename T>
@@ -30,14 +30,14 @@ print_cvector_content(cvector_t& vec, const int32_t tabs)
 
 static
 void
-print_meta(cvector_t& vec, const int32_t tabs) 
+print_meta(cvector_t& vec, const int32_t tabs)
 {
-  CTABS << 
-  "vec(size: " << vec.size << 
-  ", elem_size: " << vec.elem_data.size << 
-  ", capacity: " << vec.capacity << 
+  CTABS <<
+  "vec(size: " << vec.size <<
+  ", elem_size: " << vec.elem_data.size <<
+  ", capacity: " << vec.capacity <<
   ", allocator: " << (uint64_t)(vec.allocator) <<
-  ", elem_cleanup: " << (uint64_t)(elem_data_get_cleanup_fn(&vec.elem_data)) << 
+  ", elem_cleanup: " << (uint64_t)(elem_data_get_cleanup_fn(&vec.elem_data)) <<
   ")" << std::endl;
 }
 
@@ -165,10 +165,10 @@ test_cvector_iterators(const allocator_t* allocator, const int32_t tabs)
 
   CTABS << "values: ";
   for (
-    cvector_iterator(double) iter = cvector_begin(&vec, double); 
-    iter != cvector_end(&vec, double); 
+    cvector_iterator(double) iter = cvector_begin(&vec, double);
+    iter != cvector_end(&vec, double);
     ++iter) {
-      std::cout << *iter << " "; 
+      std::cout << *iter << " ";
     }
   NEWLINE;
   CTABS << "front: " << *cvector_front(&vec, double) << std::endl;
@@ -183,7 +183,7 @@ test_cvector_iterators(const allocator_t* allocator, const int32_t tabs)
     print_cvector_content<double>(vec, tabs);
     cvector_pop_back(&vec);
   }
-  
+
   cvector_cleanup(&vec, NULL);
 }
 
@@ -212,11 +212,11 @@ test_cvector_ops(const allocator_t* allocator, const int32_t tabs)
     cvector_replicate(&left, &right, NULL);
     print_cvector_content<int32_t>(right, tabs);
     print_meta(right, tabs);
-    
+
     cvector_cleanup(&right, NULL);
     cvector_cleanup(&left, NULL);
   }
-  
+
   {
     CTABS << "fullswap testing: " << std::endl;
     // fullswap
@@ -229,7 +229,7 @@ test_cvector_ops(const allocator_t* allocator, const int32_t tabs)
     cvector_setup(&right, get_type_data(int32_t), 20, allocator);
     for (int32_t i = 120; i < 130; ++i)
       cvector_push_back(&right, i + 1, int32_t);
-    
+
     print_cvector_content<int32_t>(left, tabs);
     print_cvector_content<int32_t>(right, tabs);
 
@@ -294,7 +294,7 @@ test_cvector_mem(const allocator_t* allocator, const int32_t tabs)
     cvector_shrink_to_fit(&vec);
     print_meta(vec, tabs);
   }
-  cvector_cleanup(&vec, NULL); 
+  cvector_cleanup(&vec, NULL);
 }
 
 typedef
@@ -310,11 +310,11 @@ elem_cleanup(void *elem_ptr, const allocator_t* allocator)
 {
   vector_custom_t* casted = (vector_custom_t*)elem_ptr;
   if (casted->count && casted->data) {
-    std::cout << std::string(casted->tabs, '\t') << "freeing " << 
+    std::cout << std::string(casted->tabs, '\t') << "freeing " <<
     casted->count << " elements" << std::endl;
     allocator->mem_free(casted->data);
   } else
-    std::cout << std::string(casted->tabs, '\t') << "nothing to free" << 
+    std::cout << std::string(casted->tabs, '\t') << "nothing to free" <<
     std::endl;
 }
 
