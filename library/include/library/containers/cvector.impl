@@ -100,7 +100,7 @@ cvector_deserialize(
   binary_stream_t *stream)
 {
   cvector_t *dst = (cvector_t *)_dst;
-  assert(dst && cvector_is_def(dst) && allocator && stream);
+  assert(dst && allocator && stream);
 
   {
     fn_deserialize_t deserialize = NULL;
