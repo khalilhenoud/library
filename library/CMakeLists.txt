@@ -6,6 +6,7 @@ project(library VERSION 1.0)
 # add the executable
 add_library(${PROJECT_NAME} SHARED
       ./source/allocator/allocator.c
+      ./source/asset/asset_ref.c
       ./source/filesystem/io.c
       ./source/filesystem/filesystem.c
       ./source/framerate_controller/framerate_controller.c
@@ -21,5 +22,5 @@ add_library(${PROJECT_NAME} SHARED
 # revisiting.
 target_link_libraries(${PROJECT_NAME} PUBLIC winmm)
 
-target_include_directories(${PROJECT_NAME} PUBLIC 
+target_include_directories(${PROJECT_NAME} PUBLIC
 			"${PROJECT_SOURCE_DIR}/include")

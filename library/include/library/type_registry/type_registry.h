@@ -37,6 +37,10 @@ typedef uint32_t type_id_t;
 // forward declarations.
 typedef struct allocator_t allocator_t;
 typedef struct binary_stream_t binary_stream_t;
+typedef struct asset_ref_t asset_ref_t;
+typedef uint8_t (*loader_t)(void **, const asset_ref_t *, const allocator_t *);
+typedef
+uint8_t (*deloader_t)(void **, const asset_ref_t *, const allocator_t *);
 
 typedef void (*fn_def_t)(void *ptr);
 typedef uint32_t (*fn_is_def_t)(const void *ptr);
@@ -55,24 +59,36 @@ typedef void (*fn_type_ids_t)(const void *src, type_id_t *ids);
 typedef uint32_t (*fn_owns_alloc_t)(void);
 typedef const allocator_t* (*fn_get_alloc_t)(const void *ptr);
 typedef void (*fn_cleanup_t)(void *ptr, const allocator_t* allocator);
+typedef const char* (*fn_get_dir_t)(void);
+typedef loader_t (*fn_get_loader_t)(void);
+typedef deloader_t (*fn_get_deloader_t)(void);
+typedef uint32_t (*fn_type_asset_count_t)(void);
+typedef void (*fn_type_get_assets_t)(const void *src, asset_ref_t *refs);
+typedef uint32_t (*fn_is_asset_type_t)(void);
 
 typedef
 struct vtable_t {
-  fn_def_t            fn_def;
-  fn_is_def_t         fn_is_def;
-  fn_replicate_t      fn_replicate;
-  fn_fullswap_t       fn_fullswap;
-  fn_serialize_t      fn_serialize;
-  fn_deserialize_t    fn_deserialize;
-  fn_hash_t           fn_hash;
-  fn_is_equal_t       fn_is_equal;
-  fn_type_size_t      fn_type_size;
-  fn_type_alignment_t fn_type_alignment;
-  fn_type_id_count_t  fn_type_id_count;
-  fn_type_ids_t       fn_type_ids;
-  fn_owns_alloc_t     fn_owns_alloc;
-  fn_get_alloc_t      fn_get_alloc;
-  fn_cleanup_t        fn_cleanup;
+  fn_def_t                              fn_def;
+  fn_is_def_t                           fn_is_def;
+  fn_replicate_t                        fn_replicate;
+  fn_fullswap_t                         fn_fullswap;
+  fn_serialize_t                        fn_serialize;
+  fn_deserialize_t                      fn_deserialize;
+  fn_hash_t                             fn_hash;
+  fn_is_equal_t                         fn_is_equal;
+  fn_type_size_t                        fn_type_size;
+  fn_type_alignment_t                   fn_type_alignment;
+  fn_type_id_count_t                    fn_type_id_count;
+  fn_type_ids_t                         fn_type_ids;
+  fn_owns_alloc_t                       fn_owns_alloc;
+  fn_get_alloc_t                        fn_get_alloc;
+  fn_cleanup_t                          fn_cleanup;
+  fn_get_dir_t                          fn_get_dir;
+  fn_get_loader_t                       fn_get_loader;
+  fn_get_deloader_t                     fn_get_deloader;
+  fn_type_asset_count_t                 fn_type_asset_count;
+  fn_type_get_assets_t                  fn_type_get_assets;
+  fn_is_asset_type_t                    fn_is_asset_type;
 } vtable_t;
 
 // NOTE: some types are not registered, meaning no vtable can be queried. to

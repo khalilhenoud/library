@@ -4,15 +4,15 @@
 
 Purpose:
 --------
-- Generic types in c are either implemented via macros or void pointers. I opted 
-for the latter approach since I want to avoid any ugly declaration at the 
-beginning of the files. 
-- This necessitates that the container holds a ref to the type and a mechanism 
-for us to retrieve information about the type. 
+- Generic types in c are either implemented via macros or void pointers. I opted
+for the latter approach since I want to avoid any ugly declaration at the
+beginning of the files.
+- This necessitates that the container holds a ref to the type and a mechanism
+for us to retrieve information about the type.
 - This is a stop gap solution to a full on source code parsing and will later be
-augmented with source code parsing to generate the serialization functions and 
+augmented with source code parsing to generate the serialization functions and
 helper functionalities.
-- This ensures that generic containers can work with any type that adheres to 
+- This ensures that generic containers can work with any type that adheres to
 the registration, and greatly simplifies the serializer package by removing data
 duplication and deferring the serialization to the type in question. This makes
 deserialization a lot easier and removes code duplication.
@@ -22,7 +22,7 @@ Downsides:
 ----------
 This approach has a couple of major problems:
   - linking optimizations opportunities are greatly reduces. The types cannot be
-  deduced at runtime, which means that function calls cannot be statically 
+  deduced at link time, which means that function calls cannot be statically
   linked (you lose a lot of speed because of that). A macro approach would have
   been better for this, but I did not care for it.
   - void pointers do not provide any type safety whatsoever. You need to know
@@ -35,9 +35,9 @@ provide these functionalities.
 
 NOTES:
 ------
-- It is fine to take the address of an inline function, the standard indicates 
+- It is fine to take the address of an inline function, the standard indicates
 that the compiler will generate another copy of the function. This means that
-when the function is called from the same translation unit (in a non vtable 
+when the function is called from the same translation unit (in a non vtable
 context) the call is inlined, otherwise in a vtable context, it is a dynamic
 call.
 - Type interface functions are optional in a lot of cases. for example if
@@ -54,7 +54,7 @@ type interface:
 ---------------
 #define uint32_t type_id;
 
-*_def           default initialize an instance of the type, create an 
+*_def           default initialize an instance of the type, create an
                 initialized memory image.
   declaration:
     void  $type$_def(void *ptr);
@@ -93,7 +93,7 @@ type interface:
     uint32_t $type$_is_equal(const void *lhs, const void *rhs);
 
 *_size          used to determine the size, so that allocation could happen.
-                note that this is the size of the struct itself and not its 
+                note that this is the size of the struct itself and not its
                 contained data, same as sizeof(type);
   declaration:
     size_t  $type$_type_size(void);
@@ -104,7 +104,7 @@ type interface:
   declaration:
     size_t  $type$_alignment(void);
 
-*_type_id_count returns the number of inner types the container depend on. this 
+*_type_id_count returns the number of inner types the container depend on. this
                 is valid when you have a  $type$ or uint32_t, the _type_id_count
                 would be 1 in this case (referring to the uin32_t). this is used
                 to support container types. a hashmap would return 2, one for
@@ -112,7 +112,7 @@ type interface:
   declaration:
     uint32_t  $type$_type_id_count(void);
 
-*_type_ids      returns the list of type_ids the container depend on. the 
+*_type_ids      returns the list of type_ids the container depend on. the
                 function takes an array of size corresponding to _type_id_count.
                 the caller is responsible for providing the correct sized array.
   declaration:
@@ -127,23 +127,52 @@ type interface:
   declaration:
     const allocator_t* $type$_get_alloc(const void *ptr);
 
-*_cleanup       destructor equivalent, cleans up the instance, this does not 
+*_cleanup       destructor equivalent, cleans up the instance, this does not
                 free up the memory associated with the instance itself, simply
                 frees the insides of the type. Only one cleanup function can be
                 registered by type.
   declaration:
     void  $type$_cleanup(void *ptr, const allocator_t* allocator);
 
+*_get_dir       returns the directory associated with the type, only for assets
+  declaration:
+    const char* $type$_get_dir(void);
+
+*_get_loader    returns the loader_t that is associated with the type. Also
+                asset specific. This is used agnostically by the asset system to
+                load assets.
+  declaration:
+    loader_t  $type$_get_loader(void);
+
+*_get_deloader  the counterpart to the get_loader function
+  declaration:
+    deloader_t  $type$_get_deloader(void);
+
+*_type_asset_count    returns the number of asset references held by the type
+  declaration:
+    uint32_t  $type$_type_asset_count(void);
+
+*_type_get_assets     returns the list of asset references the instance holds.
+                      the function takes an array of size corresponding to
+                      _type_asset_count. the caller is responsible for providing
+                      the correct sized array.
+  declaration:
+    void  $type$_type_get_assets(const void *src, asset_ref_t *refs);
+
+*_is_asset_type returns 1 or 0 depending on wether the type is an asset
+  declaration:
+    uint32_t $type$_is_asset_type(void);
+
 best practices:
 ---------------
-1- never serialize the allocator reference even if the type holds its own 
+1- never serialize the allocator reference even if the type holds its own
 reference.
-2- the allocator passed to deserialize should be held if the type dictates as 
+2- the allocator passed to deserialize should be held if the type dictates as
 much.
-3- do not serialize the type hash in the type's own serialize function, that is 
+3- do not serialize the type hash in the type's own serialize function, that is
 the responsability of the owner type.
 4- when implementing _is_equal, do not compare held allocators.
-5- remember that cleanup is for the element of the struct and not the struct 
+5- remember that cleanup is for the element of the struct and not the struct
 itself, that is the responsability of the owner.
 
 type registry:
@@ -151,7 +180,7 @@ type registry:
 This feature makes it necessary for this project to no longer be header only. I
 do not want to rely on the static variables in inline functions. thus this will
 no longer be a header only module.
-As a side effect a internal module.h definition must be created to handle 
+As a side effect a internal module.h definition must be created to handle
 __declspec(dll_export) and __declspec(dll_import), as well as change the project
 to a library (see type_registry.c).
 
@@ -174,7 +203,7 @@ extern "C" {
 //| OPERATION                   | SUPPORTED
 //|=============================================================================
 //|    *_def                    | YES
-//|    *_is_def                 | 
+//|    *_is_def                 |
 //|    *_replicate              |
 //|    *_fullswap               |
 //|    *_serialize              |
@@ -188,6 +217,12 @@ extern "C" {
 //|    *_owns_alloc             |
 //|    *_get_alloc              |
 //|    *_cleanup                |
+//|    *_get_dir                |
+//|    *_get_loader             |
+//|    *_get_deloader           |
+//|    *_type_asset_count       |
+//|    *_type_get_assets        |
+//|    *_is_asset_type          |
 ////////////////////////////////////////////////////////////////////////////////
 // NOTES/TODO/REMARK:
 ////////////////////////////////////////////////////////////////////////////////
@@ -209,7 +244,12 @@ void $type$_type_ids(const void *src, type_id_t *ids);
 uint32_t $type$_owns_alloc(void);
 const allocator_t* $type$_get_alloc(const void *ptr);
 void $type$_cleanup(void *ptr, const allocator_t* allocator);
-
+const char* $type$_get_dir(void);
+loader_t $type$_get_loader(void);
+deloader_t $type$_get_deloader(void);
+uint32_t $type$_type_asset_count(void);
+void $type$_type_get_assets(const void *src, asset_ref_t *refs);
+uint32_t $type$_is_asset_type(void);
 ////////////////////////////////////////////////////////////////////////////////
 the rest of the functions
 
@@ -225,6 +265,6 @@ macro functions
 TODO:
 -----
 - A well defined iterator interface can make implementing an algorithms library
-container agnostic. Doing so might require us to require some classification 
+container agnostic. Doing so might require us to require some classification
 functions (less or greater functions) per type that require sorting.
 - Expand the library considerably, I want to support many more stuff.
