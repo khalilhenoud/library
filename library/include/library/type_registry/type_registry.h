@@ -20,6 +20,7 @@ extern "C" {
 #include <string.h>
 #include <library/internal/module.h>
 #include <library/hash/fnv.h>
+#include <library/asset/types.h>
 
 #define get_type_id(type) hash_fnv1a_32(#type, strlen(#type))
 #define get_type_data(type) \
@@ -37,10 +38,6 @@ typedef uint32_t type_id_t;
 // forward declarations.
 typedef struct allocator_t allocator_t;
 typedef struct binary_stream_t binary_stream_t;
-typedef struct asset_ref_t asset_ref_t;
-typedef uint8_t (*loader_t)(void **, const asset_ref_t *, const allocator_t *);
-typedef
-uint8_t (*deloader_t)(void **, const asset_ref_t *, const allocator_t *);
 
 typedef void (*fn_def_t)(void *ptr);
 typedef uint32_t (*fn_is_def_t)(const void *ptr);
@@ -62,8 +59,8 @@ typedef void (*fn_cleanup_t)(void *ptr, const allocator_t* allocator);
 typedef const char* (*fn_get_dir_t)(void);
 typedef loader_t (*fn_get_loader_t)(void);
 typedef deloader_t (*fn_get_deloader_t)(void);
-typedef uint32_t (*fn_type_asset_count_t)(void);
-typedef void (*fn_type_get_assets_t)(const void *src, asset_ref_t *refs);
+typedef uint32_t (*fn_type_asset_count_t)(const void *src);
+typedef void (*fn_type_get_assets_t)(const void *src, const asset_ref_t *refs[]);
 typedef uint32_t (*fn_is_asset_type_t)(void);
 
 typedef

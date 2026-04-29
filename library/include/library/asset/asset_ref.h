@@ -123,11 +123,13 @@ asset_ref_fullswap(void *_lhs, void *_rhs)
   }
 }
 
+LIBRARY_API
 void
 asset_ref_serialize(
   const void *src,
   binary_stream_t *stream);
 
+LIBRARY_API
 void
 asset_ref_deserialize(
   void *dst,
@@ -163,8 +165,16 @@ asset_ref_type_size(void)
   return sizeof(asset_ref_t);
 }
 
+LIBRARY_API
 void
 asset_ref_cleanup(void *ptr, const allocator_t *allocator);
+
+inline
+void
+asset_ref_sanity_check(const asset_ref_t *asset_ref, uint32_t type_id)
+{
+  assert(asset_ref->type_id == type_id);
+}
 
 #ifdef __cplusplus
 }

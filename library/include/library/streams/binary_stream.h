@@ -71,6 +71,15 @@ binary_stream_read(
   size_t buffer_size,
   uint32_t to_read);
 
+// NOTE: the user is responsible for freeing the returned instance
+LIBRARY_API
+binary_stream_t *
+binary_stream_from_file(
+  const char *path,
+  const allocator_t *allocator);
+
+// TODO: add a binary_stream_to_file() function. it is useful
+
 #ifdef __cplusplus
 }
 #endif

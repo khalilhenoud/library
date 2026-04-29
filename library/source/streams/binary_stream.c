@@ -11,6 +11,7 @@
 #include <assert.h>
 #include <string.h>
 #include <library/containers/cvector.h>
+#include <library/filesystem/io.h>
 
 
 void
@@ -110,4 +111,35 @@ binary_stream_read(
   }
 
   return STREAM_EOF;
+}
+
+binary_stream_t *
+binary_stream_from_file(
+  const char *path,
+  const allocator_t *allocator)
+{
+  assert(file_exists(path));
+
+  {
+    binary_stream_t *stream = allocator->mem_alloc(sizeof(binary_stream_t));
+    binary_stream_def(stream);
+    binary_stream_setup(stream, allocator);
+
+    {
+      size_t read = 0;
+      uint8_t buffer[16 * 1024];
+      file_handle_t file;
+      file = open_file(path, FILE_OPEN_MODE_READ | FILE_OPEN_MODE_BINARY);
+      assert((void*)file != NULL);
+      do {
+        read = read_buffer(
+          file,
+          buffer, sizeof(uint8_t), 16 * 1024);
+        binary_stream_write(stream, buffer, 16 * 1024);
+      } while (read);
+      close_file(file);
+    }
+
+    return stream;
+  }
 }

@@ -110,13 +110,26 @@ cvector_fullswap(void* src, void* dst);
 void
 cvector_serialize(
   const void *src,
-  binary_stream_t* stream);
+  binary_stream_t *stream);
+
+void
+cvector_serialize_func(
+  const void *src,
+  binary_stream_t *stream,
+  fn_serialize_t serialize);
 
 void
 cvector_deserialize(
   void *dst,
   const allocator_t *allocator,
-  binary_stream_t* stream);
+  binary_stream_t *stream);
+
+void
+cvector_deserialize_func(
+  void *dst,
+  const allocator_t *allocator,
+  binary_stream_t *stream,
+  fn_deserialize_t deserialize);
 
 inline
 size_t
@@ -156,7 +169,13 @@ cvector_get_alloc(const void *vec)
 }
 
 void
-cvector_cleanup(void *ptr, const allocator_t* allocator);
+cvector_cleanup(void *ptr, const allocator_t *allocator);
+
+void
+cvector_cleanup_func(
+  void *ptr,
+  const allocator_t *allocator,
+  fn_cleanup_t cleanup);
 
 ////////////////////////////////////////////////////////////////////////////////
 /**
@@ -275,6 +294,10 @@ cvector_resize(cvector_t* vec, size_t count);
 /** returns a casted pointer to the element at n position or NULL if invalid */
 #define cvector_as(vec, n, type) \
   (type*)cvector_at((vec), (n))
+
+/** returns a const pointer to the element at n position or NULL if invalid */
+#define cvector_as_c(vec, n, type) \
+  (const type*)cvector_at_c((vec), (n))
 
 /** returns a pointer to the first element or NULL*/
 #define cvector_front(vec, type) \

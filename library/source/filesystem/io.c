@@ -83,3 +83,14 @@ close_file(file_handle_t file)
   assert((FILE *)file != NULL);
   fclose((FILE *)file);
 }
+
+uint32_t
+file_exists(const char *path)
+{
+  FILE* file = NULL;
+  if (file = fopen(path, "r")) {
+    fclose(file);
+    return 1;
+  }
+  return 0;
+}

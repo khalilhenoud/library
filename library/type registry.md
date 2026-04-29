@@ -150,14 +150,14 @@ type interface:
 
 *_type_asset_count    returns the number of asset references held by the type
   declaration:
-    uint32_t  $type$_type_asset_count(void);
+    uint32_t  $type$_type_asset_count(const void *src);
 
 *_type_get_assets     returns the list of asset references the instance holds.
                       the function takes an array of size corresponding to
                       _type_asset_count. the caller is responsible for providing
                       the correct sized array.
   declaration:
-    void  $type$_type_get_assets(const void *src, asset_ref_t *refs);
+    void  $type$_type_get_assets(const void *src, const asset_ref_t *refs[]);
 
 *_is_asset_type returns 1 or 0 depending on wether the type is an asset
   declaration:
@@ -248,7 +248,7 @@ const char* $type$_get_dir(void);
 loader_t $type$_get_loader(void);
 deloader_t $type$_get_deloader(void);
 uint32_t $type$_type_asset_count(void);
-void $type$_type_get_assets(const void *src, asset_ref_t *refs);
+void $type$_type_get_assets(const void *src, const asset_ref_t *refs);
 uint32_t $type$_is_asset_type(void);
 ////////////////////////////////////////////////////////////////////////////////
 the rest of the functions

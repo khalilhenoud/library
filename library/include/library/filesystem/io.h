@@ -59,6 +59,10 @@ LIBRARY_API
 void
 close_file(file_handle_t file);
 
+LIBRARY_API
+uint32_t
+file_exists(const char *path);
+
 #ifdef __cplusplus
 }
 #endif
