@@ -71,6 +71,13 @@ binary_stream_read(
   size_t buffer_size,
   uint32_t to_read);
 
+LIBRARY_API
+uint32_t
+binary_stream_read2(
+  binary_stream_t *stream,
+  uint8_t buffer[],
+  size_t buffer_size);
+
 // NOTE: the user is responsible for freeing the returned instance
 LIBRARY_API
 binary_stream_t *

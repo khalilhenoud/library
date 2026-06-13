@@ -89,6 +89,15 @@ binary_stream_write(
 }
 
 uint32_t
+binary_stream_read2(
+  binary_stream_t *stream,
+  uint8_t buffer[],
+  size_t buffer_size)
+{
+  return binary_stream_read(stream, buffer, buffer_size, buffer_size);
+}
+
+uint32_t
 binary_stream_read(
   binary_stream_t *stream,
   uint8_t buffer[],
