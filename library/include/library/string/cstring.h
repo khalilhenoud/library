@@ -66,7 +66,7 @@ cstring_def(void *ptr)
   assert(ptr);
 
   {
-    cstring_t *str = ptr;
+    cstring_t *str = (cstring_t *)ptr;
     memset(str, 0, sizeof(cstring_t));
   }
 }
