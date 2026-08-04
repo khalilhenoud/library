@@ -62,6 +62,7 @@ typedef deloader_t (*fn_get_deloader_t)(void);
 typedef uint32_t (*fn_type_asset_count_t)(const void *src);
 typedef void (*fn_type_get_assets_t)(const void *src, const asset_ref_t *refs[]);
 typedef uint32_t (*fn_is_asset_type_t)(void);
+typedef uint32_t (*fn_is_indexed_t)(void);
 
 typedef
 struct vtable_t {
@@ -86,6 +87,7 @@ struct vtable_t {
   fn_type_asset_count_t                 fn_type_asset_count;
   fn_type_get_assets_t                  fn_type_get_assets;
   fn_is_asset_type_t                    fn_is_asset_type;
+  fn_is_indexed_t                       fn_is_indexed_type;
 } vtable_t;
 
 // NOTE: some types are not registered, meaning no vtable can be queried. to
