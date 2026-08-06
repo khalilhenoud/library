@@ -69,7 +69,7 @@ asset_ref_def(void *ptr)
   assert(ptr);
 
   {
-    asset_ref_t *ref = ptr;
+    asset_ref_t *ref = (asset_ref_t *)ptr;
     memset(ref, 0, sizeof(asset_ref_t));
   }
 }
@@ -81,7 +81,7 @@ asset_ref_is_def(const void *ptr)
   assert(ptr);
 
   {
-    const asset_ref_t *ref = ptr;
+    const asset_ref_t *ref = (asset_ref_t *)ptr;
     asset_ref_t def;
     asset_ref_def(&def);
     return !memcmp(ref, &def, sizeof(asset_ref_t));
@@ -95,8 +95,8 @@ asset_ref_replicate(
   void *_dst,
   const allocator_t *allocator)
 {
-  const asset_ref_t *src = _src;
-  asset_ref_t *dst = _dst;
+  const asset_ref_t *src = (const asset_ref_t *)_src;
+  asset_ref_t *dst = (asset_ref_t *)_dst;
 
   assert(src && !asset_ref_is_def(src));
   assert(dst && asset_ref_is_def(dst));
@@ -111,8 +111,8 @@ inline
 void
 asset_ref_fullswap(void *_lhs, void *_rhs)
 {
-  asset_ref_t *lhs = _lhs;
-  asset_ref_t *rhs = _rhs;
+  asset_ref_t *lhs = (asset_ref_t *)_lhs;
+  asset_ref_t *rhs = (asset_ref_t *)_rhs;
 
   assert(lhs && rhs);
   cstring_fullswap(&lhs->path, &rhs->path);
@@ -140,7 +140,7 @@ inline
 uint32_t
 asset_ref_hash(const void *ptr)
 {
-  const asset_ref_t *ref = ptr;
+  const asset_ref_t *ref = (const asset_ref_t *)ptr;
   assert(ptr);
   return cstring_hash(&ref->path);
 }
@@ -151,8 +151,8 @@ asset_ref_is_equal(
   const void *_lhs,
   const void *_rhs)
 {
-  const asset_ref_t *lhs = _lhs;
-  const asset_ref_t *rhs = _rhs;
+  const asset_ref_t *lhs = (const asset_ref_t *)_lhs;
+  const asset_ref_t *rhs = (const asset_ref_t *)_rhs;
   assert(lhs && rhs);
   return
     cstring_is_equal(&lhs->path, &rhs->path) && lhs->type_id == rhs->type_id;
