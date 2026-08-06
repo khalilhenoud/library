@@ -225,6 +225,9 @@ cvector_cleanup(void *ptr, const allocator_t *allocator)
   }
 }
 
+// TODO: the element cannot own its own allocator?! this requires revisiting! it
+// seems flimsy for me. Provide a flag as to whether it owns its own allocator?
+// Also the second parameter is non-sense, a cvector will always have one
 inline
 void
 cvector_cleanup_func(
@@ -240,13 +243,8 @@ cvector_cleanup_func(
 
     if (cleanup) {
       size_t i = 0, count = vec->size;
-      uint32_t owns_alloc =
-        (vec->elem_data.vtable->fn_owns_alloc == NULL) ? 0 :
-        vec->elem_data.vtable->fn_owns_alloc();
-
       for (; i < count; ++i)
-        cleanup(
-          cvector_at(vec, i), owns_alloc ? NULL : vec->allocator);
+        cleanup(cvector_at(vec, i), vec->allocator);
     }
 
     vec->allocator->mem_free(vec->data);
