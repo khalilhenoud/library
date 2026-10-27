@@ -135,6 +135,7 @@ cvector_deserialize(
     binary_stream_read(stream, (uint8_t *)&type_data, s_s, s_s);
     dst->elem_data = get_cont_elem_data_from_packed(type_data);
     dst->allocator = allocator;
+    dst->data = NULL;
 
     binary_stream_read(stream, (uint8_t *)&dst->size, s_s, s_s);
     binary_stream_read(stream, (uint8_t *)&dst->capacity, s_s, s_s);
